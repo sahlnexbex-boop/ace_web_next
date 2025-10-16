@@ -115,6 +115,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

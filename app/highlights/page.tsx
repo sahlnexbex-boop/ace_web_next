@@ -4,6 +4,7 @@ import NewsUpdates from "@/components/newsUpdates_sm";
 import SuccessStories from "@/components/success_stories_sm";
 import Testimonials from "@/components/testimonials_sm";
 import Webinars from "@/components/webinar_sm";
+import FeaturedSuccess from "@/components/featured_success";
 import React, { useRef, useEffect, useState } from "react";
 
 export default function Highlights() {
@@ -12,6 +13,7 @@ export default function Highlights() {
   const webinarsRef = useRef<HTMLDivElement | null>(null);
   const eventsRef = useRef<HTMLDivElement | null>(null);
   const newsRef = useRef<HTMLDivElement | null>(null);
+  const featuredRef = useRef<HTMLDivElement | null>(null);
 
   const [activeTab, setActiveTab] = useState("success");
 
@@ -31,6 +33,7 @@ export default function Highlights() {
       { ref: webinarsRef, id: "webinars" },
       { ref: eventsRef, id: "events" },
       { ref: newsRef, id: "news" },
+      { ref: featuredRef, id: "featured" },
     ];
 
     const observer = new IntersectionObserver(
@@ -42,7 +45,7 @@ export default function Highlights() {
         }
       },
       {
-        threshold: 0.5, // section visible at least 50%
+        threshold: 0.5,
       }
     );
 
@@ -90,42 +93,63 @@ export default function Highlights() {
         <h1 className="text-3xl md:text-4xl font-bold mb-6">Highlights</h1>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-6 border-b pb-2 text-sm font-medium">
-          <button
-            onClick={() => scrollToSection(successRef, "success")}
-            className={tabClass("success")}
-          >
-            Success Stories
-          </button>
-          <button
-            onClick={() => scrollToSection(testimonialsRef, "testimonials")}
-            className={tabClass("testimonials")}
-          >
-            Student Testimonials
-          </button>
-          <button
-            onClick={() => scrollToSection(webinarsRef, "webinars")}
-            className={tabClass("webinars")}
-          >
-            Webinars
-          </button>
-          <button
-            onClick={() => scrollToSection(eventsRef, "events")}
-            className={tabClass("events")}
-          >
-            Ace Events
-          </button>
-          <button
-            onClick={() => scrollToSection(newsRef, "news")}
-            className={tabClass("news")}
-          >
-            News & Updates
-          </button>
+        <div className="relative">
+          <div className="flex flex-nowrap md:flex-wrap gap-6 border-b pb-2 text-sm font-medium overflow-x-auto scrollbar-hide scroll-smooth">
+            <button
+              onClick={() => scrollToSection(successRef, "success")}
+              className={`${tabClass(
+                "success"
+              )} whitespace-nowrap flex-shrink-0`}
+            >
+              Success Stories
+            </button>
+            <button
+              onClick={() => scrollToSection(featuredRef, "featured")}
+              className={`${tabClass(
+                "featured"
+              )} whitespace-nowrap flex-shrink-0`}
+            >
+              Featured Success Stories
+            </button>
+            <button
+              onClick={() => scrollToSection(testimonialsRef, "testimonials")}
+              className={`${tabClass(
+                "testimonials"
+              )} whitespace-nowrap flex-shrink-0`}
+            >
+              Student Testimonials
+            </button>
+            <button
+              onClick={() => scrollToSection(webinarsRef, "webinars")}
+              className={`${tabClass(
+                "webinars"
+              )} whitespace-nowrap flex-shrink-0`}
+            >
+              Webinars
+            </button>
+            <button
+              onClick={() => scrollToSection(eventsRef, "events")}
+              className={`${tabClass(
+                "events"
+              )} whitespace-nowrap flex-shrink-0`}
+            >
+              Ace Events
+            </button>
+            <button
+              onClick={() => scrollToSection(newsRef, "news")}
+              className={`${tabClass("news")} whitespace-nowrap flex-shrink-0`}
+            >
+              News & Updates
+            </button>
+          </div>
         </div>
       </section>
 
       <div ref={successRef} id="success">
         <SuccessStories />
+      </div>
+      <div ref={featuredRef} id="success">
+        <FeaturedSuccess />
       </div>
       <div ref={testimonialsRef} id="testimonials">
         <Testimonials />

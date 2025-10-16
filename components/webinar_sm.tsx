@@ -3,52 +3,29 @@ import React, { useEffect, useState } from "react";
 
 export default function Webinars() {
   const webinars = [
-    {
-      title: "AI in Education",
-      date: "01 April 2025",
-      time: "11:30am",
-      duration: "2 Hours",
-      image: "/webinar_01.png",
-    },
-    {
-      title: "Career Guidance",
-      date: "13 June 2025",
-      time: "11:30am",
-      duration: "2 Hours",
-      image: "/webinar_02.png",
-    },
-    {
-      title: "AI in Education",
-      date: "01 April 2025",
-      time: "11:30am",
-      duration: "2 Hours",
-      image: "/webinar_01.png",
-    },
-    {
-      title: "Career Guidance",
-      date: "13 June 2025",
-      time: "11:30am",
-      duration: "2 Hours",
-      image: "/webinar_02.png",
-    },
-    {
-      title: "AI in Education",
-      date: "01 April 2025",
-      time: "11:30am",
-      duration: "2 Hours",
-      image: "/webinar_01.png",
-    },
-    {
-      title: "Career Guidance",
-      date: "13 June 2025",
-      time: "11:30am",
-      duration: "2 Hours",
-      image: "/webinar_02.png",
-    },
+    { title: "AI in Education", date: "01 April 2025", time: "11:30am", duration: "2 Hours", image: "/webinar_01.png" },
+    { title: "Career Guidance", date: "13 June 2025", time: "11:30am", duration: "2 Hours", image: "/webinar_02.png" },
+    { title: "AI in Education", date: "01 April 2025", time: "11:30am", duration: "2 Hours", image: "/webinar_01.png" },
+    { title: "Career Guidance", date: "13 June 2025", time: "11:30am", duration: "2 Hours", image: "/webinar_02.png" },
+    { title: "AI in Education", date: "01 April 2025", time: "11:30am", duration: "2 Hours", image: "/webinar_01.png" },
+    { title: "Career Guidance", date: "13 June 2025", time: "11:30am", duration: "2 Hours", image: "/webinar_02.png" },
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = Math.ceil(webinars.length / 2);
+  const [itemsPerSlide, setItemsPerSlide] = useState(2);
+
+  // Dynamically adjust number of items per slide based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) setItemsPerSlide(1);
+      else setItemsPerSlide(2);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const totalSlides = Math.ceil(webinars.length / itemsPerSlide);
 
   // Auto-slide every 10 seconds
   useEffect(() => {
@@ -58,14 +35,13 @@ export default function Webinars() {
     return () => clearInterval(timer);
   }, [totalSlides]);
 
-  // Go to specific slide
   const goToSlide = (index: number) => setCurrentSlide(index);
 
-  // Each slide contains 2 webinars
+  // Group webinars into slides based on itemsPerSlide
   const getSlides = () => {
     const slides = [];
-    for (let i = 0; i < webinars.length; i += 2) {
-      slides.push(webinars.slice(i, i + 2));
+    for (let i = 0; i < webinars.length; i += itemsPerSlide) {
+      slides.push(webinars.slice(i, i + itemsPerSlide));
     }
     return slides;
   };
@@ -77,15 +53,20 @@ export default function Webinars() {
           Webinars
         </h2>
 
-        {/* Carousel container */}
+        {/* Carousel Container */}
         <div className="relative w-full overflow-hidden">
           <div
             className="flex transition-transform duration-700 ease-in-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
-            {getSlides().map((pair, index) => (
-              <div key={index} className="flex-shrink-0 w-full grid md:grid-cols-2 gap-8 px-2">
-                {pair.map((web, i) => (
+            {getSlides().map((slide, slideIndex) => (
+              <div
+                key={slideIndex}
+                className={`flex-shrink-0 w-full grid gap-8 ${
+                  itemsPerSlide === 2 ? "md:grid-cols-2" : "grid-cols-1"
+                }`}
+              >
+                {slide.map((web, i) => (
                   <div
                     key={i}
                     className="bg-white rounded-2xl shadow-md overflow-hidden border hover:shadow-md hover:shadow-blue-100 transition flex flex-col md:flex-row items-center p-4 md:p-6"
@@ -115,17 +96,10 @@ export default function Webinars() {
                             strokeLinejoin="round"
                             className="text-cyan-600"
                           >
-                            <rect
-                              x="3"
-                              y="4"
-                              width="18"
-                              height="18"
-                              rx="2"
-                              ry="2"
-                            ></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
                           </svg>
                           <span>{web.date}</span>
                         </div>
@@ -179,9 +153,9 @@ export default function Webinars() {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 cursor-pointer rounded-full transition ${
+                className={`w-3 h-3 rounded-full transition-all ${
                   currentSlide === index
-                    ? "bg-cyan-600"
+                    ? "bg-cyan-600 w-6"
                     : "bg-gray-300 hover:bg-cyan-400"
                 }`}
               ></button>
