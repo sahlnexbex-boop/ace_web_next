@@ -1,14 +1,16 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Events() {
+  const router = useRouter();
   const [filter, setFilter] = useState("All");
 
   const events = [
-    { title: "Meetup 2020", date: "February 11, 2025", category: "Meetup", image: "/event_01.png" },
-    { title: "Meetup", date: "February 11, 2025", category: "Events", image: "/event_02.png" },
-    { title: "Rock Music", date: "February 11, 2025", category: "Events", image: "/event_03.png" },
-    { title: "Meetup 2024", date: "February 11, 2025", category: "Meetup", image: "/event_04.png" },
+    { id: 1, title: "Meetup 2020", date: "February 11, 2025", category: "Meetup", image: "/event_01.png" },
+    { id: 2, title: "Meetup", date: "February 11, 2025", category: "Events", image: "/event_02.png" },
+    { id: 3, title: "Rock Music", date: "February 11, 2025", category: "Events", image: "/event_03.png" },
+    { id: 4, title: "Meetup 2024", date: "February 11, 2025", category: "Meetup", image: "/event_04.png" },
   ];
 
   const filtered = filter === "All" ? events : events.filter((e) => e.category === filter);
@@ -16,10 +18,8 @@ export default function Events() {
   return (
     <section className="bg-[#daeef1] py-16 px-6 md:px-10">
       <div className="max-w-7xl mx-auto text-center">
-        {/* Heading */}
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-cyan-900">ACE Events</h2>
 
-        {/* Filter Buttons */}
         <div className="flex justify-center gap-4 mb-8 flex-wrap">
           {["All", "Events", "Meetup"].map((f) => (
             <button
@@ -36,11 +36,11 @@ export default function Events() {
           ))}
         </div>
 
-        {/* Event Cards */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filtered.map((ev, i) => (
+          {filtered.map((ev) => (
             <div
-              key={i}
+              key={ev.id}
+              onClick={() => router.push(`/highlights/events/${ev.id}`)}
               className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-lg"
             >
               <div className="overflow-hidden">

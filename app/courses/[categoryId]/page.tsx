@@ -71,11 +71,14 @@ export default function CourseCategoryPage({
   params: { categoryId: string };
 }) {
   const router = useRouter();
-  const categoryName = "SSC"; // can later map dynamic data
+  const categoryName = "SSC";
+
+  const handleNavigate = (courseId: number) => {
+    router.push(`/courses/${params.categoryId}/${courseId}`);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 md:py-12 py-8 md:pb-32 pb-16">
-      {/* Breadcrumb */}
       <div className="flex items-center gap-1 text-sm text-gray-500 mb-6">
         <button
           onClick={() => router.push("/")}
@@ -91,7 +94,6 @@ export default function CourseCategoryPage({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            // className="mr-1"
           >
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
             <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
@@ -114,7 +116,6 @@ export default function CourseCategoryPage({
         <span className="text-gray-800 font-medium">{categoryName}</span>
       </div>
 
-      {/* Header */}
       <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-2">
         {categoryName}
       </h1>
@@ -122,17 +123,13 @@ export default function CourseCategoryPage({
         Offline Courses
       </p>
 
-      {/* Courses Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {courses.map((course) => (
           <div
             key={course.id}
-            onClick={() =>
-              router.push(`/courses/${params.categoryId}/${course.id}`)
-            }
+            onClick={() => handleNavigate(course.id)}
             className="bg-gray-100 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 cursor-pointer group flex flex-col"
           >
-            {/* Image */}
             <div className="relative w-full h-44 flex-shrink-0">
               <Image
                 src={course.image}
@@ -142,9 +139,7 @@ export default function CourseCategoryPage({
               />
             </div>
 
-            {/* Content */}
             <div className="flex flex-col justify-between flex-grow p-5">
-              {/* Title + Subtitle */}
               <div className="flex flex-col">
                 <h3 className="font-bold text-gray-900 text-lg group-hover:text-[#1b6dac] transition-colors line-clamp-2">
                   {course.title}
@@ -154,7 +149,6 @@ export default function CourseCategoryPage({
                 </p>
               </div>
 
-              {/* Bottom Section */}
               <div className="flex justify-between items-center text-blue-600 font-medium mt-auto pt-5">
                 <span className="text-sm text-[#1b6dac] flex items-center gap-1">
                   <svg

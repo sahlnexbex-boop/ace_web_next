@@ -5,6 +5,8 @@ import { gsap } from "gsap";
 
 export default function ExamDetails() {
   const { examId } = useParams<{ examId: string }>();
+  const gridRef = useRef<HTMLDivElement | null>(null);
+
   const rankHolders = [
     {
       id: 1,
@@ -62,39 +64,13 @@ export default function ExamDetails() {
       position: "Ambulance Assistant",
       image: "/rank_std_04.png",
     },
-    {
-      id: 9,
-      rank: 9,
-      name: "Hashir Shan K",
-      position: "Ambulance Assistant",
-      image: "/rank_std_01.png",
-    },
-    {
-      id: 10,
-      rank: 10,
-      name: "Hashir Shan K",
-      position: "Ambulance Assistant",
-      image: "/rank_std_02.png",
-    },
-    {
-      id: 11,
-      rank: 11,
-      name: "Hashir Shan K",
-      position: "Ambulance Assistant",
-      image: "/rank_std_03.png",
-    },
-    {
-      id: 12,
-      rank: 12,
-      name: "Hashir Shan K",
-      position: "Ambulance Assistant",
-      image: "/rank_std_04.png",
-    },
   ];
 
-  const gridRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
+    const cards = document.querySelectorAll(".rank-card");
+
+    gsap.set(cards, { opacity: 1 });
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -102,26 +78,20 @@ export default function ExamDetails() {
 
           if (isMobile) {
             gsap.fromTo(
-              ".rank-card",
-              {
-                opacity: 0,
-                x: (i) => (i % 2 === 0 ? -30 : 30),
-              },
+              cards,
+              { opacity: 0, y: 30 },
               {
                 opacity: 1,
-                x: 0,
-                duration: 0.7,
+                y: 0,
+                duration: 0.6,
                 stagger: 0.15,
                 ease: "power3.out",
               }
             );
           } else {
             gsap.fromTo(
-              ".rank-card",
-              {
-                opacity: 0,
-                y: 50,
-              },
+              cards,
+              { opacity: 0, y: 50 },
               {
                 opacity: 1,
                 y: 0,
@@ -135,19 +105,30 @@ export default function ExamDetails() {
           observer.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.15 }
     );
 
     if (gridRef.current) observer.observe(gridRef.current);
 
-    return () => {
-      if (gridRef.current) observer.unobserve(gridRef.current);
-    };
+    // ✅ Fallback: run animation manually if IntersectionObserver fails (common on mobile)
+    setTimeout(() => {
+      if (cards[0] && getComputedStyle(cards[0]).opacity === "0") {
+        gsap.to(cards, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power3.out",
+        });
+      }
+    }, 1500);
+
+    return () => observer.disconnect();
   }, []);
 
   return (
     <div className="md:px-20 px-8 md:py-14 py-8">
-      {/* breadcrumb  */}
+      {/* Breadcrumb */}
       <div className="text-sm text-gray-900 mb-10 md:mb-3 flex items-center flex-wrap gap-1">
         <span className="hover:underline cursor-pointer">
           <svg
@@ -160,7 +141,6 @@ export default function ExamDetails() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            // className="mr-1"
           >
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
             <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
@@ -168,23 +148,16 @@ export default function ExamDetails() {
             <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
           </svg>
         </span>
-        <span
-          className="cursor-pointer hover:underline flex items-center"
-          // onClick={() => router.push("/courses")}
-        >
+        <span className="cursor-pointer hover:underline flex items-center">
           Courses
         </span>
         <span>/</span>
-        <span
-          className="cursor-pointer hover:underline"
-          // onClick={() => router.push(`/courses/${params.categoryId}`)}
-        >
-          SSC
-        </span>
-        {/* <span>/</span>
-        <span className="font-semibold">{courseName}</span> */}
+        <span className="cursor-pointer hover:underline">SSC</span>
       </div>
-      <h1 className="md:text-3xl text-2xl font-bold mb-5 mt-10">UPSA (Malappuram) 2022</h1>
+
+      <h1 className="md:text-3xl text-2xl font-bold mb-5 mt-10">
+        UPSA (Malappuram) 2022
+      </h1>
 
       <div
         ref={gridRef}
@@ -193,14 +166,8 @@ export default function ExamDetails() {
         {rankHolders.map((holder) => (
           <div
             key={holder.id}
-            className="rank-card text-center shadow-xl border-t-2 rounded-2xl py-4 relative cursor-pointer opacity-0 bg-white"
+            className="rank-card text-center shadow-xl border-t-2 rounded-2xl py-4 relative cursor-pointer bg-white"
           >
-            {/* <img
-              src="/logo_only.png"
-              alt=""
-              className="absolute -top-8 h-[290px] opacity-40 pointer-events-none"
-            /> */}
-
             <div className="relative mb-6">
               <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto relative">
                 <div className="absolute inset-0 opacity-30">
@@ -208,13 +175,11 @@ export default function ExamDetails() {
                   <div className="absolute bottom-8 left-8 w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full"></div>
                 </div>
 
-                <div className="absolute inset-0">
-                  <img
-                    src={holder.image || "/placeholder.svg"}
-                    alt={holder.name}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
+                <img
+                  src={holder.image || "/placeholder.svg"}
+                  alt={holder.name}
+                  className="absolute inset-0 w-full h-full object-cover rounded-full"
+                />
 
                 <div className="absolute bottom-6 left-4 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg flex flex-col justify-center items-center">
                   <span className="text-lg sm:text-xl text-gray-900 font-bold">

@@ -1,20 +1,21 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function NewsUpdates() {
-  const news = [
-    { title: "ACE announces new scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
-    { title: "Results declared for Semester 1 Exams", date: "September 16, 2025", image: "/news_02.png" },
-    { title: "ACE announces new scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
-    { title: "Declared for Semester 1 Exams", date: "September 16, 2025", image: "/news_02.png" },
-    { title: "ACE new scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
-    { title: "New scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
-  ];
-
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(3);
 
-  // Adjust number of cards per slide based on screen width
+  const news = [
+    { id: 1, title: "ACE announces new scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
+    { id: 2, title: "Results declared for Semester 1 Exams", date: "September 16, 2025", image: "/news_02.png" },
+    { id: 3, title: "ACE announces new scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
+    { id: 4, title: "Declared for Semester 1 Exams", date: "September 16, 2025", image: "/news_02.png" },
+    { id: 5, title: "ACE new scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
+    { id: 6, title: "New scholarship program 2025", date: "September 16, 2025", image: "/news_01.png" },
+  ];
+  
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) setItemsPerSlide(1);
@@ -27,7 +28,6 @@ export default function NewsUpdates() {
 
   const totalSlides = Math.ceil(news.length / itemsPerSlide);
 
-  // Auto slide every 10 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -37,7 +37,6 @@ export default function NewsUpdates() {
 
   const goToSlide = (index: number) => setCurrentSlide(index);
 
-  // Divide news items into slides
   const getSlides = () => {
     const slides = [];
     for (let i = 0; i < news.length; i += itemsPerSlide) {
@@ -53,7 +52,6 @@ export default function NewsUpdates() {
           News & Updates
         </h2>
 
-        {/* Carousel Container */}
         <div className="relative w-full overflow-hidden">
           <div
             className="flex transition-transform duration-700 ease-in-out"
@@ -66,10 +64,11 @@ export default function NewsUpdates() {
                   itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
                 }`}
               >
-                {slide.map((n, i) => (
+                {slide.map((n) => (
                   <div
-                    key={i}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                    key={n.id}
+                    onClick={() => router.push(`/highlights/news/${n.id}`)}
+                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
                   >
                     <img
                       src={n.image}
@@ -86,7 +85,6 @@ export default function NewsUpdates() {
             ))}
           </div>
 
-          {/* Dots */}
           <div className="flex justify-center gap-2 mt-6">
             {Array.from({ length: totalSlides }).map((_, index) => (
               <button

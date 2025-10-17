@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { gsap } from 'gsap';
+import { gsap } from "gsap";
 
 export default function AboutUs() {
   const tabs = [
@@ -56,67 +56,67 @@ export default function AboutUs() {
   const statsRef = useRef(null);
 
   useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     tl.fromTo(
-      '.about-heading',
+      ".about-heading",
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 1 }
     );
 
     tl.fromTo(
-      '.about-subheading',
+      ".about-subheading",
       { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 0.8 },
-      '-=0.5'
+      "-=0.5"
     );
 
     tl.fromTo(
-      '.about-text',
+      ".about-text",
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.7 },
-      '-=0.4'
+      "-=0.4"
     );
 
     tl.fromTo(
-      '.about-stat',
+      ".about-stat",
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.6, stagger: 0.2 },
-      '-=0.5'
+      "-=0.5"
     );
 
     tl.fromTo(
-      '.about-button',
+      ".about-button",
       { opacity: 0, scale: 0.8 },
       { opacity: 1, scale: 1, duration: 0.5 },
-      '-=0.3'
+      "-=0.3"
     );
 
     tl.fromTo(
-      '.about-tab',
+      ".about-tab",
       { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
-      '-=0.4'
+      "-=0.4"
     );
 
     tl.fromTo(
-      '.notifications-panel',
+      ".notifications-panel",
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 0.8 },
-      '-=0.5'
+      "-=0.5"
     );
 
     tl.fromTo(
-      '.notification-item',
+      ".notification-item",
       { opacity: 0, x: 30 },
       { opacity: 1, x: 0, duration: 0.6, stagger: 0.15 },
-      '-=0.4'
+      "-=0.4"
     );
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          const counterTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+          const counterTl = gsap.timeline({ defaults: { ease: "power3.out" } });
           const counterDuration = 3;
           counterTl.to(
             yearsRef.current,
@@ -126,10 +126,11 @@ export default function AboutUs() {
               snap: { innerText: 1 },
               delay: 0.5,
               onUpdate: function () {
-                yearsRef.current.innerText = Math.ceil(this.targets()[0].innerText) + '+';
+                yearsRef.current.innerText =
+                  Math.ceil(this.targets()[0].innerText) + "+";
               },
             },
-            'start'
+            "start"
           );
           counterTl.to(
             studentsRef.current,
@@ -139,10 +140,11 @@ export default function AboutUs() {
               snap: { innerText: 500 },
               delay: 0.5,
               onUpdate: function () {
-                studentsRef.current.innerText = Math.ceil(this.targets()[0].innerText) + '+';
+                studentsRef.current.innerText =
+                  Math.ceil(this.targets()[0].innerText) + "+";
               },
             },
-            'start'
+            "start"
           );
           counterTl.to(
             facultyRef.current,
@@ -152,10 +154,11 @@ export default function AboutUs() {
               snap: { innerText: 10 },
               delay: 0.5,
               onUpdate: function () {
-                facultyRef.current.innerText = Math.ceil(this.targets()[0].innerText) + '+';
+                facultyRef.current.innerText =
+                  Math.ceil(this.targets()[0].innerText) + "+";
               },
             },
-            'start'
+            "start"
           );
 
           observer.disconnect();
@@ -209,15 +212,15 @@ export default function AboutUs() {
                 </svg>
               </div>
 
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5, 6].map((item) => (
+              <div className="space-y-4 max-h-[20rem] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => (
                   <div
                     key={item}
                     className="notification-item flex items-center justify-between py-1 border-b border-gray-100 last:border-b-0"
                   >
                     <div>
                       <p className="font-semibold text-sm text-gray-900">
-                        PCS Exam Result
+                        PCS Exam Result {item}
                       </p>
                       <p className="text-xs text-gray-500">
                         10 Apr 2025 10:25pm
@@ -248,21 +251,33 @@ export default function AboutUs() {
               2003 at Manjeri, Malappuram district of Kerala.
             </p>
 
-            <div ref={statsRef} className="about-stats grid grid-cols-3 gap-8 mb-8">
+            <div
+              ref={statsRef}
+              className="about-stats grid grid-cols-3 gap-8 mb-8"
+            >
               <div className="about-stat text-center">
-                <div ref={yearsRef} className="md:text-5xl text-2xl font-bold bg-gradient-to-r from-[#098B9F] to-[#63C2CD] bg-clip-text text-transparent mb-2">
+                <div
+                  ref={yearsRef}
+                  className="md:text-5xl text-2xl font-bold bg-gradient-to-r from-[#098B9F] to-[#63C2CD] bg-clip-text text-transparent mb-2"
+                >
                   0
                 </div>
                 <div className="text-sm text-gray-600">Years of Excellence</div>
               </div>
               <div className="about-stat text-center">
-                <div ref={studentsRef} className="md:text-5xl text-2xl font-bold bg-gradient-to-r from-[#00A0E3] to-[#1F67A5] bg-clip-text text-transparent mb-2">
+                <div
+                  ref={studentsRef}
+                  className="md:text-5xl text-2xl font-bold bg-gradient-to-r from-[#00A0E3] to-[#1F67A5] bg-clip-text text-transparent mb-2"
+                >
                   0
                 </div>
                 <div className="text-sm text-gray-600">Successful Students</div>
               </div>
               <div className="about-stat text-center">
-                <div ref={facultyRef} className="md:text-5xl text-2xl font-bold bg-gradient-to-r from-[#63C2CD] to-[#098B9F] bg-clip-text text-transparent mb-2">
+                <div
+                  ref={facultyRef}
+                  className="md:text-5xl text-2xl font-bold bg-gradient-to-r from-[#63C2CD] to-[#098B9F] bg-clip-text text-transparent mb-2"
+                >
                   0
                 </div>
                 <div className="text-sm text-gray-600">Expert Faculty</div>

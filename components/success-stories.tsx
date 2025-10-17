@@ -83,13 +83,13 @@ export default function SuccessStories() {
 
           {/* Column 1 */}
           <div className="flex flex-col gap-6">
-            <Card className={`overflow-hidden hover:shadow-lg transition-shadow rounded-3xl flex-7`}>
+            <Card className={`cursor-pointer overflow-hidden hover:shadow-lg transition-shadow rounded-3xl flex-7`}>
               <CardContent className="p-0 h-full">
                 <div className="relative h-full">
                   <img
                     src={stories[0].image}
                     alt={stories[0].name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                   <div className="absolute bottom-14 bg-white rounded-xl left-0 right-0 px-6 py-3 mx-4">
                     <h3 className="text-gray-800 font-bold text-xl mb-1">
@@ -144,9 +144,9 @@ export default function SuccessStories() {
               </CardContent>
             </Card>
 
-            <Card className={`overflow-hidden rounded-3xl hover:shadow-lg transition-shadow md:flex-5 flex-6  ${stories[3].bgColor || "bg-[#ffeef7]"}`}>
+            <Card className={`cursor-pointer overflow-hidden rounded-3xl hover:shadow-lg transition-shadow md:flex-5 flex-6  ${stories[3].bgColor || "bg-[#ffeef7]"}`}>
               <CardContent className="p-0">
-                <img src={stories[3].image} alt={stories[3].name} className="w-full object-cover" />
+                <img src={stories[3].image} alt={stories[3].name} className="w-full object-cover transition-transform duration-500 hover:scale-105" />
                 <div className="p-4">
                   <h3 className="font-bold text-xl">{stories[3].name}</h3>
                   <p>{stories[3].description}</p>
@@ -160,7 +160,7 @@ export default function SuccessStories() {
           <div className="flex flex-col gap-6">
             <Card className={`overflow-hidden rounded-3xl hover:shadow-lg transition-shadow flex-3.5 ${stories[2].bgColor || "bg-[#ffeef7]"}`}>
               <CardContent className="p-0">
-                <img src={stories[2].image} alt={stories[2].name} className="w-full object-cover" />
+                <img src={stories[2].image} alt={stories[2].name} className="w-full object-cover transition-transform duration-500 hover:scale-105" />
                 <div className="p-4">
                   <h3 className="font-bold text-lg leading-[18px] text-gray-700">{stories[2].name}</h3>
                   {/* <p>{stories[2].description}</p> */}
@@ -169,9 +169,9 @@ export default function SuccessStories() {
               </CardContent>
             </Card>
 
-            <Card className={`overflow-hidden relative hover:shadow-lg rounded-3xl transition-shadow flex-6 ${stories[5].bgColor || "bg-white"}`}>
+            <Card className={`cursor-pointer overflow-hidden relative hover:shadow-lg rounded-3xl transition-shadow flex-6 ${stories[5].bgColor || "bg-white"}`}>
               <CardContent className="p-0">
-                <img src={stories[5].image} alt="Success story" className="w-full h-full object-cover" />
+                <img src={stories[5].image} alt="Success story" className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
                 <div className="absolute flex items-end bottom-10 bg-blue-400 me-10 rounded-e-full">
                   <div className="px-6 py-3 md:py-5">
                     <p className="text-white font-bold sm:text-sm text-xs leading-relaxed">{stories[5].quote}</p>
