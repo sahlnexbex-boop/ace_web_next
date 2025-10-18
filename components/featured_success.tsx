@@ -1,7 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import VideoModal from "./videoModal";
 
 export default function FeaturedSuccess() {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const videoUrl =
+    "https://www.youtube.com/embed/WVxdvMX9C2Q?si=rKsLx1Pdkm2hhv-o";
+
+  const openVideo = () => setModalOpen(true);
+  const closeVideo = () => setModalOpen(false);
+
   const stories = [
     {
       title: "ACE SUCCESS STORY | HSST RANK HOLDER",
@@ -105,8 +113,9 @@ export default function FeaturedSuccess() {
           >
             {getSlides().map((slide, slideIndex) => (
               <div
+                onClick={openVideo}
                 key={slideIndex}
-                className={`flex-shrink-0 w-full grid gap-8 ${
+                className={`flex-shrink-0 w-full grid gap-8 cursor-pointer ${
                   itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
                 }`}
               >
@@ -149,6 +158,12 @@ export default function FeaturedSuccess() {
           </div>
         </div>
       </div>
+
+      <VideoModal
+        isOpen={isModalOpen}
+        onClose={closeVideo}
+        videoUrl={videoUrl}
+      />
     </section>
   );
 }

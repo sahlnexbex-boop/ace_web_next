@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function LatestNews() {
+  const router =  useRouter();
   const news = [
     {
       id: 1,
@@ -65,7 +67,6 @@ export default function LatestNews() {
   return (
     <section className="md:py-16 py-10 bg-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Heading with underline image */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
             Latest News
@@ -85,6 +86,7 @@ export default function LatestNews() {
         >
           {news.map((item) => (
             <Card
+              onClick={()=>router.push(`/highlights/news/${item.id}`)}
               key={item.id}
               className="news-card opacity-0 overflow-hidden hover:shadow-lg transition-shadow rounded-xl cursor-pointer"
             >
