@@ -53,7 +53,6 @@ export default function FeaturedSuccess() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(3);
 
-  // Responsive slide count
   useEffect(() => {
     const handleResize = () => {
       setItemsPerSlide(window.innerWidth < 768 ? 1 : 3);
@@ -65,7 +64,6 @@ export default function FeaturedSuccess() {
 
   const totalSlides = Math.ceil(stories.length / itemsPerSlide);
 
-  // Auto-slide every 10s
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -75,7 +73,6 @@ export default function FeaturedSuccess() {
 
   const goToSlide = (index: number) => setCurrentSlide(index);
 
-  // Divide into slides
   const getSlides = () => {
     const slides = [];
     for (let i = 0; i < stories.length; i += itemsPerSlide) {
@@ -87,7 +84,6 @@ export default function FeaturedSuccess() {
   return (
     <section className="bg-white py-16 px-6 md:px-10 overflow-hidden">
       <div className="max-w-7xl mx-auto text-center">
-        {/* Heading */}
         <div className="relative mb-12 text-left">
           <h2 className="text-2xl md:text-4xl font-bold text-cyan-900 inline-block">
             Featured Success Stories
@@ -138,7 +134,6 @@ export default function FeaturedSuccess() {
             ))}
           </div>
 
-          {/* Dots */}
           <div className="flex justify-center gap-2 mt-8">
             {Array.from({ length: totalSlides }).map((_, index) => (
               <button

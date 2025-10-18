@@ -1,7 +1,13 @@
 "use client";
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function AboutInstitution() {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
   const features = [
     {
       icon: (
@@ -12,10 +18,10 @@ export default function AboutInstitution() {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          className="icon icon-tabler icons-tabler-outline icon-tabler-stack-2 w-6 h-6 text-rose-500"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-6 h-6 text-rose-500"
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M12 4l-8 4l8 4l8 -4l-8 -4" />
@@ -35,10 +41,10 @@ export default function AboutInstitution() {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          className="icon icon-tabler icons-tabler-outline icon-tabler-users w-6 h-6 text-blue-500"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-6 h-6 text-blue-500"
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
@@ -59,10 +65,10 @@ export default function AboutInstitution() {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          className="icon icon-tabler icons-tabler-outline icon-tabler-book w-6 h-6 text-purple-500"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-6 h-6 text-purple-500"
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" />
@@ -78,27 +84,61 @@ export default function AboutInstitution() {
   ];
 
   const team = [
-    {
-      name: "Thomas Joe",
-      role: "Founder & Director",
-      image: "/lead_01.png",
-    },
-    {
-      name: "Riya Kumar",
-      role: "Head of Curriculum",
-      image: "/lead_02.png",
-    },
-    {
-      name: "Thomas Paul",
-      role: "Placement Lead",
-      image: "/lead_03.png",
-    },
+    { name: "Thomas Joe", role: "Founder & Director", image: "/lead_01.png" },
+    { name: "Riya Kumar", role: "Head of Curriculum", image: "/lead_02.png" },
+    { name: "Thomas Paul", role: "Placement Lead", image: "/lead_03.png" },
   ];
 
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>(".feature-card").forEach((card) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              toggleActions: "play none none none",
+              once: true,
+            },
+          }
+        );
+      });
+
+      gsap.utils.toArray<HTMLElement>(".team-card").forEach((card) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 60 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              toggleActions: "play none none none",
+              once: true,
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="bg-blue-50 md:py-16 py-8 px-6 md:px-10">
+    <section
+      ref={sectionRef}
+      className="bg-blue-50 md:py-16 py-8 px-6 md:px-10"
+    >
       <div className="max-w-7xl mx-auto">
-        {/* Mission & Vision */}
         <div className="grid md:grid-cols-2 gap-6 mb-10">
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="font-semibold text-lg text-gray-900 mb-2">
@@ -124,12 +164,11 @@ export default function AboutInstitution() {
           </div>
         </div>
 
-        {/* Features */}
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mb-16">
           {features.map((f, i) => (
             <div
               key={i}
-              className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition"
+              className="feature-card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition"
             >
               <div className="mb-3">{f.icon}</div>
               <h4 className="font-semibold text-gray-900 mb-2">{f.title}</h4>
@@ -150,7 +189,7 @@ export default function AboutInstitution() {
             {team.map((member, index) => (
               <div
                 key={index}
-                className="bg-white/40 p-6 rounded-xl shadow-sm text-center hover:shadow-lg transition"
+                className="team-card bg-white/40 p-6 rounded-xl shadow-sm text-center hover:shadow-lg transition"
               >
                 <img
                   src={member.image}

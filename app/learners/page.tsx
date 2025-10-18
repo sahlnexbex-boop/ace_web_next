@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Home, Book, FileText, Video, File, Key } from "lucide-react";
 import { useRouter } from "next/navigation";
+import VideoModal from "@/components/videoModal";
 
 export default function LearnersPortal() {
   const router = useRouter();
@@ -33,13 +34,17 @@ export default function LearnersPortal() {
 
   const [activeCategory, setActiveCategory] = useState<Category>("All");
 
+  // 🎬 Video Modal State
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
   const renderCategoryTabs = () => (
-    <div className="flex flex-wrap gap-3 mb-6">
+    <div className="flex flex-wrap gap-3 mb-6 overflow-x-auto pb-2 md:pb-0">
       {categories.map((cat) => (
         <button
           key={cat}
           onClick={() => setActiveCategory(cat)}
-          className={`px-5 py-2 rounded-full text-sm font-medium transition ${
+          className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
             activeCategory === cat
               ? "bg-[#087fc2] text-white"
               : "bg-white text-gray-700 border border-gray-200 hover:bg-blue-50"
@@ -55,31 +60,11 @@ export default function LearnersPortal() {
     switch (activeTab) {
       case "current": {
         const currentAffairs = [
-          {
-            id: 1,
-            title: "January 2025 Current Affairs",
-            published: "Jan 15, 2025",
-          },
-          {
-            id: 2,
-            title: "February 2025 Current Affairs",
-            published: "Feb 18, 2025",
-          },
-          {
-            id: 3,
-            title: "March 2025 Current Affairs",
-            published: "Mar 12, 2025",
-          },
-          {
-            id: 4,
-            title: "April 2025 Current Affairs",
-            published: "Apr 10, 2025",
-          },
-          {
-            id: 5,
-            title: "May 2025 Current Affairs",
-            published: "May 20, 2025",
-          },
+          { id: 1, title: "January 2025 Current Affairs", published: "Jan 15, 2025" },
+          { id: 2, title: "February 2025 Current Affairs", published: "Feb 18, 2025" },
+          { id: 3, title: "March 2025 Current Affairs", published: "Mar 12, 2025" },
+          { id: 4, title: "April 2025 Current Affairs", published: "Apr 10, 2025" },
+          { id: 5, title: "May 2025 Current Affairs", published: "May 20, 2025" },
         ];
 
         return (
@@ -125,22 +110,10 @@ export default function LearnersPortal() {
 
       case "publications": {
         const publications = [
-          {
-            id: 1,
-            title: "General Knowledge Guide 2025",
-            author: "ABC Publishers",
-          },
+          { id: 1, title: "General Knowledge Guide 2025", author: "ABC Publishers" },
           { id: 2, title: "History of India", author: "XYZ Publishers" },
-          {
-            id: 3,
-            title: "Quantitative Aptitude Made Easy",
-            author: "R.S. Sharma",
-          },
-          {
-            id: 4,
-            title: "English Grammar Essentials",
-            author: "Bright Academy",
-          },
+          { id: 3, title: "Quantitative Aptitude Made Easy", author: "R.S. Sharma" },
+          { id: 4, title: "English Grammar Essentials", author: "Bright Academy" },
           { id: 5, title: "Current Affairs Yearly 2025", author: "EduWorld" },
           { id: 6, title: "Indian Polity Handbook", author: "M. Krishnan" },
         ];
@@ -154,9 +127,7 @@ export default function LearnersPortal() {
               >
                 <div>
                   <h3 className="font-semibold text-gray-800">{p.title}</h3>
-                  <p className="text-sm text-[#0c8da6] mt-1 mb-2">
-                    By {p.author}
-                  </p>
+                  <p className="text-sm text-[#0c8da6] mt-1 mb-2">By {p.author}</p>
                 </div>
                 <button
                   onClick={() => router.push(`/learners/publications/${p.id}`)}
@@ -200,9 +171,6 @@ export default function LearnersPortal() {
                 >
                   <div className="flex flex-col items-start">
                     <img src="/pdf.png" alt="" className="mb-2" />
-                    {/* <div className="bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold">
-                      PDF
-                    </div> */}
                     <h3 className="font-semibold text-gray-800 text-lg">
                       {item.title}
                     </h3>
@@ -260,15 +228,30 @@ export default function LearnersPortal() {
       case "videos": {
         const videoData = {
           All: [
-            // "LDC Previous Question Paper | IT/Computer",
-            // "KTET Marathon | Day 4",
-            // "HSA Final Touch",
+            {
+              title: "KTET Marathon | Full Session",
+              url: "https://www.youtube.com/watch?v=8EN71MtvFNk",
+            },
+            {
+              title: "HSA Final Touch",
+              url: "https://www.youtube.com/watch?v=8EN71MtvFNk",
+            },
           ],
-          "Kerala PSC": ["KPSC Orientation Class"],
-          HSA: ["HSA Crash Course"],
-          HSST: ["HSST Model Class"],
-          KTET: ["KTET 2025 Full Session"],
-          LPUP: ["LPUP Quick Review"],
+          "Kerala PSC": [
+            { title: "KPSC Orientation Class", url: "https://www.youtube.com/watch?v=8EN71MtvFNk" },
+          ],
+          HSA: [
+            { title: "HSA Crash Course", url: "https://www.youtube.com/watch?v=8EN71MtvFNk" },
+          ],
+          HSST: [
+            { title: "HSST Model Class", url: "https://www.youtube.com/watch?v=8EN71MtvFNk" },
+          ],
+          KTET: [
+            { title: "KTET 2025 Full Session", url: "https://www.youtube.com/watch?v=8EN71MtvFNk" },
+          ],
+          LPUP: [
+            { title: "LPUP Quick Review", url: "https://www.youtube.com/watch?v=8EN71MtvFNk0" },
+          ],
         };
 
         const list =
@@ -283,15 +266,19 @@ export default function LearnersPortal() {
               {list.map((v, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden transition"
+                  className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden transition cursor-pointer"
+                  onClick={() => {
+                    setVideoUrl(v.url);
+                    setIsVideoOpen(true);
+                  }}
                 >
                   <img
                     src={`/video_thumb_${i + 1}.png`}
-                    alt={v}
+                    alt={v.title}
                     className="w-full h-40 object-cover"
                   />
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-800">{v}</h3>
+                    <h3 className="font-semibold text-gray-800">{v.title}</h3>
                     <p className="text-sm text-gray-500 mt-2">August 2025</p>
                   </div>
                 </div>
@@ -316,10 +303,7 @@ export default function LearnersPortal() {
             LPUP: ["LPUP 2024 Paper"],
           },
           model: {
-            All: [
-              "General Studies Model Paper",
-              "Quantitative Aptitude Model Paper",
-            ],
+            All: ["General Studies Model Paper", "Quantitative Aptitude Model Paper"],
             "Kerala PSC": ["KPSC Model Paper"],
             HSA: ["HSA Model Paper"],
             HSST: ["HSST Model Paper"],
@@ -355,7 +339,6 @@ export default function LearnersPortal() {
                   key={i}
                   className="bg-red-50 p-5 rounded-xl shadow hover:shadow-lg transition"
                 >
-                  {" "}
                   <img src="/pdf.png" alt="" className="mb-2" />
                   <h4 className="font-medium text-gray-800 mb-3">{item}</h4>
                   <button className="bg-white text-gray-900 font-medium px-5 py-2 rounded-2xl cursor-pointer border border-gray-300 hover:bg-gray-100 transition w-full">
@@ -386,16 +369,13 @@ export default function LearnersPortal() {
         </span>
       </div>
 
-      {/* Heading */}
       <h1 className="md:text-3xl text-2xl font-bold text-gray-900 md:mb-8 mb-5">
         Learners Portal
       </h1>
 
-      {/* Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar */}
-        <div className="bg-white p-4 rounded-xl shadow h-fit">
-          <ul className="space-y-2">
+        <div className="md:bg-white md:p-4 p-0 md:rounded-xl md:shadow h-fit overflow-x-auto lg:overflow-visible">
+          <ul className="flex lg:flex-col gap-3 lg:gap-2 w-max lg:w-full">
             {menuItems.map(({ id, label, icon: Icon }) => (
               <li key={id}>
                 <button
@@ -403,7 +383,7 @@ export default function LearnersPortal() {
                     setActiveTab(id);
                     setActiveCategory("All");
                   }}
-                  className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg text-left transition cursor-pointer ${
+                  className={`flex w-full items-center gap-3 px-4 py-2 rounded-lg text-left transition cursor-pointer whitespace-nowrap ${
                     activeTab === id
                       ? "bg-gradient-to-r from-[#1F67A5] to-[#087fc2] text-white"
                       : "text-gray-700 hover:bg-blue-200"
@@ -419,6 +399,12 @@ export default function LearnersPortal() {
 
         <div className="lg:col-span-3">{renderContent()}</div>
       </div>
+
+      <VideoModal
+        videoUrl={videoUrl}
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+      />
     </div>
   );
 }

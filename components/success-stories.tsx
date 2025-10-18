@@ -3,9 +3,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import VideoModal from "./videoModal";
 
 export default function SuccessStories() {
   const router = useRouter();
+
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const videoUrl =
+    "https://www.youtube.com/embed/WVxdvMX9C2Q?si=rKsLx1Pdkm2hhv-o";
+
+  const openVideo = () => setModalOpen(true);
+  const closeVideo = () => setModalOpen(false);
 
   const stories = [
     {
@@ -71,7 +81,10 @@ export default function SuccessStories() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900" onClick={()=>router.push("/highlights")}>
+          <h2
+            className="text-3xl md:text-4xl font-bold text-gray-900"
+            onClick={() => router.push("/highlights")}
+          >
             Success Stories
           </h2>
           <div className="mt-2 flex justify-center">
@@ -88,6 +101,7 @@ export default function SuccessStories() {
           {/* Column 1 */}
           <div className="flex flex-col gap-6">
             <Card
+              onClick={openVideo}
               className={`cursor-pointer overflow-hidden hover:shadow-lg transition-shadow rounded-3xl flex-7`}
             >
               <CardContent className="p-0 h-full">
@@ -175,6 +189,7 @@ export default function SuccessStories() {
             </Card>
 
             <Card
+              onClick={openVideo}
               className={`cursor-pointer overflow-hidden rounded-3xl hover:shadow-lg transition-shadow md:flex-5 flex-6  ${
                 stories[3].bgColor || "bg-[#ffeef7]"
               }`}
@@ -199,6 +214,7 @@ export default function SuccessStories() {
           {/* Column 3 */}
           <div className="flex flex-col gap-6">
             <Card
+              onClick={openVideo}
               className={`overflow-hidden rounded-3xl hover:shadow-lg transition-shadow flex-3.5 ${
                 stories[2].bgColor || "bg-[#ffeef7]"
               }`}
@@ -222,6 +238,7 @@ export default function SuccessStories() {
             </Card>
 
             <Card
+             onClick={openVideo}
               className={`cursor-pointer overflow-hidden relative hover:shadow-lg rounded-3xl transition-shadow flex-6 ${
                 stories[5].bgColor || "bg-white"
               }`}
@@ -244,6 +261,12 @@ export default function SuccessStories() {
           </div>
         </div>
       </div>
+
+      <VideoModal
+        isOpen={isModalOpen}
+        onClose={closeVideo}
+        videoUrl={videoUrl}
+      />
     </section>
   );
 }

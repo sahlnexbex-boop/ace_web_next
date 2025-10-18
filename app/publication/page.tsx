@@ -1,11 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function PublicationsPage() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [search, setSearch] = useState("");
+
+  const pageRef = useRef(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   const categories = [
     "All",
@@ -48,21 +55,63 @@ export default function PublicationsPage() {
       b.title.toLowerCase().includes(search.toLowerCase())
   );
 
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        pageRef.current,
+        { autoAlpha: 0, y: 40 },
+        { autoAlpha: 1, y: 0, duration: 0.8, ease: "power2.out" }
+      );
+
+      if (cardsRef.current) {
+        const cards = cardsRef.current.querySelectorAll(".book-card");
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 60 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: cardsRef.current,
+              start: "top 85%",
+            },
+          }
+        );
+      }
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, [filteredBooks]);
+
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-10 md:py-16 py-8">
+    <div ref={pageRef} className="max-w-7xl mx-auto px-6 md:px-10 md:py-16 py-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-gray-600 text-sm mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeWidth={2}
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"
+          />
         </svg>
         <span>/</span>
         <span>Publications</span>
       </div>
 
-      <h1 className="text-2xl md:text-3xl font-bold text-center text-gradient-to-r from-[#0197db] to-[#0c8da6] mb-4">Publications</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-center text-gradient-to-r from-[#0197db] to-[#0c8da6] mb-4">
+        Publications
+      </h1>
       <p className="text-center text-gray-600 max-w-3xl mx-auto mb-10 text-sm md:text-base">
-        ACE publishes authentic study materials, Super Rank Files, Books and Magazines which help the candidates
-        to secure top ranks in many toughest competitive examinations.
+        ACE publishes authentic study materials, Super Rank Files, Books and Magazines which help
+        candidates secure top ranks in many toughest competitive examinations.
       </p>
 
       <div className="md:hidden mb-6">
@@ -100,7 +149,9 @@ export default function PublicationsPage() {
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`cursor-pointer hover:text-cyan-700 ${
-                    selectedCategory === cat ? "text-cyan-700 font-semibold" : "text-gray-600"
+                    selectedCategory === cat
+                      ? "text-cyan-700 font-semibold"
+                      : "text-gray-600"
                   }`}
                 >
                   {cat}
@@ -110,25 +161,35 @@ export default function PublicationsPage() {
           </div>
         </div>
 
-        <div className="flex-1 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div ref={cardsRef} className="flex-1 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBooks.length > 0 ? (
             filteredBooks.map((book) => (
               <div
                 key={book.id}
                 onClick={() => router.push(`/publication/${book.id}`)}
-                className="bg-white border rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 cursor-pointer flex flex-col h-[400px] justify-between"
+                className="book-card bg-white border rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 cursor-pointer flex flex-col h-[400px] justify-between"
               >
                 <div className="flex-1 flex items-center justify-center">
-                  <img src={book.image} alt={book.title} className="w-full h-64 object-contain" />
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="w-full h-64 object-contain transform transition-transform duration-500 hover:scale-105"
+                  />
                 </div>
                 <div className="mt-3 text-center">
-                  <h3 className="font-semibold text-gray-800 text-sm line-clamp-2">{book.title}</h3>
-                  <p className="font-bold text-gray-900 mt-1">₹{book.price.toFixed(2)}</p>
+                  <h3 className="font-semibold text-gray-800 text-sm line-clamp-2">
+                    {book.title}
+                  </h3>
+                  <p className="font-bold text-gray-900 mt-1">
+                    ₹{book.price.toFixed(2)}
+                  </p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 col-span-full text-center py-10">No books found.</p>
+            <p className="text-gray-500 col-span-full text-center py-10">
+              No books found.
+            </p>
           )}
         </div>
       </div>

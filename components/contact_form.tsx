@@ -5,9 +5,7 @@ export default function ContactSection() {
   return (
     <section className="bg-[#f7fbff] py-16 px-6 md:px-10">
       <div className="max-w-7xl mx-auto space-y-16">
-        {/* Contact Info + Enquiry Form */}
         <div className="bg-white shadow-md rounded-2xl p-4 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Left Side – Contact Info */}
           <div>
             <h3 className="text-xl font-semibold mb-1 md:mb-2 text-gray-900">
               Address
@@ -34,7 +32,7 @@ export default function ContactSection() {
             <div className="flex gap-3">
               <a
                 href="#"
-                className="bg-blue-400 text-white p-2 rounded-md hover:bg-blue-700 transition"
+                className="bg-blue-400 text-white p-2 rounded-md hover:bg-blue-500 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +52,7 @@ export default function ContactSection() {
               </a>
               <a
                 href="#"
-                className="bg-pink-400 text-white p-2 rounded-md hover:bg-pink-700 transition"
+                className="bg-pink-400 text-white p-2 rounded-md hover:bg-pink-500 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +68,7 @@ export default function ContactSection() {
               </a>
               <a
                 href="#"
-                className="bg-sky-400 text-white p-2 rounded-md hover:bg-sky-600 transition"
+                className="bg-sky-400 text-white p-2 rounded-md hover:bg-sky-500 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +88,7 @@ export default function ContactSection() {
               </a>
               <a
                 href="#"
-                className="bg-red-400 text-white p-2 rounded-md hover:bg-red-700 transition"
+                className="bg-red-400 text-white p-2 rounded-md hover:bg-red-500 transition"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -112,7 +110,6 @@ export default function ContactSection() {
             </div>
           </div>
 
-          {/* Right Side – Enquiry Form */}
           <div>
             <h3 className="text-xl font-semibold mb-6 text-gray-900">
               Enquiry Form
@@ -155,9 +152,7 @@ export default function ContactSection() {
           </div>
         </div>
 
-        {/* Map Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
-          {/* Left Info */}
           <div className="h-full flex flex-col justify-center md:px-10">
             <h3 className="text-2xl font-semibold text-gray-900 mb-3">
               Find us on the map

@@ -1,77 +1,59 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Download, ChevronRight } from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function NotificationsPage() {
-  const [activeTab, setActiveTab] = useState<"notifications" | "results">(
-    "notifications"
-  );
+  const [activeTab, setActiveTab] = useState<"notifications" | "results">("notifications");
+  const listRef = useRef<HTMLDivElement>(null);
 
   const notifications = [
-    {
-      title: "Semester Exam Notification – March 2025",
-      date: "Published: 20 Sep 2025",
-      course: "UG - B.Sc",
-    },
-    {
-      title: "Mid-Term Exam Schedule – Feb 2025",
-      date: "Published: 10 Feb 2025",
-      course: "PG - MBA",
-    },
-    {
-      title: "Entrance Exam Notification – 2025 Batch",
-      date: "Published: 13 Jan 2025",
-      course: "UG/PG - All Courses",
-    },
-    {
-      title: "Supplementary Exam Notification – April 2025",
-      date: "Published: 28 Mar 2025",
-      course: "UG - B.Com",
-    },
-    {
-      title: "Practical Exam Timetable – June 2025",
-      date: "Published: 15 Jun 2025",
-      course: "UG/PG - All Science Streams",
-    },
-    {
-      title: "Online Exam Guidelines – July 2025",
-      date: "Published: 05 Jul 2025",
-      course: "PG - MCA",
-    },
-    {
-      title: "Revaluation Notification – Aug 2025",
-      date: "Published: 08 Aug 2025",
-      course: "UG - Arts & Science",
-    },
+    { title: "Semester Exam Notification – March 2025", date: "Published: 20 Sep 2025", course: "UG - B.Sc" },
+    { title: "Mid-Term Exam Schedule – Feb 2025", date: "Published: 10 Feb 2025", course: "PG - MBA" },
+    { title: "Entrance Exam Notification – 2025 Batch", date: "Published: 13 Jan 2025", course: "UG/PG - All Courses" },
+    { title: "Supplementary Exam Notification – April 2025", date: "Published: 28 Mar 2025", course: "UG - B.Com" },
+    { title: "Practical Exam Timetable – June 2025", date: "Published: 15 Jun 2025", course: "UG/PG - All Science Streams" },
+    { title: "Online Exam Guidelines – July 2025", date: "Published: 05 Jul 2025", course: "PG - MCA" },
+    { title: "Revaluation Notification – Aug 2025", date: "Published: 08 Aug 2025", course: "UG - Arts & Science" },
   ];
 
   const results = [
-    {
-      title: "Final Year Results – B.Sc Computer Science 2025",
-      date: "Published: 15 Sep 2025",
-      course: "UG - B.Sc",
-    },
-    {
-      title: "MBA Semester Results – June 2025",
-      date: "Published: 09 Jul 2025",
-      course: "PG - MBA",
-    },
-    {
-      title: "Entrance Exam Results – 2025 Batch",
-      date: "Published: 30 Apr 2025",
-      course: "UG/PG - All Courses",
-    },
-    {
-      title: "Supplementary Results – B.Com April 2025",
-      date: "Published: 25 May 2025",
-      course: "UG - B.Com",
-    },
-    {
-      title: "MCA Final Year Results – July 2025",
-      date: "Published: 20 Jul 2025",
-      course: "PG - MCA",
-    },
+    { title: "Final Year Results – B.Sc Computer Science 2025", date: "Published: 15 Sep 2025", course: "UG - B.Sc" },
+    { title: "MBA Semester Results – June 2025", date: "Published: 09 Jul 2025", course: "PG - MBA" },
+    { title: "Entrance Exam Results – 2025 Batch", date: "Published: 30 Apr 2025", course: "UG/PG - All Courses" },
+    { title: "Supplementary Results – B.Com April 2025", date: "Published: 25 May 2025", course: "UG - B.Com" },
+    { title: "MCA Final Year Results – July 2025", date: "Published: 20 Jul 2025", course: "PG - MCA" },
   ];
+
+  useEffect(() => {
+    if (listRef.current) {
+      const cards = listRef.current.querySelectorAll(".notify-card");
+
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "power3.out",
+        }
+      );
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    gsap.from(".page-header", {
+      opacity: 0,
+      y: -20,
+      duration: 0.6,
+      ease: "power3.out",
+    });
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto px-5 md:px-10 md:py-14 py-8">
@@ -100,7 +82,7 @@ export default function NotificationsPage() {
           onClick={() => setActiveTab("notifications")}
           className={`cursor-pointer px-5 py-2 rounded-full text-sm font-medium transition-all ${
             activeTab === "notifications"
-              ? "bg-cyan-600 text-white"
+              ? "bg-cyan-600 text-white shadow-md"
               : "bg-gray-100 text-gray-700 hover:bg-cyan-50"
           }`}
         >
@@ -110,7 +92,7 @@ export default function NotificationsPage() {
           onClick={() => setActiveTab("results")}
           className={`cursor-pointer px-5 py-2 rounded-full text-sm font-medium transition-all ${
             activeTab === "results"
-              ? "bg-cyan-600 text-white"
+              ? "bg-cyan-600 text-white shadow-md"
               : "bg-gray-100 text-gray-700 hover:bg-cyan-50"
           }`}
         >
@@ -118,34 +100,32 @@ export default function NotificationsPage() {
         </button>
       </div>
 
-      <div className="space-y-4">
-        {(activeTab === "notifications" ? notifications : results).map(
-          (item, index) => (
-            <div
-              key={index}
-              className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white shadow-sm hover:shadow-md border border-gray-100 rounded-lg p-4 transition-all"
-            >
-              <div className="text-left w-full sm:w-auto">
-                <h3 className="text-cyan-800 font-semibold text-base md:text-lg">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  {item.date} | {item.course}
-                </p>
-              </div>
-
-              {activeTab === "notifications" ? (
-                <button className="cursor-pointer flex items-center gap-1 mt-3 sm:mt-0 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all">
-                  View Details <ChevronRight size={16} />
-                </button>
-              ) : (
-                <button className="cursor-pointer flex items-center gap-2 mt-3 sm:mt-0 bg-red-50 text-red-600 hover:bg-red-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all">
-                  <Download size={16} /> Download
-                </button>
-              )}
+      <div ref={listRef} className="space-y-4">
+        {(activeTab === "notifications" ? notifications : results).map((item, index) => (
+          <div
+            key={index}
+            className="notify-card flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white shadow-sm hover:shadow-md border border-gray-100 rounded-lg p-4 transition-all hover:-translate-y-1"
+          >
+            <div className="text-left w-full sm:w-auto">
+              <h3 className="text-cyan-800 font-semibold text-base md:text-lg">
+                {item.title}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {item.date} | {item.course}
+              </p>
             </div>
-          )
-        )}
+
+            {activeTab === "notifications" ? (
+              <button className="cursor-pointer flex items-center gap-1 mt-3 sm:mt-0 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all">
+                View Details <ChevronRight size={16} />
+              </button>
+            ) : (
+              <button className="cursor-pointer flex items-center gap-2 mt-3 sm:mt-0 bg-red-50 text-red-600 hover:bg-red-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all">
+                <Download size={16} /> Download
+              </button>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

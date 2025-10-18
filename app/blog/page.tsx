@@ -1,9 +1,14 @@
 "use client";
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function BlogPage() {
   const router = useRouter();
+  const sectionRef = useRef<HTMLDivElement | null>(null);
 
   const blogs = [
     {
@@ -56,8 +61,38 @@ export default function BlogPage() {
     },
   ];
 
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>(".blog-card").forEach((card, i) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 60, scale: 0.95 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            delay: i * 0.1, 
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              toggleActions: "play none none none",
+              once: true,
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-12 md:py-14 py-8">
+    <div
+      ref={sectionRef}
+      className="max-w-7xl mx-auto px-6 md:px-12 md:py-14 py-8"
+    >
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-gray-600 text-sm mb-6">
         <svg
@@ -83,7 +118,7 @@ export default function BlogPage() {
           <div
             key={blog.id}
             onClick={() => router.push(`/blog/${blog.id}`)}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer overflow-hidden group"
+            className="blog-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer overflow-hidden group"
           >
             <div className="overflow-hidden">
               <img
