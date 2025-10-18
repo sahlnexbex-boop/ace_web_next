@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Menu,
@@ -23,6 +23,7 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   const menuLinks = [
     { label: "Home", href: "/home", icon: Home },
@@ -34,7 +35,6 @@ export default function Header() {
     { label: "Contact Us", href: "/contact", icon: Phone },
   ];
 
-  // GSAP animations for mobile menu
   useEffect(() => {
     if (isMenuOpen) {
       gsap.to(overlayRef.current, {
@@ -74,17 +74,21 @@ export default function Header() {
     }
   }, [isMenuOpen]);
 
-  // Handle navigation
   const handleNavigate = (path: string) => {
     setIsMenuOpen(false);
     router.push(path);
+  };
+
+  const isActive = (href: string) => {
+    if (pathname === href) return true;
+    if (pathname.startsWith(href + "/")) return true;
+    return false;
   };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div
             className="flex items-center space-x-2 cursor-pointer"
             onClick={() => router.push("/home")}
@@ -92,20 +96,22 @@ export default function Header() {
             <img src="/logo_blue.png" alt="logo" className="h-10 sm:h-auto" />
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {menuLinks.map(({ label, href }) => (
               <Link
                 key={href}
                 href={href}
-                className="text-gray-700 hover:text-blue-600 transition-colors"
+                className={`transition-colors font-medium ${
+                  isActive(href)
+                    ? "text-cyan-600 border-b-2 border-cyan-600 pb-1"
+                    : "text-gray-700 hover:text-cyan-500"
+                }`}
               >
                 {label}
               </Link>
             ))}
           </nav>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <Button
               variant="ghost"
@@ -118,7 +124,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Overlay */}
       <div
         ref={overlayRef}
         onClick={() => setIsMenuOpen(false)}
@@ -130,7 +135,6 @@ export default function Header() {
         ref={menuRef}
         className="fixed top-0 right-0 h-full w-64 bg-white/80 backdrop-blur-md shadow-xl z-50 p-6 flex flex-col translate-x-full"
       >
-        {/* Close button */}
         <button
           onClick={() => setIsMenuOpen(false)}
           className="self-end mb-6 text-gray-700 hover:text-blue-600"
@@ -138,13 +142,16 @@ export default function Header() {
           <X className="h-6 w-6" />
         </button>
 
-        {/* Nav links with icons */}
         <nav className="flex flex-col gap-3">
           {menuLinks.map(({ label, href, icon: Icon }) => (
             <button
               key={label}
               onClick={() => handleNavigate(href)}
-              className="mobile-link flex items-center gap-3 px-4 py-2 rounded-lg bg-blue-100/70 text-gray-800 hover:bg-blue-600 hover:text-white transition-colors text-sm font-medium shadow-sm opacity-0"
+              className={`mobile-link flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium shadow-sm opacity-0 transition-colors ${
+                isActive(href)
+                  ? "bg-cyan-600 text-white"
+                  : "bg-blue-100/70 text-gray-800 hover:bg-blue-600 hover:text-white"
+              }`}
             >
               <Icon className="h-4 w-4" />
               {label}

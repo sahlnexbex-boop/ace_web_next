@@ -11,7 +11,6 @@ export default function AboutHeader() {
           grid-cols-1 md:grid-cols-2
         "
       >
-        {/* Image Section (shown first on mobile) */}
         <div className="order-1 md:order-2 flex justify-center relative z-10">
           <div className="relative">
             <img
@@ -39,7 +38,6 @@ export default function AboutHeader() {
           </div>
         </div>
 
-        {/* Text Section (shown second on mobile) */}
         <div className="order-2 md:order-1">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
             Success Stories Ace
@@ -50,17 +48,17 @@ export default function AboutHeader() {
           </p>
 
           <div className="flex flex-wrap gap-4 bg-white py-5 rounded-3xl">
-            <div className="rounded-lg p-4 flex-1 min-w-[120px] text-center">
-              <p className="text-3xl font-bold text-cyan-700">20+</p>
-              <p className="text-xs text-gray-600">Years of Excellence</p>
+            <div className="rounded-lg md:p-4 flex-1 text-center">
+              <p className="md:text-5xl text-2xl font-bold text-cyan-700">20+</p>
+              <p className="text-xs md:text-sm text-gray-600">Years of Excellence</p>
             </div>
-            <div className="rounded-lg p-4 flex-1 min-w-[120px] text-center">
-              <p className="text-3xl font-bold text-cyan-700">5000+</p>
-              <p className="text-xs text-gray-600">Successful Students</p>
+            <div className="rounded-lg md:p-4 flex-1 text-center">
+              <p className="md:text-5xl text-2xl font-bold text-cyan-700">5000+</p>
+              <p className="text-xs md:text-sm text-gray-600">Successful Students</p>
             </div>
-            <div className="rounded-lg p-4 flex-1 min-w-[120px] text-center">
-              <p className="text-3xl font-bold text-cyan-700">100+</p>
-              <p className="text-xs text-gray-600">Expert Faculty</p>
+            <div className="rounded-lg md:p-4 flex-1 text-center">
+              <p className="md:text-5xl text-2xl font-bold text-cyan-700">100+</p>
+              <p className="text-xs md:text-sm text-gray-600">Expert Faculty</p>
             </div>
           </div>
 

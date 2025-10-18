@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { gsap } from "gsap";
 
@@ -54,6 +55,8 @@ export default function AboutUs() {
   const studentsRef = useRef(null);
   const facultyRef = useRef(null);
   const statsRef = useRef(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -137,7 +140,7 @@ export default function AboutUs() {
             {
               innerText: 5000,
               duration: counterDuration,
-              snap: { innerText: 500 },
+              snap: { innerText: 100 },
               delay: 0.5,
               onUpdate: function () {
                 studentsRef.current.innerText =
@@ -151,7 +154,7 @@ export default function AboutUs() {
             {
               innerText: 100,
               duration: counterDuration,
-              snap: { innerText: 10 },
+              snap: { innerText: 1 },
               delay: 0.5,
               onUpdate: function () {
                 facultyRef.current.innerText =
@@ -191,7 +194,7 @@ export default function AboutUs() {
             />
             <div className="notifications-panel bg-white/80 rounded-lg shadow-lg p-6 max-w-md !z-10 relative mx-auto lg:mx-0">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg cursor-pointer font-bold text-gray-900" onClick={()=>router.push("/notification")}>
                   Notifications
                 </h3>
                 <svg
@@ -287,6 +290,7 @@ export default function AboutUs() {
             <Button
               size="lg"
               className="about-button cursor-pointer bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#176090] hover:to-[#0088c7] text-white px-8 py-3"
+              onClick={()=>router.push("/about")}
             >
               Explore More
             </Button>

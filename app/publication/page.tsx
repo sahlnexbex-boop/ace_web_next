@@ -59,7 +59,7 @@ export default function PublicationsPage() {
         <span>Publications</span>
       </div>
 
-      <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">Publications</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-center text-gradient-to-r from-[#0197db] to-[#0c8da6] mb-4">Publications</h1>
       <p className="text-center text-gray-600 max-w-3xl mx-auto mb-10 text-sm md:text-base">
         ACE publishes authentic study materials, Super Rank Files, Books and Magazines which help the candidates
         to secure top ranks in many toughest competitive examinations.

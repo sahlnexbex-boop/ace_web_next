@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function RankHolders() {
@@ -9,6 +10,7 @@ export default function RankHolders() {
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
 
   const rankHolders = Array.from({ length: 12 }, (_, i) => ({
     id: i + 1,
@@ -68,7 +70,7 @@ export default function RankHolders() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Title */}
         <div className="relative mb-12 flex justify-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer" onClick={()=>router.push("/exams")}>
             Rank Holders
           </h2>
           <img
@@ -114,9 +116,7 @@ export default function RankHolders() {
             <div
               key={holder.id}
               className={`rank-card snap-start flex-shrink-0 ${
-                isMobile
-                  ? "w-[80%]"
-                  : "w-[calc(25%-1rem)]"
+                isMobile ? "w-[80%]" : "w-[calc(25%-1rem)]"
               } text-center shadow-xl border-t-2 rounded-2xl py-4 relative cursor-pointer opacity-0 bg-white ${
                 !isMobile && idx === 0 ? "ml-6" : "" // 👈 fixed left margin only for first card
               }`}

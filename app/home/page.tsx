@@ -1,4 +1,3 @@
-// import Header from "@/components/header"
 import Hero from "@/components/hero"
 import AceShorts from "@/components/ace-shorts"
 import LatestNews from "@/components/latest-news"
@@ -12,12 +11,10 @@ import AboutUs from "@/components/about-us"
 import OurFeatures from "@/components/our-features"
 import SocialService from "@/components/social-service"
 import Branches from "@/components/branches"
-// import Footer from "@/components/footer"
 
 export default function Home() {
   return (
     <main className="min-h-screen">
-      {/* <Header /> */}
       <Hero />
       <AboutUs />
       <Courses />
@@ -31,7 +28,6 @@ export default function Home() {
       <SocialService />
       <Branches />
       <OurFeatures />
-      {/* <Footer /> */}
     </main>
   )
 }
