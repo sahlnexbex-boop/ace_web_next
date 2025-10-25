@@ -22,7 +22,7 @@ export default function ExamListing() {
   ];
 
   const handleExamClick = (id: number) => {
-    router.push(`/exams/${id}`); 
+    router.push(`/public/exams/${id}`); 
   };
 
   return (

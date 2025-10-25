@@ -29,29 +29,29 @@ export default function Header() {
   const pathname = usePathname();
 
   const courseList = [
-    { name: "All Courses", href: "/courses" },
-    { name: "UPSC", href: "/courses/upsc" },
-    { name: "Kerala PSC", href: "/courses/kerala-psc" },
-    { name: "HSA", href: "/courses/hsa" },
-    { name: "HSST", href: "/courses/hsst" },
-    { name: "KTET", href: "/courses/ktet" },
+    { name: "All Courses", href: "/public/courses" },
+    { name: "UPSC", href: "/public/courses/upsc" },
+    { name: "Kerala PSC", href: "/public/courses/kerala-psc" },
+    { name: "HSA", href: "/public/courses/hsa" },
+    { name: "HSST", href: "/public/courses/hsst" },
+    { name: "KTET", href: "/public/courses/ktet" },
   ];
 
   const insightList = [
-    { name: "Blogs", href: "/blog" },
-    { name: "Notifications", href: "/notification" },
-    { name: "Publications", href: "/publication" },
+    { name: "Blogs", href: "/public/blog" },
+    { name: "Notifications", href: "/public/notification" },
+    { name: "Publications", href: "/public/publication" },
   ];
 
   const menuLinks = [
-    { label: "Home", href: "/home", icon: Home },
-    { label: "Courses", href: "/courses", icon: BookOpen, dropdown: courseList },
-    { label: "Learners Portal", href: "/learners", icon: GraduationCap },
-    { label: "Exam & Results", href: "/exams", icon: FileText },
-    { label: "Highlights", href: "/highlights", icon: Star },
+    { label: "Home", href: "/public/home", icon: Home },
+    { label: "Courses", href: "/public/courses", icon: BookOpen, dropdown: courseList },
+    { label: "Learners Portal", href: "/public/learners", icon: GraduationCap },
+    { label: "Exam & Results", href: "/public/exams", icon: FileText },
+    { label: "Highlights", href: "/public/highlights", icon: Star },
     { label: "Insights", href: "#", icon: Lightbulb, dropdown: insightList },
-    { label: "About", href: "/about", icon: Info },
-    { label: "Contact Us", href: "/contact", icon: Phone },
+    { label: "About", href: "/public/about", icon: Info },
+    { label: "Contact Us", href: "/public/contact", icon: Phone },
   ];
 
   useEffect(() => {
@@ -89,14 +89,14 @@ export default function Header() {
   const isActive = (href: string, label?: string) => {
     if (
       label === "Insights" &&
-      (pathname.startsWith("/blog") ||
-        pathname.startsWith("/notification") ||
-        pathname.startsWith("/publication"))
+      (pathname.startsWith("/public/blog") ||
+        pathname.startsWith("/public/notification") ||
+        pathname.startsWith("/public/publication"))
     ) {
       return true;
     }
 
-    return pathname === href || pathname.startsWith(href + "/");
+    return pathname === href || pathname.startsWith(href + "/public/");
   };
 
   return (
@@ -105,7 +105,7 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           <div
             className="flex items-center space-x-2 cursor-pointer"
-            onClick={() => router.push("/home")}
+            onClick={() => router.push("/public/home")}
           >
             <img src="/logo_blue.png" alt="logo" className="h-10 sm:h-auto" />
           </div>

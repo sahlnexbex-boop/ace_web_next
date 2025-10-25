@@ -8,7 +8,7 @@ import { gsap } from "gsap";
 export default function Courses() {
   const [activeTab, setActiveTab] = useState("offline");
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter(); // ✅ initialize router
+  const router = useRouter();
 
   const courses = [
     {
@@ -117,7 +117,7 @@ export default function Courses() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-center md:mb-12 mb-6 text-gray-900 cursor-pointer" onClick={()=>router.push("/courses")}>
+        <h2 className="text-3xl md:text-4xl font-bold text-center md:mb-12 mb-6 text-gray-900 cursor-pointer" onClick={()=>router.push("/public/courses")}>
           Courses
         </h2>
 
@@ -148,7 +148,7 @@ export default function Courses() {
           {filteredCourses.map((course) => (
             <Card
               key={course.id}
-              onClick={() => router.push(`/courses/${course.id}`)} 
+              onClick={() => router.push(`/public/courses/${course.id}`)} 
               className="group course-card opacity-0 bg-gray-50/80 border-0 rounded-2xl cursor-pointer z-10 
                  transition-all duration-1000 ease-in-out 
                  hover:bg-gradient-to-r hover:from-[#1b6dac] hover:to-[#0595d7] hover:shadow-lg"

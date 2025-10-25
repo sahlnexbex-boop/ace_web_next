@@ -194,7 +194,7 @@ export default function AboutUs() {
             />
             <div className="notifications-panel bg-white/80 rounded-lg shadow-lg p-6 max-w-md !z-10 relative mx-auto lg:mx-0">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg cursor-pointer font-bold text-gray-900" onClick={()=>router.push("/notification")}>
+                <h3 className="text-lg cursor-pointer font-bold text-gray-900" onClick={()=>router.push("/public/notification")}>
                   Notifications
                 </h3>
                 <svg
@@ -290,7 +290,7 @@ export default function AboutUs() {
             <Button
               size="lg"
               className="about-button cursor-pointer bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#176090] hover:to-[#0088c7] text-white px-8 py-3"
-              onClick={()=>router.push("/about")}
+              onClick={()=>router.push("/public/about")}
             >
               Explore More
             </Button>

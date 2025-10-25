@@ -92,7 +92,7 @@ export default function Publications() {
     <section className="md:py-16 py-10 bg-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative mb-12 flex justify-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer" onClick={()=>router.push("/publication")}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer" onClick={()=>router.push("/public/publication")}>
             Publications or Book
           </h2>
           <img
@@ -110,7 +110,7 @@ export default function Publications() {
             <Card
               key={book.id}
               className="pub-card bg-white hover:shadow-2xl shadow-lg transition-shadow rounded-xl pt-6 sm:pt-10 cursor-pointer opacity-0"
-              onClick={()=>router.push(`/publication/${book.id}`)}
+              onClick={()=>router.push(`/public/publication/${book.id}`)}
             >
               <CardContent className="pb-4 sm:pb-6 text-center">
                 <div className="mb-4 sm:mb-6">

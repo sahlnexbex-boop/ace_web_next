@@ -70,7 +70,7 @@ export default function RankHolders() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Title */}
         <div className="relative mb-12 flex justify-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer" onClick={()=>router.push("/exams")}>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer" onClick={()=>router.push("/public/exams")}>
             Rank Holders
           </h2>
           <img
