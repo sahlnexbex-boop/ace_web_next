@@ -17,6 +17,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import image from "../../../public/ace_landscape.png"
+
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/admin/protected/dashboard" },
   { name: "Users", icon: Users, path: "/admin/protected/users" },
@@ -32,28 +34,32 @@ const menuItems = [
     icon: BookOpen,
     children: [
       { name: "current Affairs", icon: FileText, path: "/admin/protected/affairs" },
-      { name: "Video Class", icon: PlayCircle, path: "/admin/protected/video-class" },
-      { name: "Previous Paper", icon: FileText, path: "/admin/protected/previous-paper" },
-      { name: "Model Paper", icon: FileText, path: "/admin/protected/model-paper" },
-      { name: "Question Paper", icon: HelpCircle, path: "/admin/protected/question-paper" },
-      { name: "Syllabus", icon: FileText, path: "/admin/protected/syllabus" },
-      { name: "Study Material", icon: FileText, path: "/admin/protected/study-material" },
-      { name: "Answer Keys", icon: FileText, path: "/admin/protected/answer-keys" },
+      { name: "Video Class", icon: PlayCircle, path: "/admin/protected/video-class" }, 
+      { name: "Study Service", icon: FileText, path: "/admin/protected/study-service" },
+
+      // { name: "Previous Paper", icon: FileText, path: "/admin/protected/previous-paper" },
+      // { name: "Model Paper", icon: FileText, path: "/admin/protected/model-paper" },
+      // { name: "Syllabus", icon: FileText, path: "/admin/protected/syllabus" },
+      // { name: "Study Material", icon: FileText, path: "/admin/protected/study-material" },
+      // { name: "Answer Keys", icon: FileText, path: "/admin/protected/answer-keys" },
+
+
+      // { name: "Question Paper", icon: HelpCircle, path: "/admin/protected/question-paper" },
     ],
   },
    { name: "Insights", icon: Star,
     children: [
       { name: "Blogs", icon: FileText, path: "/admin/protected/blogs" },
-      { name: "Notifications", icon: FileText, path: "/admin/protected/notifications" },
-      { name: "Publications", icon: HelpCircle, path: "/admin/protected/publications" },
-      { name: "Social Services", icon: FileText, path: "/admin/protected/social-services" },
+      { name: "Publications", icon: HelpCircle, path: "/admin/protected/publication" },
+      { name: "Social Services", icon: FileText, path: "/admin/protected/social-service" },
+      { name: "Results", icon: FileText, path: "/admin/protected/results" },
     ],
     },
   { name: "Highlights", icon: Star,
     children: [
       { name: "Success Stories", icon: FileText, path: "/admin/protected/success-stories" },
-      { name: "Testimonials", icon: FileText, path: "/admin/protected/testimonials" },
-      { name: "Webinars", icon: HelpCircle, path: "/admin/protected/webinars" },
+      { name: "Testimonials", icon: FileText, path: "/admin/protected/testimonial" },
+      { name: "Webinars", icon: HelpCircle, path: "/admin/protected/webinar" },
       { name: "Events", icon: FileText, path: "/admin/protected/events" },
       { name: "News & Updates", icon: FileText, path: "/admin/protected/news-updates" },
     ],
@@ -61,7 +67,7 @@ const menuItems = [
      { name: "Rank Mangement", icon: Star,
     children: [
       { name: "Rank holders", icon: FileText, path: "/admin/protected/rank-holders" },
-      { name: "Toppers", icon: FileText, path: "/admin/protected/toppers" },
+      { name: "Toppers", icon: FileText, path: "/admin/protected/topper" },
     ],
     },
     { name: "Enquiry's", icon: Users, path: "/admin/protected/enquiry" },
@@ -96,9 +102,11 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
         >
           <div className="flex items-center justify-between p-4 border-b border-cyan-700">
-            <h1 className={`font-bold text-lg ${isCollapsed ? "hidden" : "block"}`}>
-              Ace Admin Panel
-            </h1>
+            <img src="../../ace_landscape.png" alt="" className={`h-12 ps-8 ${isCollapsed ? "hidden" : "block"}`} />
+            <img src="../../logo_full.png" alt="" className={`h-8 w-10 ${isCollapsed ? "block" : "hidden"}`} />
+            {/* <h1 className={`font-bold text-lg ${isCollapsed ? "hidden" : "block"}`}>
+              Admin Panel
+            </h1> */}
             <button
               onClick={toggleSidebar}
               className="hidden cursor-pointer lg:block text-cyan-200 hover:text-white"

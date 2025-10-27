@@ -1,0 +1,270 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import DataTable from "@/components/dynamicTable";
+import DynamicFormModal from "@/components/dynamicModal";
+import ConfirmDeleteModal from "@/components/deleteModal";
+import { useDebounce } from "@/hooks/debounce";
+import {
+  getResults,
+  createResult,
+  updateResult,
+  deleteResult,
+} from "@/lib/api/result";
+import { getCourses } from "@/lib/api/course";
+import { getCourseCategories } from "@/lib/api/courseCategory";
+
+export default function ResultsPage() {
+  const [data, setData] = useState<any[]>([]);
+  const [openForm, setOpenForm] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [selected, setSelected] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [courses, setCourses] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [basedType, setBasedType] = useState<string>("");
+
+  const debouncedSearch = useDebounce(search, 500);
+
+  // Fetch Results
+  const loadResults = async () => {
+    try {
+      const res = await getResults(page, 10, debouncedSearch);
+      setData(res?.data || []);
+      setTotalPages(res?.totalPages || 1);
+    } catch (err) {
+      console.error("Error loading results:", err);
+    }
+  };
+
+  // Fetch Courses
+  const loadCourses = async () => {
+    try {
+      const res = await getCourses(1, 100, "");
+      setCourses(res?.data || []);
+    } catch (err) {
+      console.error("Error loading courses:", err);
+    }
+  };
+
+  // Fetch Course Categories
+  const loadCategories = async () => {
+    try {
+      const res = await getCourseCategories();
+      const arr =
+        Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+      setCategories(arr);
+    } catch (err) {
+      console.error("Error loading categories:", err);
+      setCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    loadResults();
+    loadCourses();
+    loadCategories();
+  }, [page, debouncedSearch]);
+
+  const courseOptions = courses.map((c: any) => ({
+    label: c.course_name,
+    value: String(c.course_id),
+  }));
+
+  const categoryOptions = categories.map((c: any) => ({
+    label: c.category_name,
+    value: String(c.category_id),
+  }));
+
+  // Form fields for Modal
+  const fields = [
+    { name: "result_title", label: "Result Title", type: "text", required: true },
+    { name: "result_description", label: "Description", type: "textarea", required: true },
+    { name: "result_date", label: "Result Date", type: "date", required: true },
+    {
+      name: "result_type",
+      label: "Result Type",
+      type: "select",
+      required: true,
+      options: [
+        { label: "Notification", value: "1" },
+        { label: "Result", value: "2" },
+      ],
+    },
+    {
+      name: "based_type",
+      label: "Based Type",
+      type: "select",
+      required: true,
+      options: [
+        { label: "Course", value: "1" },
+        { label: "Course Category", value: "2" },
+      ],
+      onChange: (val: string) => setBasedType(val),
+    },
+    {
+      name: "course_id",
+      label: "Select Course",
+      type: "select",
+      options: courseOptions,
+      required: false,
+      disabled: basedType !== "1",
+    },
+    {
+      name: "category_id",
+      label: "Select Course Category",
+      type: "select",
+      options: categoryOptions,
+      required: false,
+      disabled: basedType !== "2",
+    },
+    { name: "result_file", label: "Result File", type: "file", required: false },
+    {
+      name: "status",
+      label: "Status",
+      type: "select",
+      required: true,
+      options: [
+        { label: "Active", value: "1" },
+        { label: "Inactive", value: "0" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="p-4 sm:p-6">
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-semibold text-cyan-700">Results</h1>
+        <button
+          onClick={() => {
+            setSelected(null);
+            setBasedType(""); // reset when creating new
+            setOpenForm(true);
+          }}
+          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+        >
+          Create Result
+        </button>
+      </div>
+
+      <DataTable
+        columns={[
+          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
+          { key: "result_title", label: "Title" },
+          {
+            key: "result_date",
+            label: "Date",
+            render: (r) =>
+              r.result_date ? new Date(r.result_date).toLocaleDateString("en-IN") : "—",
+          },
+          {
+            key: "based_type",
+            label: "Based On",
+            render: (r) =>
+              r.based_type === 1
+                ? "Course"
+                : r.based_type === 2
+                ? "Course Category"
+                : "—",
+          },
+          {
+            key: "result_type",
+            label: "Result Type",
+            render: (r) =>
+              r.result_type === 1 ? "Notification" : "Result",
+          },
+          {
+            key: "result_file",
+            label: "File",
+            render: (r) =>
+              r.result_file ? (
+                <a
+                  href={r.result_file}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  View
+                </a>
+              ) : (
+                "—"
+              ),
+          },
+          {
+            key: "status",
+            label: "Status",
+            render: (r) =>
+              r.status === 1 || r.status === "1" ? (
+                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+                  Active
+                </div>
+              ) : (
+                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                  Inactive
+                </div>
+              ),
+          },
+        ]}
+        data={data}
+        page={page}
+        totalPages={totalPages}
+        search={search}
+        setPage={setPage}
+        setSearch={setSearch}
+        onEdit={(row) => {
+          setSelected({
+            ...row,
+            result_date: row.result_date
+              ? new Date(row.result_date).toISOString().split("T")[0]
+              : "",
+            result_type: String(row.result_type),
+            based_type: String(row.based_type),
+            status: String(row.status),
+            course_id: row.course_id ? String(row.course_id) : "",
+            category_id: row.category_id ? String(row.category_id) : "",
+          });
+          setBasedType(String(row.based_type));
+          setOpenForm(true);
+        }}
+        onDelete={(row) => {
+          setSelected(row);
+          setOpenDelete(true);
+        }}
+      />
+
+      <DynamicFormModal
+        title={selected ? "Edit Result" : "Create Result"}
+        isOpen={openForm}
+        onClose={() => setOpenForm(false)}
+        fields={fields}
+        defaultValues={selected}
+        onSubmit={async (fd: FormData) => {
+          if (selected) await updateResult(selected.result_id, fd);
+          else await createResult(fd);
+        }}
+        onSuccess={loadResults}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={openDelete}
+        onClose={() => setOpenDelete(false)}
+        title="Delete Result"
+        message={`Are you sure you want to delete "${selected?.result_title}"?`}
+        onConfirm={async () => {
+          if (selected) {
+            await deleteResult(selected.result_id);
+            setOpenDelete(false);
+            loadResults();
+          }
+        }}
+      />
+    </div>
+  );
+}

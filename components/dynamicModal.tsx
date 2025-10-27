@@ -20,6 +20,9 @@ interface Field {
   options?: { label: string; value: string }[];
   required?: boolean;
   placeholder?: string;
+  multiple?: boolean;
+  disabled?: boolean; // ✅ new
+  onChange?: (val: string) => void; // ✅ new
 }
 
 interface DynamicFormModalProps {
@@ -51,7 +54,7 @@ export default function DynamicFormModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  // normalize default values
+  // normalize default values when modal opens
   useEffect(() => {
     const normalized: Record<string, any> = {};
     if (defaultValues) {
@@ -66,24 +69,42 @@ export default function DynamicFormModal({
 
   if (!isOpen) return null;
 
+  /** -------------------------
+   * Handle Change
+   * ------------------------ */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, type } = e.target as HTMLInputElement;
+    const { name, type, value } = e.target as HTMLInputElement;
+
     if (type === "file") {
       const input = e.target as HTMLInputElement;
-      const file = input.files && input.files.length > 0 ? input.files[0] : null;
+      const file =
+        input.files && input.files.length > 0
+          ? input.multiple
+            ? Array.from(input.files)
+            : input.files[0]
+          : null;
       setFormState((prev) => ({ ...prev, [name]: file }));
     } else {
-      const value = (e.target as HTMLInputElement).value;
       setFormState((prev) => ({ ...prev, [name]: value }));
+
+      // If field has custom onChange (like based_type → update enable/disable)
+      const field = fields.find((f) => f.name === name);
+      if (field?.onChange) field.onChange(value);
     }
   };
 
+  /** -------------------------
+   * Remove File
+   * ------------------------ */
   const removeFile = (fieldName: string) => {
     setFormState((prev) => ({ ...prev, [fieldName]: null }));
   };
 
+  /** -------------------------
+   * Build FormData safely
+   * ------------------------ */
   const buildFormData = () => {
     const fd = new FormData();
     for (const field of fields) {
@@ -93,20 +114,33 @@ export default function DynamicFormModal({
       if (field.type === "file") {
         if (val instanceof File) {
           fd.append(field.name, val);
+        } else if (Array.isArray(val)) {
+          val.forEach((f) => {
+            if (f instanceof File) fd.append(field.name, f);
+          });
         }
       } else {
-        fd.append(field.name, typeof val === "object" ? JSON.stringify(val) : String(val));
+        fd.append(
+          field.name,
+          typeof val === "object" ? JSON.stringify(val) : String(val)
+        );
       }
     }
     return fd;
   };
 
+  /** -------------------------
+   * Default Submit
+   * ------------------------ */
   const defaultSubmit = async (formData: FormData) => {
     if (!endpoint) throw new Error("No endpoint provided for default submit");
     const url = editId ? `${endpoint}/${editId}` : endpoint;
     return apiRequest(url, method, formData);
   };
 
+  /** -------------------------
+   * Submit Handler
+   * ------------------------ */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -120,14 +154,18 @@ export default function DynamicFormModal({
       onSuccess?.();
       onClose();
     } catch (err: any) {
-      const msg = err?.message || (typeof err === "string" ? err : "An error occurred");
+      const msg =
+        err?.message || (typeof err === "string" ? err : "An error occurred");
       setError(msg);
-      console.error("submit error", err);
+      console.error("Submit error:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  /** -------------------------
+   * UI Rendering
+   * ------------------------ */
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 backdrop-blur-sm p-4 overflow-auto">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative max-h-[90vh] overflow-auto">
@@ -145,28 +183,44 @@ export default function DynamicFormModal({
           {fields.map((field) => {
             const value = formState?.[field.name] ?? "";
 
-            return (
-              <div key={field.name}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {field.label}
-                </label>
-
-                {field.type === "textarea" ? (
+            // --- Textarea ---
+            if (field.type === "textarea") {
+              return (
+                <div key={field.name}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {field.label}
+                  </label>
                   <textarea
                     name={field.name}
-                    value={typeof value === "string" ? value : JSON.stringify(value)}
+                    value={
+                      typeof value === "string" ? value : JSON.stringify(value)
+                    }
                     onChange={handleChange}
                     placeholder={field.placeholder}
                     required={field.required}
+                    disabled={field.disabled}
                     className="w-full border rounded p-2 focus:ring-2 focus:ring-cyan-500"
                   />
-                ) : field.type === "select" ? (
+                </div>
+              );
+            }
+
+            // --- Select ---
+            if (field.type === "select") {
+              return (
+                <div key={field.name}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {field.label}
+                  </label>
                   <select
                     name={field.name}
                     value={value ?? ""}
                     onChange={handleChange}
                     required={field.required}
-                    className="w-full border rounded p-2 focus:ring-2 focus:ring-cyan-500"
+                    disabled={field.disabled}
+                    className={`w-full border rounded p-2 focus:ring-2 focus:ring-cyan-500 ${
+                      field.disabled ? "bg-gray-100 cursor-not-allowed" : ""
+                    }`}
                   >
                     <option value="">Select...</option>
                     {field.options?.map((opt) => (
@@ -175,73 +229,92 @@ export default function DynamicFormModal({
                       </option>
                     ))}
                   </select>
-                ) : field.type === "file" ? (
-                  <>
-                    <input
-                      type="file"
-                      name={field.name}
-                      onChange={handleChange}
-                      required={field.required && !defaultValues?.[field.name]}
-                      className="w-full"
-                    />
-                    {formState[field.name] && (
-                      <div className="flex items-center mt-2 space-x-2">
-                        {formState[field.name] instanceof File ? (
-                          formState[field.name].type.startsWith("image/") ? (
-                            <img
-                              src={URL.createObjectURL(formState[field.name])}
-                              className="w-20 h-20 object-cover rounded"
-                              alt="preview"
-                            />
-                          ) : (
-                            <div className="flex items-center border px-2 py-1 rounded space-x-2">
-                              <span className="text-gray-700">{formState[field.name].name}</span>
-                            </div>
-                          )
-                        ) : typeof formState[field.name] === "string" ? (
-                          formState[field.name].endsWith(".png") ||
-                          formState[field.name].endsWith(".jpg") ||
-                          formState[field.name].endsWith(".jpeg") ? (
-                            <img
-                              src={formState[field.name]}
-                              className="w-20 h-20 object-cover rounded"
-                            />
-                          ) : (
-                            <div className="flex items-center border px-2 py-1 rounded space-x-2">
-                              <span className="text-gray-700">
-                                {formState[field.name].split("/").pop()}
-                              </span>
-                            </div>
-                          )
-                        ) : null}
+                </div>
+              );
+            }
 
-                        <button
-                          type="button"
-                          onClick={() => removeFile(field.name)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
+            // --- File Field ---
+            if (field.type === "file") {
+              const fileVal = formState[field.name];
+              return (
+                <div key={field.name}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {field.label}
+                  </label>
                   <input
-                    type={field.type === "date" ? "date" : field.type}
+                    type="file"
                     name={field.name}
-                    value={
-                      field.type === "date" && value
-                        ? new Date(value).toISOString().split("T")[0]
-                        : typeof value === "string"
-                        ? value
-                        : value ?? ""
-                    }
                     onChange={handleChange}
-                    placeholder={field.placeholder}
-                    required={field.required}
-                    className="w-full border rounded p-2 focus:ring-2 focus:ring-cyan-500"
+                    multiple={field.multiple}
+                    required={field.required && !defaultValues?.[field.name]}
+                    disabled={field.disabled}
+                    className="w-full"
                   />
-                )}
+                  {fileVal && (
+                    <div className="flex items-center mt-2 space-x-2">
+                      {fileVal instanceof File ? (
+                        fileVal.type.startsWith("image/") ? (
+                          <img
+                            src={URL.createObjectURL(fileVal)}
+                            className="w-20 h-20 object-cover rounded"
+                            alt="preview"
+                          />
+                        ) : (
+                          <div className="border px-2 py-1 rounded text-sm">
+                            {fileVal.name}
+                          </div>
+                        )
+                      ) : typeof fileVal === "string" ? (
+                        fileVal.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                          <img
+                            src={fileVal}
+                            className="w-20 h-20 object-cover rounded"
+                            alt="preview"
+                          />
+                        ) : (
+                          <div className="border px-2 py-1 rounded text-sm">
+                            {fileVal.split("/").pop()}
+                          </div>
+                        )
+                      ) : null}
+
+                      <button
+                        type="button"
+                        onClick={() => removeFile(field.name)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            // --- Default input types (text, email, date, etc.) ---
+            return (
+              <div key={field.name}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {field.label}
+                </label>
+                <input
+                  type={field.type === "date" ? "date" : field.type}
+                  name={field.name}
+                  value={
+                    field.type === "date" && value
+                      ? new Date(value).toISOString().split("T")[0]
+                      : typeof value === "string"
+                      ? value
+                      : value ?? ""
+                  }
+                  onChange={handleChange}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  disabled={field.disabled}
+                  className={`w-full border rounded p-2 focus:ring-2 focus:ring-cyan-500 ${
+                    field.disabled ? "bg-gray-100 cursor-not-allowed" : ""
+                  }`}
+                />
               </div>
             );
           })}
