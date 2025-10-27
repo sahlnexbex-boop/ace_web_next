@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getSocialServices,
+  getSocialServiceById,
   createSocialService,
   updateSocialService,
   deleteSocialService,
@@ -16,7 +18,9 @@ export default function SocialServicesPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -36,6 +40,18 @@ export default function SocialServicesPage() {
   useEffect(() => {
     loadSocialServices();
   }, [page, debouncedSearch]);
+
+  const handleView = async (row: any) => {
+    try {
+      const res = await getSocialServiceById(row.service_id);
+      if (res?.data) {
+        setViewData(res.data);
+        setOpenView(true);
+      }
+    } catch (error) {
+      console.error("Error fetching service details:", error);
+    }
+  };
 
   const fields = [
     { name: "service_title", label: "Service Title", type: "text", required: true },
@@ -64,6 +80,7 @@ export default function SocialServicesPage() {
 
   return (
     <div className="p-4 sm:p-6">
+      {/* Header */}
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold text-cyan-700">Social Services</h1>
         <button
@@ -82,7 +99,7 @@ export default function SocialServicesPage() {
           {
             key: "sno",
             label: "S.No",
-            render: (_, idx) => idx + 1 + (page - 1) * 10,
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
           { key: "service_title", label: "Title" },
           { key: "service_location", label: "Location" },
@@ -166,6 +183,7 @@ export default function SocialServicesPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleView}
       />
 
       <DynamicFormModal
@@ -193,6 +211,16 @@ export default function SocialServicesPage() {
         }}
         title="Delete Social Service"
         message={`Are you sure you want to delete "${selected?.service_title}"?`}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => {
+          setOpenView(false);
+          setViewData(null);
+        }}
+        title="View Social Service"
+        data={viewData}
       />
     </div>
   );

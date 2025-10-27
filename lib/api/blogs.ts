@@ -17,6 +17,9 @@ export const getBlogs = async (
   return apiRequest(`/api/blogs?${params.toString()}`, "GET");
 };
 
+export const getBlogById = (id: number) =>
+  apiRequest(`/api/blogs/${id}`, "GET");
+
 export const createBlog = (data: FormData) =>
   apiRequest("/api/blogs", "POST", data, true);
 

@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getPublications,
+  getPublicationById,
   createPublication,
   updatePublication,
   deletePublication,
@@ -17,7 +19,9 @@ export default function PublicationPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -25,7 +29,6 @@ export default function PublicationPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // Load list
   const loadPublications = async () => {
     try {
       const res = await getPublications(page, 10, debouncedSearch);
@@ -36,7 +39,6 @@ export default function PublicationPage() {
     }
   };
 
-  // Load categories
   const loadCategories = async () => {
     try {
       const res = await getPublicationCategories();
@@ -52,6 +54,19 @@ export default function PublicationPage() {
   useEffect(() => {
     loadPublications();
   }, [page, debouncedSearch]);
+
+  // 🔹 Row click handler
+  const handleView = async (row: any) => {
+    try {
+      const res = await getPublicationById(row.book_id);
+      if (res?.data) {
+        setViewData(res.data);
+        setOpenView(true);
+      }
+    } catch (err) {
+      console.error("Error fetching publication details:", err);
+    }
+  };
 
   const categoryOptions = categories.map((c) => ({
     label: c.category_name,
@@ -92,10 +107,9 @@ export default function PublicationPage() {
 
   return (
     <div className="p-4 sm:p-6">
+      {/* Header */}
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-cyan-700">
-          Publications
-        </h1>
+        <h1 className="text-2xl font-semibold text-cyan-700">Publications</h1>
         <button
           onClick={() => {
             setSelected(null);
@@ -112,7 +126,7 @@ export default function PublicationPage() {
           {
             key: "sno",
             label: "S.No",
-            render: (_, idx) => idx + 1 + (page - 1) * 10,
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
           { key: "book_id", label: "ID" },
           { key: "book_title", label: "Title" },
@@ -121,7 +135,7 @@ export default function PublicationPage() {
           {
             key: "book_price",
             label: "Price",
-            render: (r) => `₹${r.book_price}`,
+            render: (r) => (r.book_price ? `₹${r.book_price}` : "—"),
           },
           {
             key: "book_image",
@@ -131,6 +145,7 @@ export default function PublicationPage() {
                 <img
                   src={r.book_image}
                   className="w-10 h-10 object-cover rounded-full"
+                  alt="Book"
                 />
               ) : (
                 "—"
@@ -186,6 +201,7 @@ export default function PublicationPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleView}
       />
 
       <DynamicFormModal
@@ -213,6 +229,16 @@ export default function PublicationPage() {
         }}
         title="Delete Publication"
         message={`Are you sure you want to delete "${selected?.book_title}"?`}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => {
+          setOpenView(false);
+          setViewData(null);
+        }}
+        title="View Publication"
+        data={viewData}
       />
     </div>
   );

@@ -23,6 +23,9 @@ export const getResults = async (
   return apiRequest(`/api/results?${params.toString()}`, "GET");
 };
 
+export const getResultById = (id: number) =>
+  apiRequest(`/api/results/${id}`, "GET");
+
 export const createResult = (data: FormData) =>
   apiRequest("/api/results", "POST", data, true);
 

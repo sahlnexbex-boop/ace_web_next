@@ -19,6 +19,9 @@ export const getSocialServices = async (
   return apiRequest(`/api/social-service?${params.toString()}`, "GET");
 };
 
+export const getSocialServiceById = (id: number) =>
+  apiRequest(`/api/social-service/${id}`, "GET");
+
 export const createSocialService = (data: FormData) =>
   apiRequest("/api/social-service", "POST", data, true);
 

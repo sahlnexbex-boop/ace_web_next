@@ -19,6 +19,9 @@ export const getEvents = async (
   return apiRequest(`/api/events?${params.toString()}`, "GET");
 };
 
+export const getEventById = async (id: number) =>
+  apiRequest(`/api/events/${id}`, "GET");
+
 export const createEvent = (data: FormData) =>
   apiRequest("/api/events", "POST", data, true);
 

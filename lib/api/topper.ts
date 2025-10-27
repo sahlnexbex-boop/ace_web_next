@@ -25,6 +25,9 @@ export const getToppers = async (
   return apiRequest(`/api/topper?${params.toString()}`, "GET");
 };
 
+export const getEnquiryById = (id: number) =>
+  apiRequest(`/api/topper/${id}`, "GET");
+
 export const createTopper = (data: FormData) =>
   apiRequest("/api/topper", "POST", data, true);
 

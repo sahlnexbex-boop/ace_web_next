@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProtectedRoute from "@/components/protectedRoute";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,45 +17,40 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import image from "../../../public/ace_landscape.png"
-
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/admin/protected/dashboard" },
   { name: "Users", icon: Users, path: "/admin/protected/users" },
-  { name: "Course Management", icon: Star,
+  {
+    name: "Course Management",
+    icon: Star,
     children: [
       { name: "Course Tyepes", icon: FileText, path: "/admin/protected/course-types" },
       { name: "Course Categories", icon: FileText, path: "/admin/protected/course-category" },
       { name: "courses", icon: HelpCircle, path: "/admin/protected/courses" },
     ],
-    },
-    {
+  },
+  {
     name: "Learning Managament",
     icon: BookOpen,
     children: [
       { name: "current Affairs", icon: FileText, path: "/admin/protected/affairs" },
-      { name: "Video Class", icon: PlayCircle, path: "/admin/protected/video-class" }, 
+      { name: "Video Class", icon: PlayCircle, path: "/admin/protected/video-class" },
       { name: "Study Service", icon: FileText, path: "/admin/protected/study-service" },
-
-      // { name: "Previous Paper", icon: FileText, path: "/admin/protected/previous-paper" },
-      // { name: "Model Paper", icon: FileText, path: "/admin/protected/model-paper" },
-      // { name: "Syllabus", icon: FileText, path: "/admin/protected/syllabus" },
-      // { name: "Study Material", icon: FileText, path: "/admin/protected/study-material" },
-      // { name: "Answer Keys", icon: FileText, path: "/admin/protected/answer-keys" },
-
-
-      // { name: "Question Paper", icon: HelpCircle, path: "/admin/protected/question-paper" },
     ],
   },
-   { name: "Insights", icon: Star,
+  {
+    name: "Insights",
+    icon: Star,
     children: [
       { name: "Blogs", icon: FileText, path: "/admin/protected/blogs" },
       { name: "Publications", icon: HelpCircle, path: "/admin/protected/publication" },
       { name: "Social Services", icon: FileText, path: "/admin/protected/social-service" },
       { name: "Results", icon: FileText, path: "/admin/protected/results" },
     ],
-    },
-  { name: "Highlights", icon: Star,
+  },
+  {
+    name: "Highlights",
+    icon: Star,
     children: [
       { name: "Success Stories", icon: FileText, path: "/admin/protected/success-stories" },
       { name: "Testimonials", icon: FileText, path: "/admin/protected/testimonial" },
@@ -63,15 +58,16 @@ const menuItems = [
       { name: "Events", icon: FileText, path: "/admin/protected/events" },
       { name: "News & Updates", icon: FileText, path: "/admin/protected/news-updates" },
     ],
-    },
-     { name: "Rank Mangement", icon: Star,
+  },
+  {
+    name: "Rank Mangement",
+    icon: Star,
     children: [
       { name: "Rank holders", icon: FileText, path: "/admin/protected/rank-holders" },
       { name: "Toppers", icon: FileText, path: "/admin/protected/topper" },
     ],
-    },
-    { name: "Enquiry's", icon: Users, path: "/admin/protected/enquiry" },
-  
+  },
+  { name: "Enquiry's", icon: Users, path: "/admin/protected/enquiry" },
 ];
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -79,6 +75,14 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  // Auto-open parent when a child is active
+  useEffect(() => {
+    const activeParent = menuItems.find((item) =>
+      item.children?.some((child) => pathname.startsWith(child.path))
+    );
+    if (activeParent) setOpenDropdown(activeParent.name);
+  }, [pathname]);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const toggleDropdown = (name: string) =>
@@ -102,11 +106,16 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
         >
           <div className="flex items-center justify-between p-4 border-b border-cyan-700">
-            <img src="../../ace_landscape.png" alt="" className={`h-12 ps-8 ${isCollapsed ? "hidden" : "block"}`} />
-            <img src="../../logo_full.png" alt="" className={`h-8 w-10 ${isCollapsed ? "block" : "hidden"}`} />
-            {/* <h1 className={`font-bold text-lg ${isCollapsed ? "hidden" : "block"}`}>
-              Admin Panel
-            </h1> */}
+            <img
+              src="../../ace_landscape.png"
+              alt=""
+              className={`h-12 ps-8 ${isCollapsed ? "hidden" : "block"}`}
+            />
+            <img
+              src="../../logo_full.png"
+              alt=""
+              className={`h-8 w-10 ${isCollapsed ? "block" : "hidden"}`}
+            />
             <button
               onClick={toggleSidebar}
               className="hidden cursor-pointer lg:block text-cyan-200 hover:text-white"
@@ -116,14 +125,17 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           </div>
 
           <nav className="mt-4 space-y-1">
-            {menuItems.map((item) =>
-              item.children ? (
+            {menuItems.map((item) => {
+              const isActiveParent =
+                item.path === pathname ||
+                item.children?.some((child) => pathname.startsWith(child.path));
+
+              return item.children ? (
                 <div key={item.name}>
                   <button
                     onClick={() => toggleDropdown(item.name)}
-                    className={`flex items-center w-full px-4 py-3 text-sm font-medium hover:bg-cyan-700 transition ${
-                      openDropdown === item.name ? "bg-cyan-700" : ""
-                    }`}
+                    className={`flex items-center w-full px-4 py-3 text-sm font-medium transition 
+                      ${isActiveParent ? "bg-cyan-700" : "hover:bg-cyan-700"}`}
                   >
                     <item.icon size={20} className="mr-3" />
                     {!isCollapsed && <span>{item.name}</span>}
@@ -134,8 +146,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
                         <Link
                           href={child.path}
                           key={child.name}
-                          className={`block px-3 py-2 rounded-md text-sm hover:bg-cyan-700 ${
-                            pathname === child.path ? "bg-cyan-600" : ""
+                          className={`block px-3 py-2 rounded-s-lg text-sm transition ${
+                            pathname === child.path
+                              ? "bg-cyan-600 text-white"
+                              : "hover:bg-cyan-700"
                           }`}
                         >
                           {child.name}
@@ -148,15 +162,14 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
                 <Link
                   key={item.name}
                   href={item.path}
-                  className={`flex items-center px-4 py-3 text-sm font-medium hover:bg-cyan-700 transition ${
-                    pathname === item.path ? "bg-cyan-600" : ""
-                  }`}
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition 
+                    ${pathname === item.path ? "bg-cyan-600" : "hover:bg-cyan-700"}`}
                 >
                   <item.icon size={20} className="mr-3" />
                   {!isCollapsed && <span>{item.name}</span>}
                 </Link>
-              )
-            )}
+              );
+            })}
           </nav>
         </aside>
 

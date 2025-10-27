@@ -171,7 +171,7 @@ export default function DynamicFormModal({
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-6 relative max-h-[90vh] overflow-auto">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-black"
+          className="absolute cursor-pointer top-3 right-3 text-gray-500 hover:text-black"
         >
           <X size={20} />
         </button>
@@ -322,7 +322,7 @@ export default function DynamicFormModal({
           <button
             type="submit"
             disabled={loading}
-            className="w-full cursor-pointer bg-cyan-700 text-white py-2 rounded hover:bg-cyan-800 transition"
+            className="w-full cursor-pointer bg-cyan-700 text-white py-2 mt-5 rounded-md hover:bg-cyan-800 transition"
           >
             {loading ? "Saving..." : "Submit"}
           </button>

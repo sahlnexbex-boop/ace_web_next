@@ -24,6 +24,10 @@ export async function getEnquiries(
   return await apiRequest(`${BASE_URL}?${query.toString()}`, "GET");
 }
 
+export async function getEnquiryById(id: number) {
+  return await apiRequest(`${BASE_URL}/${id}`, "GET");
+}
+
 export async function createEnquiry(data: any) {
   return await apiRequest(BASE_URL, "POST", data, false);
 }

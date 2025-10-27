@@ -5,6 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import { useDebounce } from "@/hooks/debounce";
+import { IconPlus } from '@tabler/icons-react';
 
 import { getUsers, createUser, updateUser, deleteUser } from "@/lib/api/user";
 
@@ -52,12 +53,12 @@ export default function UsersPage() {
   return (
     <div className="p-4 sm:p-6">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-cyan-700">Users</h1>
+        <h1 className="text-3xl font-semibold text-cyan-700">Users</h1>
         <button
           onClick={() => { setSelected(null); setOpenForm(true); }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create User
+          Add User <IconPlus size={20} />
         </button>
       </div>
 

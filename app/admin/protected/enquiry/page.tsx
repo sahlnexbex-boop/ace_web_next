@@ -4,15 +4,17 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getEnquiries,
   createEnquiry,
   updateEnquiry,
   deleteEnquiry,
+  getEnquiryById,
 } from "@/lib/api/enquiry";
 
-// Enquiry Type labels
+// Label maps
 const ENQUIRY_TYPE: Record<number, string> = {
   1: "General",
   2: "Course",
@@ -20,7 +22,6 @@ const ENQUIRY_TYPE: Record<number, string> = {
   4: "Others",
 };
 
-// Enquiry Status labels
 const ENQUIRY_STATUS: Record<number, string> = {
   1: "Requested",
   2: "Ongoing",
@@ -31,7 +32,10 @@ export default function EnquiryPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -63,7 +67,17 @@ export default function EnquiryPage() {
     loadEnquiries();
   }, [page, debouncedSearch, statusFilter, typeFilter, statusTypeFilter]);
 
-  // Modal fields
+  // Row click handler for dynamic view modal
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getEnquiryById(row.enquiry_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Failed to load enquiry details", err);
+    }
+  };
+
   const fields = [
     { name: "cstmr_name", label: "Customer Name", type: "text", required: true },
     { name: "cstmr_email", label: "Email", type: "email", required: true },
@@ -128,12 +142,10 @@ export default function EnquiryPage() {
           {
             key: "sno",
             label: "S.No",
-            render: (_, i) => i + 1 + (page - 1) * 10,
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
           { key: "cstmr_name", label: "Customer Name" },
-        //   { key: "cstmr_email", label: "Email" },
           { key: "cstmr_phone", label: "Phone" },
-        //   { key: "cstmr_message", label: "Message" },
           {
             key: "enquiry_type",
             label: "Type",
@@ -176,44 +188,7 @@ export default function EnquiryPage() {
         search={search}
         setPage={setPage}
         setSearch={setSearch}
-        filters={[
-          {
-            label: "Status",
-            value: statusFilter ?? "",
-            options: [
-              { label: "All", value: "" },
-              { label: "Active", value: "1" },
-              { label: "Inactive", value: "0" },
-            ],
-            onChange: (v: string) =>
-              setStatusFilter(v ? Number(v) : undefined),
-          },
-          {
-            label: "Type",
-            value: typeFilter ?? "",
-            options: [
-              { label: "All", value: "" },
-              ...Object.entries(ENQUIRY_TYPE).map(([val, label]) => ({
-                label,
-                value: val,
-              })),
-            ],
-            onChange: (v: string) => setTypeFilter(v ? Number(v) : undefined),
-          },
-          {
-            label: "Enquiry Status",
-            value: statusTypeFilter ?? "",
-            options: [
-              { label: "All", value: "" },
-              ...Object.entries(ENQUIRY_STATUS).map(([val, label]) => ({
-                label,
-                value: val,
-              })),
-            ],
-            onChange: (v: string) =>
-              setStatusTypeFilter(v ? Number(v) : undefined),
-          },
-        ]}
+        onRowClick={handleRowClick}
         onEdit={(row) => {
           setSelected({
             ...row,
@@ -257,6 +232,14 @@ export default function EnquiryPage() {
         }}
         title="Delete Enquiry"
         message={`Are you sure you want to delete "${selected?.cstmr_name}"?`}
+      />
+
+      {/* View Modal */}
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Enquiry Details"
+        data={viewData}
       />
     </div>
   );

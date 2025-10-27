@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getRankHolders,
   createRankHolder,
   updateRankHolder,
   deleteRankHolder,
+  getRankHolderById,
 } from "@/lib/api/rankHolders";
 import { getCourses } from "@/lib/api/course";
 import { getCourseCategories } from "@/lib/api/courseCategory";
@@ -18,7 +20,9 @@ export default function RankHoldersPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -29,7 +33,6 @@ export default function RankHoldersPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load data
   const loadRankHolders = async () => {
     try {
       const res = await getRankHolders(page, 10, debouncedSearch);
@@ -40,7 +43,6 @@ export default function RankHoldersPage() {
     }
   };
 
-  // ✅ Load courses
   const loadCourses = async () => {
     try {
       const res = await getCourses(1, 100, "");
@@ -50,16 +52,14 @@ export default function RankHoldersPage() {
     }
   };
 
-  // ✅ Load categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories();
-      const arr =
-        Array.isArray(res)
-          ? res
-          : Array.isArray(res?.data)
-          ? res.data
-          : [];
+      const arr = Array.isArray(res)
+        ? res
+        : Array.isArray(res?.data)
+        ? res.data
+        : [];
       setCategories(arr);
     } catch (err) {
       console.error("Error loading categories:", err);
@@ -73,6 +73,16 @@ export default function RankHoldersPage() {
     loadCategories();
   }, [page, debouncedSearch]);
 
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getRankHolderById(row.rank_holder_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Error fetching rank holder details:", err);
+    }
+  };
+
   const courseOptions = courses.map((c: any) => ({
     label: c.course_name,
     value: String(c.course_id),
@@ -83,10 +93,19 @@ export default function RankHoldersPage() {
     value: String(c.category_id),
   }));
 
-  // ✅ Form Fields
   const fields = [
-    { name: "student_name", label: "Student Name", type: "text", required: true },
-    { name: "student_rank", label: "Student Rank", type: "number", required: true },
+    {
+      name: "student_name",
+      label: "Student Name",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "student_rank",
+      label: "Student Rank",
+      type: "number",
+      required: true,
+    },
     {
       name: "based_type",
       label: "Based Type",
@@ -115,8 +134,18 @@ export default function RankHoldersPage() {
       disabled: basedType !== "2",
     },
     { name: "exam_name", label: "Exam Name", type: "text", required: true },
-    { name: "joining_date", label: "Joining Date", type: "date", required: true },
-    { name: "name_of_office", label: "Office Name", type: "text", required: true },
+    {
+      name: "joining_date",
+      label: "Joining Date",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "name_of_office",
+      label: "Office Name",
+      type: "text",
+      required: true,
+    },
     { name: "place", label: "Place", type: "text", required: true },
     { name: "phone_no", label: "Phone No", type: "text", required: true },
     {
@@ -140,7 +169,12 @@ export default function RankHoldersPage() {
       required: true,
     },
     { name: "year", label: "Year", type: "number", required: true },
-    { name: "student_photo", label: "Student Photo", type: "file", required: false },
+    {
+      name: "student_photo",
+      label: "Student Photo",
+      type: "file",
+      required: false,
+    },
   ];
 
   return (
@@ -160,10 +194,13 @@ export default function RankHoldersPage() {
         </button>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "student_name", label: "Student Name" },
           { key: "student_rank", label: "Rank" },
           {
@@ -177,9 +214,6 @@ export default function RankHoldersPage() {
                 : "—",
           },
           { key: "exam_name", label: "Exam Name" },
-        //   { key: "name_of_office", label: "Office" },
-        //   { key: "place", label: "Place" },
-        //   { key: "phone_no", label: "Phone" },
           {
             key: "student_photo",
             label: "Photo",
@@ -249,9 +283,9 @@ export default function RankHoldersPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick}
       />
 
-      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Rank Holder" : "Create Rank Holder"}
         isOpen={openForm}
@@ -265,7 +299,6 @@ export default function RankHoldersPage() {
         onSuccess={loadRankHolders}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -278,6 +311,13 @@ export default function RankHoldersPage() {
             loadRankHolders();
           }
         }}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Rank Holder Details"
+        data={viewData}
       />
     </div>
   );

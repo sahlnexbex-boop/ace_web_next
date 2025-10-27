@@ -25,6 +25,9 @@ export const getRankHolders = async (
   return apiRequest(`/api/rankholders?${params.toString()}`, "GET");
 };
 
+export const getRankHolderById = (id: number) =>
+  apiRequest(`/api/rankholders/${id}`, "GET");
+
 export const createRankHolder = (data: FormData) =>
   apiRequest("/api/rankholders", "POST", data, true);
 

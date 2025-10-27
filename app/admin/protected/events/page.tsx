@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getEvents,
+  getEventById,
   createEvent,
   updateEvent,
   deleteEvent,
@@ -16,7 +18,9 @@ export default function EventsPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -36,6 +40,16 @@ export default function EventsPage() {
   useEffect(() => {
     loadEvents();
   }, [page, debouncedSearch]);
+
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getEventById(row.event_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Failed to load event details:", err);
+    }
+  };
 
   const fields = [
     { name: "event_title", label: "Event Title", type: "text", required: true },
@@ -97,13 +111,12 @@ export default function EventsPage() {
         </button>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
-          {
+           {
             key: "sno",
             label: "S.No",
-            render: (_, i) => i + 1 + (page - 1) * 10,
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
           { key: "event_title", label: "Title" },
           { key: "event_location", label: "Location" },
@@ -116,10 +129,12 @@ export default function EventsPage() {
             key: "date_time",
             label: "Date & Time",
             render: (r) =>
-              new Date(r.date_time).toLocaleString("en-IN", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              }),
+              r.date_time
+                ? new Date(r.date_time).toLocaleString("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : "—",
           },
           {
             key: "event_image",
@@ -160,6 +175,9 @@ export default function EventsPage() {
           setSelected({
             ...row,
             status: String(row.status),
+            date_time: row.date_time
+              ? new Date(row.date_time).toISOString().slice(0, 16)
+              : "",
           });
           setOpenForm(true);
         }}
@@ -167,9 +185,9 @@ export default function EventsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick} 
       />
 
-      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Event" : "Create Event"}
         isOpen={openForm}
@@ -183,7 +201,6 @@ export default function EventsPage() {
         onSuccess={loadEvents}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -196,6 +213,13 @@ export default function EventsPage() {
         }}
         title="Delete Event"
         message={`Are you sure you want to delete "${selected?.event_title}"?`}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Event Details"
+        data={viewData}
       />
     </div>
   );

@@ -3,10 +3,10 @@
 import React from "react";
 import { IconEdit, IconTrashX } from "@tabler/icons-react";
 
-interface Column {
+export interface Column {
   key: string;
   label: string;
-  render?: (row: any) => React.ReactNode;
+  render?: (row: any, index?: number) => React.ReactNode;
 }
 
 interface DataTableProps {
@@ -19,6 +19,7 @@ interface DataTableProps {
   setSearch: (search: string) => void;
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
+  onRowClick?: (row: any) => void; // ✅ new
 }
 
 export default function DataTable({
@@ -31,6 +32,7 @@ export default function DataTable({
   setSearch,
   onEdit,
   onDelete,
+  onRowClick,
 }: DataTableProps) {
   return (
     <div className="bg-white shadow rounded-lg overflow-x-auto">
@@ -76,14 +78,25 @@ export default function DataTable({
             </tr>
           ) : (
             data.map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50">
+              <tr
+                key={idx}
+                onClick={() => onRowClick && onRowClick(row)}
+                className={`hover:bg-gray-50 ${
+                  onRowClick ? "cursor-pointer" : ""
+                }`}
+              >
                 {columns.map((col) => (
                   <td key={col.key} className="px-4 py-2 text-gray-700">
-                    {col.render ? col.render(row, idx) : row[col.key]}
+                    {col.render
+                      ? col.render(row, idx)
+                      : row[col.key] ?? "—"}
                   </td>
                 ))}
                 {(onEdit || onDelete) && (
-                  <td className="px-4 py-2 text-right space-x-5">
+                  <td
+                    className="px-4 py-2 text-right space-x-5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {onEdit && (
                       <button
                         onClick={() => onEdit(row)}

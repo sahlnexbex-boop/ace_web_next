@@ -17,6 +17,10 @@ export const getPublications = async (
   return apiRequest(`/api/publication?${params.toString()}`, "GET");
 };
 
+export const getPublicationById = async (id: number) => {
+  return apiRequest(`/api/publication/${id}`, "GET");
+};
+
 export const createPublication = (data: FormData) =>
   apiRequest("/api/publication", "POST", data, true);
 

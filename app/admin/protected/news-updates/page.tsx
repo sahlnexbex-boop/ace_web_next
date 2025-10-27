@@ -4,14 +4,23 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
-import { getNews, createNews, updateNews, deleteNews } from "@/lib/api/news";
+import {
+  getNews,
+  getNewsById,
+  createNews,
+  updateNews,
+  deleteNews,
+} from "@/lib/api/news";
 
 export default function NewsPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -31,6 +40,17 @@ export default function NewsPage() {
   useEffect(() => {
     loadNews();
   }, [page, debouncedSearch]);
+
+
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getNewsById(row.news_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Failed to load news details:", err);
+    }
+  };
 
   const fields = [
     { name: "news_title", label: "News Title", type: "text", required: true },
@@ -80,10 +100,13 @@ export default function NewsPage() {
         </button>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "news_title", label: "Title" },
           {
             key: "date_time",
@@ -100,8 +123,11 @@ export default function NewsPage() {
             key: "news_description",
             label: "Description",
             render: (r) => (
-              <div className="truncate max-w-[250px]" title={r.news_description}>
-                {r.news_description}
+              <div
+                className="truncate max-w-[250px]"
+                title={r.news_description}
+              >
+                {r.news_description || "—"}
               </div>
             ),
           },
@@ -154,9 +180,9 @@ export default function NewsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick} 
       />
 
-      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit News" : "Create News"}
         isOpen={openForm}
@@ -170,7 +196,6 @@ export default function NewsPage() {
         onSuccess={loadNews}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -183,6 +208,13 @@ export default function NewsPage() {
         }}
         title="Delete News"
         message={`Are you sure you want to delete "${selected?.news_title}"?`}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View News Details"
+        data={viewData}
       />
     </div>
   );

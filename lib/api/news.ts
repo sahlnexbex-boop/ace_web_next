@@ -17,6 +17,8 @@ export const getNews = async (
   return apiRequest(`/api/news?${params.toString()}`, "GET");
 };
 
+export const getNewsById = (id: number) => apiRequest(`/api/news/${id}`, "GET");
+
 export const createNews = (data: FormData) =>
   apiRequest("/api/news", "POST", data, true);
 

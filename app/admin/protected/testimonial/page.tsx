@@ -4,19 +4,23 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getTestimonials,
   createTestimonial,
   updateTestimonial,
   deleteTestimonial,
+  getTestimonialById,
 } from "@/lib/api/testimonial";
 
 export default function TestimonialsPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -36,6 +40,16 @@ export default function TestimonialsPage() {
   useEffect(() => {
     loadTestimonials();
   }, [page, debouncedSearch]);
+
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getTestimonialById(row.testimonial_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Failed to load details", err);
+    }
+  };
 
   const fields = [
     { name: "name_of_candidate", label: "Candidate Name", type: "text", required: true },
@@ -73,7 +87,7 @@ export default function TestimonialsPage() {
       {/* Data Table */}
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
+          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "name_of_candidate", label: "Candidate Name" },
           { key: "position_of_candidate", label: "Position" },
           {
@@ -95,7 +109,7 @@ export default function TestimonialsPage() {
             label: "Content",
             render: (r) => (
               <div className="truncate max-w-[250px]" title={r.content}>
-                {r.content}
+                {r.content || "—"}
               </div>
             ),
           },
@@ -121,16 +135,14 @@ export default function TestimonialsPage() {
         setPage={setPage}
         setSearch={setSearch}
         onEdit={(row) => {
-          setSelected({
-            ...row,
-            status: String(row.status),
-          });
+          setSelected({ ...row, status: String(row.status) });
           setOpenForm(true);
         }}
         onDelete={(row) => {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick} 
       />
 
       <DynamicFormModal
@@ -158,6 +170,13 @@ export default function TestimonialsPage() {
         }}
         title="Delete Testimonial"
         message={`Are you sure you want to delete "${selected?.name_of_candidate}"?`}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Testimonial Details"
+        data={viewData}
       />
     </div>
   );

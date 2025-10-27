@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getResults,
   createResult,
   updateResult,
   deleteResult,
+  getResultById,
 } from "@/lib/api/result";
 import { getCourses } from "@/lib/api/course";
 import { getCourseCategories } from "@/lib/api/courseCategory";
@@ -18,7 +20,9 @@ export default function ResultsPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -29,7 +33,6 @@ export default function ResultsPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // Fetch Results
   const loadResults = async () => {
     try {
       const res = await getResults(page, 10, debouncedSearch);
@@ -40,7 +43,6 @@ export default function ResultsPage() {
     }
   };
 
-  // Fetch Courses
   const loadCourses = async () => {
     try {
       const res = await getCourses(1, 100, "");
@@ -50,16 +52,14 @@ export default function ResultsPage() {
     }
   };
 
-  // Fetch Course Categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories();
-      const arr =
-        Array.isArray(res)
-          ? res
-          : Array.isArray(res?.data)
-          ? res.data
-          : [];
+      const arr = Array.isArray(res)
+        ? res
+        : Array.isArray(res?.data)
+        ? res.data
+        : [];
       setCategories(arr);
     } catch (err) {
       console.error("Error loading categories:", err);
@@ -73,6 +73,16 @@ export default function ResultsPage() {
     loadCategories();
   }, [page, debouncedSearch]);
 
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getResultById(row.result_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Error fetching result details:", err);
+    }
+  };
+
   const courseOptions = courses.map((c: any) => ({
     label: c.course_name,
     value: String(c.course_id),
@@ -83,10 +93,14 @@ export default function ResultsPage() {
     value: String(c.category_id),
   }));
 
-  // Form fields for Modal
   const fields = [
     { name: "result_title", label: "Result Title", type: "text", required: true },
-    { name: "result_description", label: "Description", type: "textarea", required: true },
+    {
+      name: "result_description",
+      label: "Description",
+      type: "textarea",
+      required: true,
+    },
     { name: "result_date", label: "Result Date", type: "date", required: true },
     {
       name: "result_type",
@@ -140,12 +154,13 @@ export default function ResultsPage() {
 
   return (
     <div className="p-4 sm:p-6">
+      {/* Header */}
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold text-cyan-700">Results</h1>
         <button
           onClick={() => {
             setSelected(null);
-            setBasedType(""); // reset when creating new
+            setBasedType("");
             setOpenForm(true);
           }}
           className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
@@ -156,13 +171,19 @@ export default function ResultsPage() {
 
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "result_title", label: "Title" },
           {
             key: "result_date",
             label: "Date",
             render: (r) =>
-              r.result_date ? new Date(r.result_date).toLocaleDateString("en-IN") : "—",
+              r.result_date
+                ? new Date(r.result_date).toLocaleDateString("en-IN")
+                : "—",
           },
           {
             key: "based_type",
@@ -202,13 +223,13 @@ export default function ResultsPage() {
             label: "Status",
             render: (r) =>
               r.status === 1 || r.status === "1" ? (
-                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <span className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
-                </div>
+                </span>
               ) : (
-                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <span className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Inactive
-                </div>
+                </span>
               ),
           },
         ]}
@@ -237,6 +258,7 @@ export default function ResultsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick}
       />
 
       <DynamicFormModal
@@ -264,6 +286,13 @@ export default function ResultsPage() {
             loadResults();
           }
         }}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Result Details"
+        data={viewData}
       />
     </div>
   );

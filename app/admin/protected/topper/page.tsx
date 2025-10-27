@@ -1,196 +1,162 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
-  getToppers,
-  createTopper,
-  updateTopper,
-  deleteTopper,
-} from "@/lib/api/topper";
-import { getCourses } from "@/lib/api/course";
-import { getCourseCategories } from "@/lib/api/courseCategory";
+  getEnquiries,
+  createEnquiry,
+  updateEnquiry,
+  deleteEnquiry,
+  getEnquiryById,
+} from "@/lib/api/enquiry";
 
-export default function ToppersPage() {
+export default function EnquiryPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
 
-  const [courses, setCourses] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [basedType, setBasedType] = useState<string>("");
-
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load data
-  const loadToppers = async () => {
+  // 🔹 Enquiry type & status mappings
+  const enquiryTypeLabels: Record<number, string> = {
+    1: "General",
+    2: "Course",
+    3: "Event",
+    4: "Others",
+  };
+
+  const enquiryStatusLabels: Record<number, string> = {
+    1: "Requested",
+    2: "Ongoing",
+    3: "Completed",
+  };
+
+  // 🔹 Load all Enquiries
+  const loadEnquiries = async () => {
     try {
-      const res = await getToppers(page, 10, debouncedSearch);
+      const res = await getEnquiries(page, 10, debouncedSearch);
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
-      console.error("Error loading toppers:", err);
-    }
-  };
-
-  // ✅ Load courses
-  const loadCourses = async () => {
-    try {
-      const res = await getCourses(1, 100, "");
-      setCourses(res?.data || []);
-    } catch (err) {
-      console.error("Error loading courses:", err);
-    }
-  };
-
-  // ✅ Load categories
-  const loadCategories = async () => {
-    try {
-      const res = await getCourseCategories();
-      const arr =
-        Array.isArray(res)
-          ? res
-          : Array.isArray(res?.data)
-          ? res.data
-          : [];
-      setCategories(arr);
-    } catch (err) {
-      console.error("Error loading categories:", err);
-      setCategories([]);
+      console.error("Error loading enquiries:", err);
     }
   };
 
   useEffect(() => {
-    loadToppers();
-    loadCourses();
-    loadCategories();
+    loadEnquiries();
   }, [page, debouncedSearch]);
 
-  const courseOptions = courses.map((c: any) => ({
-    label: c.course_name,
-    value: String(c.course_id),
-  }));
+  // 🔹 Handle row view
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getEnquiryById(row.enquiry_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Failed to load enquiry details", err);
+    }
+  };
 
-  const categoryOptions = categories.map((c: any) => ({
-    label: c.category_name,
-    value: String(c.category_id),
-  }));
-
-  // ✅ Form Fields
+  // 🔹 Form Fields
   const fields = [
-    { name: "topper_name", label: "Topper Name", type: "text", required: true },
-    { name: "topper_rank", label: "Rank", type: "number", required: true },
-    { name: "year", label: "Year", type: "number", required: true },
-    { name: "exam_name", label: "Exam Name", type: "text", required: true },
+    { name: "cstmr_name", label: "Customer Name", type: "text", required: true },
+    { name: "cstmr_email", label: "Email", type: "email", required: true },
+    { name: "cstmr_phone", label: "Phone", type: "text", required: true },
     {
-      name: "based_type",
-      label: "Based Type",
+      name: "enquiry_type",
+      label: "Enquiry Type",
       type: "select",
       required: true,
       options: [
-        { label: "Course", value: "1" },
-        { label: "Course Category", value: "2" },
+        { label: "General", value: "1" },
+        { label: "Course", value: "2" },
+        { label: "Event", value: "3" },
+        { label: "Others", value: "4" },
       ],
-      onChange: (val: string) => setBasedType(val),
     },
     {
-      name: "course_id",
-      label: "Select Course",
-      type: "select",
-      options: courseOptions,
-      required: false,
-      disabled: basedType !== "1",
-    },
-    {
-      name: "category_id",
-      label: "Select Category",
-      type: "select",
-      options: categoryOptions,
-      required: false,
-      disabled: basedType !== "2",
-    },
-    {
-      name: "status",
-      label: "Status",
+      name: "enquiry_status",
+      label: "Enquiry Status",
       type: "select",
       required: true,
       options: [
-        { label: "Active", value: "1" },
-        { label: "Inactive", value: "0" },
+        { label: "Requested", value: "1" },
+        { label: "Ongoing", value: "2" },
+        { label: "Completed", value: "3" },
       ],
     },
-    { name: "topper_image", label: "Topper Image", type: "file", required: false },
+    { name: "cstmr_message", label: "Message", type: "textarea", required: true },
   ];
 
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-cyan-700">Toppers</h1>
+        <h1 className="text-2xl font-semibold text-cyan-700">Enquiries</h1>
         <button
           onClick={() => {
             setSelected(null);
-            setBasedType("");
             setOpenForm(true);
           }}
           className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
         >
-          Create Topper
+          Create Enquiry
         </button>
       </div>
 
       {/* Data Table */}
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
-          { key: "topper_name", label: "Topper Name" },
-          { key: "topper_rank", label: "Rank" },
-          { key: "exam_name", label: "Exam Name" },
           {
-            key: "based_type",
-            label: "Based On",
-            render: (r) =>
-              r.based_type === 1
-                ? "Course"
-                : r.based_type === 2
-                ? "Course Category"
-                : "—",
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "year", label: "Year" },
+          { key: "cstmr_name", label: "Name" },
+          { key: "cstmr_email", label: "Email" },
+          { key: "cstmr_phone", label: "Phone" },
           {
-            key: "topper_image",
-            label: "Image",
-            render: (r) =>
-              r.topper_image ? (
-                <img
-                  src={r.topper_image}
-                  alt="Topper"
-                  className="w-10 h-10 object-cover rounded-md"
-                />
-              ) : (
-                "—"
-              ),
+            key: "enquiry_type",
+            label: "Type",
+            render: (r: any) =>
+              enquiryTypeLabels[r.enquiry_type] || "—",
           },
           {
-            key: "status",
+            key: "enquiry_status",
             label: "Status",
-            render: (r) =>
-              r.status === 1 || r.status === "1" ? (
-                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
-                  Active
+            render: (r: any) => {
+              const label = enquiryStatusLabels[r.enquiry_status] || "—";
+              const color =
+                r.enquiry_status === 1
+                  ? "bg-yellow-100"
+                  : r.enquiry_status === 2
+                  ? "bg-blue-100"
+                  : "bg-green-100";
+              return (
+                <div className={`${color} text-black w-fit px-3 py-0.5 rounded-full`}>
+                  {label}
                 </div>
-              ) : (
-                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
-                  Inactive
-                </div>
-              ),
+              );
+            },
+          },
+          {
+            key: "cstmr_message",
+            label: "Message",
+            render: (r: any) => (
+              <div className="truncate max-w-[250px]" title={r.cstmr_message}>
+                {r.cstmr_message || "—"}
+              </div>
+            ),
           },
         ]}
         data={data}
@@ -202,48 +168,53 @@ export default function ToppersPage() {
         onEdit={(row) => {
           setSelected({
             ...row,
-            based_type: String(row.based_type),
-            course_id: row.course_id ? String(row.course_id) : "",
-            category_id: row.category_id ? String(row.category_id) : "",
-            status: String(row.status),
-            year: String(row.year),
+            enquiry_type: String(row.enquiry_type),
+            enquiry_status: String(row.enquiry_status),
           });
-          setBasedType(String(row.based_type));
           setOpenForm(true);
         }}
         onDelete={(row) => {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick}
       />
 
       {/* Form Modal */}
       <DynamicFormModal
-        title={selected ? "Edit Topper" : "Create Topper"}
+        title={selected ? "Edit Enquiry" : "Create Enquiry"}
         isOpen={openForm}
         onClose={() => setOpenForm(false)}
         fields={fields}
         defaultValues={selected}
         onSubmit={async (fd: FormData) => {
-          if (selected) await updateTopper(selected.topper_id, fd);
-          else await createTopper(fd);
+          if (selected) await updateEnquiry(selected.enquiry_id, fd);
+          else await createEnquiry(fd);
         }}
-        onSuccess={loadToppers}
+        onSuccess={loadEnquiries}
       />
 
       {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
-        title="Delete Topper"
-        message={`Are you sure you want to delete "${selected?.topper_name}"?`}
         onConfirm={async () => {
           if (selected) {
-            await deleteTopper(selected.topper_id);
+            await deleteEnquiry(selected.enquiry_id);
             setOpenDelete(false);
-            loadToppers();
+            loadEnquiries();
           }
         }}
+        title="Delete Enquiry"
+        message={`Are you sure you want to delete "${selected?.cstmr_name}"?`}
+      />
+
+      {/* View Modal */}
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Enquiry Details"
+        data={viewData}
       />
     </div>
   );

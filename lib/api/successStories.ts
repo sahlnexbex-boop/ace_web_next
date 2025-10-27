@@ -19,6 +19,9 @@ export const getSuccessStories = async (
   return apiRequest(`/api/success-stories?${params.toString()}`, "GET");
 };
 
+export const getSuccessStoryById = (id: number) =>
+  apiRequest(`/api/success-stories/${id}`, "GET");
+
 export const createSuccessStory = (data: FormData) =>
   apiRequest("/api/success-stories", "POST", data, true);
 

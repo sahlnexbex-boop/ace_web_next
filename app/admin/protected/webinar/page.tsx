@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getWebinars,
+  getWebinarById,
   createWebinar,
   updateWebinar,
   deleteWebinar,
@@ -18,7 +20,9 @@ export default function WebinarsPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -55,6 +59,17 @@ export default function WebinarsPage() {
     loadWebinars();
     loadCategories();
   }, [page, debouncedSearch]);
+
+  // ✅ Handle row click to show Dynamic View Modal
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getWebinarById(row.webinar_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Failed to load webinar details:", err);
+    }
+  };
 
   // ✅ Form fields
   const fields = [
@@ -101,16 +116,25 @@ export default function WebinarsPage() {
         </button>
       </div>
 
-      {/* Table */}
+      {/* Data Table */}
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "webinar_title", label: "Title" },
           {
             key: "date_time",
             label: "Date & Time",
             render: (r) =>
-              r.date_time ? new Date(r.date_time).toLocaleString("en-IN") : "—",
+              r.date_time
+                ? new Date(r.date_time).toLocaleString("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : "—",
           },
           { key: "webinar_duration", label: "Duration" },
           { key: "speaker_name", label: "Speaker Name" },
@@ -165,6 +189,7 @@ export default function WebinarsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick} // 👈 View Modal trigger
       />
 
       {/* Create/Edit Modal */}
@@ -194,6 +219,14 @@ export default function WebinarsPage() {
         }}
         title="Delete Webinar"
         message={`Are you sure you want to delete "${selected?.webinar_title}"?`}
+      />
+
+      {/* View Modal */}
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Webinar Details"
+        data={viewData}
       />
     </div>
   );

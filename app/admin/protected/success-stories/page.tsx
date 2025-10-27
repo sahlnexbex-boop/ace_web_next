@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 
 import {
   getSuccessStories,
+  getSuccessStoryById,
   createSuccessStory,
   updateSuccessStory,
   deleteSuccessStory,
@@ -18,7 +20,9 @@ export default function SuccessStoriesPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -27,10 +31,14 @@ export default function SuccessStoriesPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load all success stories
   const loadSuccessStories = async () => {
     try {
-      const res = await getSuccessStories(page, 10, debouncedSearch, yearFilter);
+      const res = await getSuccessStories(
+        page,
+        10,
+        debouncedSearch,
+        yearFilter
+      );
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
@@ -38,7 +46,6 @@ export default function SuccessStoriesPage() {
     }
   };
 
-  // ✅ Load categories
   const loadCategories = async () => {
     try {
       const res = await getSuccessCategoryOptions();
@@ -59,12 +66,36 @@ export default function SuccessStoriesPage() {
     value: String(c.category_id),
   }));
 
-  // ✅ Form fields for modal
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getSuccessStoryById(row.stories_id);
+      setViewData(res?.data || res);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Error fetching story details:", err);
+    }
+  };
+
   const fields = [
-    { name: "stories_title", label: "Story Title", type: "text", required: true },
-    { name: "name_of_candidate", label: "Candidate Name", type: "text", required: true },
+    {
+      name: "stories_title",
+      label: "Story Title",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "name_of_candidate",
+      label: "Candidate Name",
+      type: "text",
+      required: true,
+    },
     { name: "year", label: "Year", type: "number", required: true },
-    { name: "description", label: "Description", type: "textarea", required: true },
+    {
+      name: "description",
+      label: "Description",
+      type: "textarea",
+      required: true,
+    },
     {
       name: "course_category_id",
       label: "Course Category",
@@ -72,7 +103,12 @@ export default function SuccessStoriesPage() {
       options: categoryOptions,
       required: true,
     },
-    { name: "youtube_video_link", label: "YouTube Video Link", type: "text", required: false },
+    {
+      name: "youtube_video_link",
+      label: "YouTube Video Link",
+      type: "text",
+      required: false,
+    },
     {
       name: "status",
       label: "Status",
@@ -83,14 +119,21 @@ export default function SuccessStoriesPage() {
       ],
       required: true,
     },
-    { name: "thumbnail_image", label: "Thumbnail Image", type: "file", required: false },
+    {
+      name: "thumbnail_image",
+      label: "Thumbnail Image",
+      type: "file",
+      required: false,
+    },
   ];
 
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-cyan-700">Success Stories</h1>
+        <h1 className="text-2xl font-semibold text-cyan-700">
+          Success Stories
+        </h1>
         <button
           onClick={() => {
             setSelected(null);
@@ -102,7 +145,6 @@ export default function SuccessStoriesPage() {
         </button>
       </div>
 
-      {/* Optional Filters */}
       <div className="flex gap-2 mb-4">
         <input
           type="text"
@@ -113,10 +155,13 @@ export default function SuccessStoriesPage() {
         />
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => i + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "stories_title", label: "Story Title" },
           { key: "name_of_candidate", label: "Candidate Name" },
           { key: "year", label: "Year" },
@@ -192,9 +237,9 @@ export default function SuccessStoriesPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
+        onRowClick={handleRowClick}
       />
 
-      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Success Story" : "Create Success Story"}
         isOpen={openForm}
@@ -208,7 +253,6 @@ export default function SuccessStoriesPage() {
         onSuccess={loadSuccessStories}
       />
 
-      {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -221,6 +265,13 @@ export default function SuccessStoriesPage() {
         }}
         title="Delete Success Story"
         message={`Are you sure you want to delete "${selected?.stories_title}"?`}
+      />
+
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => setOpenView(false)}
+        title="View Success Story"
+        data={viewData}
       />
     </div>
   );

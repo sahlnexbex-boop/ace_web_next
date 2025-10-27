@@ -1,6 +1,5 @@
 import { apiRequest } from "./apiClients";
 
-// ✅ Get all webinars (with filters)
 export const getWebinars = async (
   page = 1,
   limit = 10,
@@ -21,6 +20,9 @@ export const getWebinars = async (
   return apiRequest(`/api/webinars?${params.toString()}`, "GET");
 };
 
+export const getWebinarById = async (id: number) =>
+  apiRequest(`/api/webinars/${id}`, "GET");
+
 export const createWebinar = (data: FormData) =>
   apiRequest("/api/webinars", "POST", data, true);
 
@@ -30,7 +32,6 @@ export const updateWebinar = (id: number, data: FormData) =>
 export const deleteWebinar = (id: number) =>
   apiRequest(`/api/webinars/${id}`, "DELETE", undefined, true);
 
-// ✅ Get course categories for dropdow
 export const getCourseCategoryOptions = async () => {
   const res = await apiRequest("/api/course-category", "GET");
   return res.data || [];

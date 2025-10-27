@@ -17,6 +17,10 @@ export const getTestimonials = async (
   return apiRequest(`/api/testimonials?${params.toString()}`, "GET");
 };
 
+export const getTestimonialById = async (id: number) => {
+  return apiRequest(`/api/testimonials/${id}`, "GET");
+};
+
 export const createTestimonial = (data: FormData) =>
   apiRequest("/api/testimonials", "POST", data, true);
 
