@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
@@ -13,9 +15,8 @@ import {
   createCourse,
   updateCourse,
   deleteCourse,
-  getCourseCategoryOptions,
 } from "@/lib/api/course";
-import { IconPlus } from "@tabler/icons-react";
+import { getCourseCategories } from "@/lib/api/courseCategory";
 
 export default function CoursesPage() {
   const [data, setData] = useState<any[]>([]);
@@ -28,13 +29,14 @@ export default function CoursesPage() {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<any[]>([]);
+  const [filters, setFilters] = useState<{ status?: string; category_id?: string }>({});
   const debouncedSearch = useDebounce(search, 500);
 
   // ✅ Load Categories
   const loadCategories = async () => {
     try {
-      const res = await getCourseCategoryOptions();
-      setCategories(res || []);
+      const res = await getCourseCategories(1, 100);
+      setCategories(res?.data || []);
     } catch (err) {
       console.error("Error loading categories:", err);
     }
@@ -43,7 +45,7 @@ export default function CoursesPage() {
   // ✅ Load Courses
   const loadCourses = async () => {
     try {
-      const res = await getCourses(page, 10, debouncedSearch);
+      const res = await getCourses(page, 10, debouncedSearch, filters);
       setData(res.data || []);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
@@ -57,21 +59,23 @@ export default function CoursesPage() {
 
   useEffect(() => {
     loadCourses();
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, filters]);
 
-  const categoryOptions = categories.map((c) => ({
-    label: c.category_name,
-    value: String(c.category_id),
-  }));
+  const categoryOptions = Array.isArray(categories)
+    ? categories.map((c) => ({
+        label: c.category_name,
+        value: String(c.category_id),
+      }))
+    : [];
 
-  // ✅ Handle View (fetch full single data and format)
+  // ✅ View Logic
   const handleView = async (row: any) => {
     try {
       const res = await getCourseById(row.course_id);
       if (res?.data) {
         const c = res.data;
 
-        const formatted: Record<string, React.ReactNode> = {
+        const formatted = {
           "Course Name": c.course_name || "—",
           Description: (
             <p className="text-gray-700 whitespace-pre-line">
@@ -92,7 +96,7 @@ export default function CoursesPage() {
               rel="noopener noreferrer"
               className="text-cyan-700 underline"
             >
-              {c.course_syllabus_file}
+             {c.course_syllabus_file}
             </a>
           ) : (
             "—"
@@ -146,7 +150,7 @@ export default function CoursesPage() {
     }
   };
 
-  // ✅ Form Fields
+  // ✅ Extended Form Fields
   const fields = [
     { name: "course_name", label: "Course Name", type: "text", required: true },
     {
@@ -162,28 +166,18 @@ export default function CoursesPage() {
       options: categoryOptions,
       required: true,
     },
-    {
-      name: "course_rating",
-      label: "Course Rating",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "course_duration",
-      label: "Duration (Hours)",
-      type: "text",
-      required: true,
-    },
-    { name: "course_fee", label: "Fee", type: "text", required: true },
+    { name: "course_rating", label: "Rating", type: "text", required: false },
+    { name: "course_duration", label: "Duration (Hours)", type: "text", required: false },
+    { name: "course_fee", label: "Fee", type: "text", required: false },
     {
       name: "course_overview",
-      label: "Overview",
+      label: "Course Overview",
       type: "textarea",
       required: false,
     },
     {
       name: "course_syllabus",
-      label: "Syllabus",
+      label: "Course Syllabus",
       type: "textarea",
       required: false,
     },
@@ -195,13 +189,13 @@ export default function CoursesPage() {
     },
     {
       name: "course_syllabus_file",
-      label: "Syllabus File",
+      label: "Syllabus File (PDF)",
       type: "file",
       required: false,
     },
     {
       name: "course_questions_file",
-      label: "Questions File",
+      label: "Questions File (PDF)",
       type: "file",
       required: false,
     },
@@ -225,31 +219,54 @@ export default function CoursesPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex justify-between mb-4">
+      {/* Header + Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Courses</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Course <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* Filter Button */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+              {
+                key: "category_id",
+                label: "Category",
+                options: categoryOptions,
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-cyan-800"
+          >
+            Create Course <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Data Table */}
       <DataTable
         columns={[
-          {
-            key: "sno",
-            label: "S.No",
-            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
-          },
+          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "course_name", label: "Name" },
           {
-            key: "course_category_id",
+            key: "category",
             label: "Category",
             render: (r) => r.category?.category_name || "—",
           },
@@ -257,10 +274,24 @@ export default function CoursesPage() {
           { key: "course_fee", label: "Fee" },
           { key: "course_duration", label: "Duration" },
           {
+            key: "course_image",
+            label: "Image",
+            render: (r) =>
+              r.course_image ? (
+                <img
+                  src={r.course_image}
+                  className="w-10 h-10 object-cover rounded-full"
+                  alt="Class"
+                />
+              ) : (
+                "—"
+              ),
+          },
+          {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status == 1 || r.status == "1" ? (
+              r.status == 1 || r.status === "1" ? (
                 <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
                 </div>
@@ -289,7 +320,7 @@ export default function CoursesPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleView} // ✅ Row click opens View Modal
+        onRowClick={handleView}
       />
 
       {/* Form Modal */}
@@ -306,7 +337,7 @@ export default function CoursesPage() {
         onSuccess={loadCourses}
       />
 
-      {/* Delete Confirmation */}
+      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -321,7 +352,7 @@ export default function CoursesPage() {
         message={`Are you sure you want to delete "${selected?.course_name}"?`}
       />
 
-      {/* ✅ View Modal */}
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

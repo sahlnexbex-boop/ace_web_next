@@ -14,7 +14,7 @@ export const getVideoClasses = async (
 
   if (search) params.append("search", search);
   if (category_id) params.append("category_id", String(category_id));
-  if (status !== undefined) params.append("status", String(status)); // only append if given
+  if (status !== undefined) params.append("status", String(status)); 
 
   return apiRequest(`/api/video-class?${params.toString()}`, "GET");
 };
@@ -30,8 +30,3 @@ export const updateVideoClass = (id: number, data: FormData) =>
 
 export const deleteVideoClass = (id: number) =>
   apiRequest(`/api/video-class/${id}`, "DELETE", undefined, true);
-
-export const getVideoClassCategoryOptions = async () => {
-  const res = await apiRequest("/api/course-category", "GET");
-  return res.data || [];
-};

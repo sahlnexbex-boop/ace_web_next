@@ -4,14 +4,17 @@ export const getCourses = async (
   page = 1,
   limit = 10,
   search = "",
-  category_id?: number
+  filters: { status?: string; category_id?: string } = {}
 ) => {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
   });
+
   if (search) params.append("search", search);
-  if (category_id) params.append("category_id", String(category_id));
+  if (filters.category_id) params.append("category_id", filters.category_id);
+  if (filters.status) params.append("status", filters.status);
+
   return apiRequest(`/api/courses?${params.toString()}`, "GET");
 };
 
@@ -27,7 +30,5 @@ export const updateCourse = (id: number, data: FormData) =>
 export const deleteCourse = (id: number) =>
   apiRequest(`/api/courses/${id}`, "DELETE", undefined, true);
 
-export const getCourseCategoryOptions = async () => {
-  const res = await apiRequest("/api/course-category", "GET");
-  return res.data || [];
-};
+// export const getCourseCategoryOptions = async () =>
+//   apiRequest("/api/course-category/options", "GET");

@@ -5,7 +5,8 @@ export const getStudyServices = async (
   limit = 10,
   search = "",
   status?: number,
-  service_type?: number
+  service_type?: number,
+  category_id?: number
 ) => {
   const params = new URLSearchParams({
     page: String(page),
@@ -14,13 +15,14 @@ export const getStudyServices = async (
 
   if (search) params.append("search", search);
   if (status !== undefined) params.append("status", String(status));
-  if (service_type !== undefined)
+  if (service_type !== undefined && service_type >= 1 && service_type <= 5)
     params.append("service_type", String(service_type));
+  if (category_id !== undefined) params.append("category_id", String(category_id));
 
   return apiRequest(`/api/study-service?${params.toString()}`, "GET");
 };
 
-export const getStudyServiceById = async (id: number) =>
+export const getStudyServiceById = (id: number) =>
   apiRequest(`/api/study-service/${id}`, "GET");
 
 export const createStudyService = (data: FormData) =>
@@ -31,8 +33,3 @@ export const updateStudyService = (id: number, data: FormData) =>
 
 export const deleteStudyService = (id: number) =>
   apiRequest(`/api/study-service/${id}`, "DELETE", undefined, true);
-
-export const getStudyCategoryOptions = async () => {
-  const res = await apiRequest("/api/course-category", "GET");
-  return res.data || [];
-};

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
@@ -13,36 +15,40 @@ import {
   updateBlog,
   deleteBlog,
 } from "@/lib/api/blogs";
-import { IconPlus } from "@tabler/icons-react";
 
 export default function BlogsPage() {
   const [data, setData] = useState<any[]>([]);
-  const [openForm, setOpenForm] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
-  const [openView, setOpenView] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [openForm, setOpenForm] = useState(false);
+  const [selected, setSelected] = useState<any>(null);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
+  const [viewData, setViewData] = useState<any>(null);
+
   const debouncedSearch = useDebounce(search, 500);
 
-  // Load blogs list
-  const loadBlogs = async () => {
-    try {
-      const res = await getBlogs(page, 10, debouncedSearch);
-      setData(res.data || []);
-      setTotalPages(res.totalPages || 1);
-    } catch (err) {
-      console.error("Error fetching blogs:", err);
-    }
-  };
+  // ✅ Load Blogs
+  const loadData = async () => {
+  try {
+    const status =
+      filters.status && filters.status !== "" ? Number(filters.status) : undefined;
+    const res = await getBlogs(page, 10, debouncedSearch, status);
+    setData(res.data || []);
+    setTotalPages(res.totalPages || 1);
+  } catch (err) {
+    console.error("Error loading blogs:", err);
+  }
+};
+
 
   useEffect(() => {
-    loadBlogs();
-  }, [page, debouncedSearch]);
+    loadData();
+  }, [page, debouncedSearch, filters]);
 
-  // Normalize tags before sending
+  // ✅ Tags normalize helper
   const normalizeTagsFormData = (fd: FormData) => {
     const tagsValue = fd.get("tags");
     if (!tagsValue) {
@@ -72,129 +78,45 @@ export default function BlogsPage() {
     fd.set("tags", JSON.stringify(arr));
   };
 
-  const handleModalSubmit = async (fd: FormData) => {
-    normalizeTagsFormData(fd);
-    if (selected) await updateBlog(selected.blog_id, fd);
-    else await createBlog(fd);
-  };
-
-  const handleView = async (row: any) => {
-    try {
-      const res = await getBlogById(row.blog_id);
-      if (res?.data) {
-        const b = res.data;
-
-        // Parse tags
-        let parsedTags = "—";
-        try {
-          const tagsArray = JSON.parse(b.tags);
-          if (Array.isArray(tagsArray) && tagsArray.length > 0) {
-            parsedTags = tagsArray.join(", ");
-          }
-        } catch {
-          parsedTags = b.tags || "—";
-        }
-
-        // Format for modal (consistent with your service format)
-        const formatted: Record<string, React.ReactNode> = {
-          "Blog Title": b.blog_title || "—",
-          "Blog Author": b.blog_author || "—",
-          "Blog Content": (
-            <p className="text-gray-700 whitespace-pre-line">
-              {b.blog_content || "—"}
-            </p>
-          ),
-          "Publishing Date": b.publishing_date
-            ? new Date(b.publishing_date).toLocaleDateString("en-IN")
-            : "—",
-          Tags: parsedTags,
-          Status:
-            b.status === 1 || b.status === "1" ? (
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
-                Active
-              </span>
-            ) : (
-              <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
-                Inactive
-              </span>
-            ),
-          "Blog Image": b.blog_image ? (
-            <div className="flex justify-end">
-              <img
-                src={b.blog_image}
-                alt="Blog Image"
-                className="w-14 h-14 object-cover rounded"
-              />
-            </div>
-          ) : (
-            "—"
-          ),
-          "Created At": b.created_at
-            ? new Date(b.created_at).toLocaleString("en-IN")
-            : "—",
-          "Updated At": b.updated_at
-            ? new Date(b.updated_at).toLocaleString("en-IN")
-            : "—",
-        };
-
-        setViewData(formatted);
-        setOpenView(true);
-      }
-    } catch (err) {
-      console.error("Error fetching blog details:", err);
-    }
-  };
-
-  const fields = [
-    { name: "blog_title", label: "Blog Title", type: "text", required: true },
-    { name: "blog_author", label: "Author", type: "text", required: true },
-    {
-      name: "blog_content",
-      label: "Content",
-      type: "textarea",
-      required: true,
-    },
-    {
-      name: "publishing_date",
-      label: "Publishing Date",
-      type: "date",
-      required: true,
-    },
-    {
-      name: "tags",
-      label: "Tags (comma separated)",
-      type: "text",
-      required: false,
-    },
-    {
-      name: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "1" },
-        { label: "Inactive", value: "0" },
-      ],
-      required: true,
-    },
-    { name: "blog_image", label: "Blog Image", type: "file", required: false },
-  ];
-
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex justify-between mb-4">
+      {/* ✅ Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Blogs</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Blog <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Reusable Filter */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* ✅ Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Create Blog <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
+      {/* ✅ Table */}
       <DataTable
         columns={[
           {
@@ -202,7 +124,6 @@ export default function BlogsPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          // { key: "blog_id", label: "ID" },
           {
             key: "blog_image",
             label: "Image",
@@ -256,6 +177,18 @@ export default function BlogsPage() {
                 </div>
               ),
           },
+          {
+            key: "created_at",
+            label: "Created At",
+            render: (r) =>
+              r.created_at
+                ? new Date(r.created_at).toLocaleDateString("en-IN", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "—",
+          },
         ]}
         data={data}
         page={page}
@@ -290,21 +223,100 @@ export default function BlogsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleView}
+        onRowClick={async (row) => {
+          const res = await getBlogById(row.blog_id);
+          const b = res?.data;
+          if (!b) return;
+
+          let parsedTags = "—";
+          try {
+            const tagsArray = JSON.parse(b.tags);
+            if (Array.isArray(tagsArray) && tagsArray.length > 0) {
+              parsedTags = tagsArray.join(", ");
+            }
+          } catch {
+            parsedTags = b.tags || "—";
+          }
+
+          const formatted = {
+            "Blog Title": b.blog_title || "—",
+            "Blog Author": b.blog_author || "—",
+            "Blog Content": (
+              <p className="text-gray-700 whitespace-pre-line">
+                {b.blog_content || "—"}
+              </p>
+            ),
+            "Publishing Date": b.publishing_date
+              ? new Date(b.publishing_date).toLocaleDateString("en-IN")
+              : "—",
+            Tags: parsedTags,
+            Status:
+              b.status == 1 || b.status == "1" ? (
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                  Active
+                </span>
+              ) : (
+                <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+                  Inactive
+                </span>
+              ),
+            "Blog Image": b.blog_image ? (
+              <div className="flex justify-end">
+              <img
+                src={b.blog_image}
+                alt="Blog"
+                className="w-14 h-14 object-cover rounded"
+              />
+              </div>
+            ) : (
+              "—"
+            ),
+            "Created At": b.created_at
+              ? new Date(b.created_at).toLocaleString("en-IN")
+              : "—",
+            "Updated At": b.updated_at
+              ? new Date(b.updated_at).toLocaleString("en-IN")
+              : "—",
+          };
+
+          setViewData(formatted);
+          setOpenView(true);
+        }}
       />
 
-      {/* Form Modal */}
+      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Blog" : "Create Blog"}
         isOpen={openForm}
         onClose={() => setOpenForm(false)}
-        fields={fields}
+        fields={[
+          { name: "blog_title", label: "Blog Title", type: "text", required: true },
+          { name: "blog_author", label: "Author", type: "text", required: true },
+          { name: "blog_content", label: "Content", type: "textarea", required: true },
+          { name: "publishing_date", label: "Publishing Date", type: "date", required: true },
+          { name: "tags", label: "Tags (comma separated)", type: "text", required: false },
+          {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: [
+              { label: "Active", value: "1" },
+              { label: "Inactive", value: "0" },
+            ],
+            required: true,
+          },
+          { name: "blog_image", label: "Blog Image", type: "file", required: false },
+        ]}
         defaultValues={selected}
-        onSubmit={handleModalSubmit}
-        onSuccess={loadBlogs}
+        onSubmit={async (fd) => {
+          normalizeTagsFormData(fd);
+          if (selected) await updateBlog(selected.blog_id, fd);
+          else await createBlog(fd);
+        }}
+        onSuccess={loadData}
       />
 
-      {/* Delete Confirmation */}
+      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -312,20 +324,17 @@ export default function BlogsPage() {
           if (selected) {
             await deleteBlog(selected.blog_id);
             setOpenDelete(false);
-            loadBlogs();
+            loadData();
           }
         }}
         title="Delete Blog"
         message={`Are you sure you want to delete "${selected?.blog_title}"?`}
       />
 
-      {/* View Modal */}
+      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
-        onClose={() => {
-          setOpenView(false);
-          setViewData(null);
-        }}
+        onClose={() => setOpenView(false)}
         title="View Blog"
         data={viewData}
       />

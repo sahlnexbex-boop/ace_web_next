@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
-import { IconPlus } from "@tabler/icons-react";
 
 import {
   getUsers,
@@ -18,21 +19,22 @@ import {
 
 export default function UsersPage() {
   const [data, setData] = useState<any[]>([]);
-  const [openForm, setOpenForm] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
-  const [openView, setOpenView] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [openForm, setOpenForm] = useState(false);
+  const [selected, setSelected] = useState<any>(null);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
+  const [viewData, setViewData] = useState<any>(null);
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load all users
-  const loadUsers = async () => {
+  // ✅ Load Users
+  const loadData = async () => {
     try {
-      const res = await getUsers(page, debouncedSearch, 10);
+      const res = await getUsers(page, debouncedSearch, 10, filters);
       setData(res.data || []);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
@@ -41,85 +43,48 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    loadUsers();
-  }, [page, debouncedSearch]);
-
-  // ✅ Handle View — fetch full user details
-  const handleView = async (row: any) => {
-    try {
-      const res = await getUserById(row.user_id);
-      if (res?.data) {
-        const u = res.data;
-
-        const formatted: Record<string, React.ReactNode> = {
-          "User ID": u.user_id || "—",
-          "User Name": u.user_name || "—",
-          Email: u.email || "—",
-          Status:
-            u.status == 1 || u.status === "1" ? (
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
-                Active
-              </span>
-            ) : (
-              <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
-                Inactive
-              </span>
-            ),
-          "Created At": u.created_at
-            ? new Date(u.created_at).toLocaleString("en-IN")
-            : "—",
-          "Updated At": u.updated_at
-            ? new Date(u.updated_at).toLocaleString("en-IN")
-            : "—",
-        };
-
-        setViewData(formatted);
-        setOpenView(true);
-      }
-    } catch (err) {
-      console.error("Error fetching user details:", err);
-    }
-  };
-
-  // ✅ Form fields
-  const fields = [
-    { name: "user_name", label: "User Name", type: "text", required: true },
-    { name: "email", label: "Email", type: "email", required: true },
-    {
-      name: "password",
-      label: "Password",
-      type: "password",
-      required: !selected,
-    },
-    {
-      name: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "1" },
-        { label: "Inactive", value: "0" },
-      ],
-      required: true,
-    },
-  ];
+    loadData();
+  }, [page, debouncedSearch, filters]);
 
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between mb-4">
-        <h1 className="text-3xl font-semibold text-cyan-700">Users</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Add User <IconPlus size={20} />
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+        <h1 className="text-2xl font-semibold text-cyan-700">Users</h1>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Reusable Filter Button */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* ✅ Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Add User <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -127,21 +92,31 @@ export default function UsersPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "user_name", label: "Name" },
+          { key: "user_name", label: "User Name" },
           { key: "email", label: "Email" },
           {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status == 1 || r.status == "1" ? (
-                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+              r.status == 1 || r.status === "1" ? (
+                <span className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
-                </div>
+                </span>
               ) : (
-                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <span className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Inactive
-                </div>
+                </span>
               ),
+          },
+          {
+            key: "created_at",
+            label: "Created At",
+            render: (r) =>
+              new Date(r.created_at).toLocaleDateString("en-IN", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              }),
           },
         ]}
         data={data}
@@ -150,38 +125,84 @@ export default function UsersPage() {
         search={search}
         setPage={setPage}
         setSearch={setSearch}
-        onEdit={(row) => {
-          setSelected(row);
+        onEdit={(r) => {
+          setSelected(r);
           setOpenForm(true);
         }}
-        onDelete={(row) => {
-          setSelected(row);
+        onDelete={(r) => {
+          setSelected(r);
           setOpenDelete(true);
         }}
-        onRowClick={handleView} // ✅ Row click opens View Modal
+        onRowClick={async (r) => {
+          const res = await getUserById(r.user_id);
+          const u = res?.data;
+          if (!u) return;
+
+          const formatted = {
+            "User ID": u.user_id || "—",
+            "User Name": u.user_name || "—",
+            Email: u.email || "—",
+            Status:
+              u.status == 1 || u.status === "1" ? (
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                  Active
+                </span>
+              ) : (
+                <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+                  Inactive
+                </span>
+              ),
+            "Created At": u.created_at
+              ? new Date(u.created_at).toLocaleString("en-IN")
+              : "—",
+            "Updated At": u.updated_at
+              ? new Date(u.updated_at).toLocaleString("en-IN")
+              : "—",
+          };
+
+          setViewData(formatted);
+          setOpenView(true);
+        }}
       />
 
-      {/* ✅ Create/Edit Form Modal */}
+      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit User" : "Create User"}
         isOpen={openForm}
         onClose={() => setOpenForm(false)}
-        fields={fields}
+        fields={[
+          { name: "user_name", label: "User Name", type: "text", required: true },
+          { name: "email", label: "Email", type: "email", required: true },
+          {
+            name: "password",
+            label: "Password",
+            type: "password",
+            required: !selected,
+          },
+          {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: [
+              { label: "Active", value: "1" },
+              { label: "Inactive", value: "0" },
+            ],
+            required: true,
+          },
+        ]}
         defaultValues={selected}
         onSubmit={async (fd) => {
           const payload: any = {};
           fd.forEach((value, key) => {
-            if (key === "status") payload[key] = Number(value);
-            else payload[key] = value;
+            payload[key] = key === "status" ? Number(value) : value;
           });
-
           if (selected) await updateUser(selected.user_id, payload);
           else await createUser(payload);
         }}
-        onSuccess={loadUsers}
+        onSuccess={loadData}
       />
 
-      {/* ✅ Delete Confirmation Modal */}
+      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -189,7 +210,7 @@ export default function UsersPage() {
           if (selected) {
             await deleteUser(selected.user_id);
             setOpenDelete(false);
-            loadUsers();
+            loadData();
           }
         }}
         title="Delete User"
@@ -199,10 +220,7 @@ export default function UsersPage() {
       {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
-        onClose={() => {
-          setOpenView(false);
-          setViewData(null);
-        }}
+        onClose={() => setOpenView(false)}
         title="View User"
         data={viewData}
       />

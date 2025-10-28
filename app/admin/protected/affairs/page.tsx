@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
@@ -14,9 +14,8 @@ import {
   updateCurrentAffair,
   deleteCurrentAffair,
 } from "@/lib/api/current-affair";
-
 import { getCourseCategories } from "@/lib/api/courseCategory";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconFilter } from "@tabler/icons-react";
 
 export default function CurrentAffairPage() {
   const [data, setData] = useState<any[]>([]);
@@ -30,12 +29,19 @@ export default function CurrentAffairPage() {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<any[]>([]);
-  const debouncedSearch = useDebounce(search, 500);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
-  // ✅ Load current affairs
+  const debouncedSearch = useDebounce(search, 500);
+  const filterRef = useRef<HTMLDivElement>(null);
+
   const loadAffairs = async () => {
     try {
-      const res = await getCurrentAffairs(page, 10, debouncedSearch);
+      const res = await getCurrentAffairs(page, 10, debouncedSearch, {
+        status: statusFilter,
+        category_id: categoryFilter,
+      });
       setData(res.data || []);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
@@ -43,7 +49,6 @@ export default function CurrentAffairPage() {
     }
   };
 
-  // ✅ Load categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories(1, 100);
@@ -59,19 +64,27 @@ export default function CurrentAffairPage() {
 
   useEffect(() => {
     loadAffairs();
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, statusFilter, categoryFilter]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFiltersOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const categoryOptions = categories.map((c) => ({
     label: c.category_name,
     value: String(c.category_id),
   }));
 
-  // ✅ View modal loader
   const handleView = async (row: any) => {
     try {
       const res = await getCurrentAffairById(row.affair_id);
       const s = res?.data;
-
       if (!s) return;
 
       const formatted: Record<string, React.ReactNode> = {
@@ -96,13 +109,18 @@ export default function CurrentAffairPage() {
               Inactive
             </span>
           ),
-        File: s.affair_file ? <div className="flex justify-end">
-          <img
-            src={s.affair_file}
-            alt={s.affair_title}
-            className="w-16 h-16 rounded-full object-cover border"
-          />
-        </div> : "—",
+        File: s.affair_file ? (
+          <a
+            href={s.affair_file}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+           {s.affair_file}
+          </a>
+        ) : (
+          "—"
+        ),
         "Created At": s.created_at
           ? new Date(s.created_at).toLocaleString("en-IN")
           : "—",
@@ -154,20 +172,85 @@ export default function CurrentAffairPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex justify-between mb-4">
+    <div className="p-4 sm:p-6 relative">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">
           Current Affairs
         </h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Affair <IconPlus size={20} />
-        </button>
+        <div className="flex items-center gap-3 relative">
+          {/* ✅ Search Field from DataTable */}
+          {/* handled inside DataTable — so skip here */}
+
+          {/* ✅ Filter Button */}
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="flex items-center gap-2 bg-gray-100 cursor-pointer hover:bg-gray-200 text-gray-700 border px-3 py-2 rounded-md shadow-sm transition"
+            >
+              <IconFilter size={18} />
+              <span className="hidden sm:inline">Filters</span>
+            </button>
+
+            {filtersOpen && (
+              <div
+                className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg p-3 z-50"
+                style={{ zIndex: 9999 }}
+              >
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label className="text-sm text-gray-600 font-medium">
+                      Status
+                    </label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => {
+                        setStatusFilter(e.target.value);
+                        setPage(1);
+                      }}
+                      className="mt-1 w-full border rounded-md p-2 text-sm"
+                    >
+                      <option value="">All</option>
+                      <option value="1">Active</option>
+                      <option value="0">Inactive</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-600 font-medium">
+                      Category
+                    </label>
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => {
+                        setCategoryFilter(e.target.value);
+                        setPage(1);
+                      }}
+                      className="mt-1 w-full border rounded-md p-2 text-sm"
+                    >
+                      <option value="">All</option>
+                      {categoryOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ✅ Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Create Affair <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
       {/* ✅ Data Table */}
@@ -190,6 +273,19 @@ export default function CurrentAffairPage() {
             label: "Category",
             render: (r) => r.category?.category_name || "—",
           },
+          {
+            key: "affair_file",
+            label: "File",
+            render: (r) => (
+              <a
+                href={r.affair_file}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-700 underline"
+              >
+                View
+              </a>
+            )},
           {
             key: "status",
             label: "Status",

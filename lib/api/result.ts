@@ -1,14 +1,7 @@
 import { apiRequest } from "./apiClients";
 
 export const getResults = async (
-  page = 1,
-  limit = 10,
-  search = "",
-  status?: string,
-  based_type?: string,
-  result_type?: string,
-  category_id?: string
-) => {
+page = 1, limit = 10, search = "", status?: string, based_type?: string, result_type?: string, category_id?: string, p0?: string | undefined) => {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),

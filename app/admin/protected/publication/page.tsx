@@ -1,38 +1,67 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IconPlus } from "@tabler/icons-react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
+import TableFilter from "@/components/filter_button"; // ✅ Reusable Filter
 import { useDebounce } from "@/hooks/debounce";
+
 import {
   getPublications,
   getPublicationById,
   createPublication,
   updatePublication,
   deletePublication,
-  getPublicationCategories,
 } from "@/lib/api/publication";
-import { IconPlus } from "@tabler/icons-react";
+import { getCourseCategories } from "@/lib/api/courseCategory";
 
 export default function PublicationPage() {
   const [data, setData] = useState<any[]>([]);
-  const [openForm, setOpenForm] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
-  const [openView, setOpenView] = useState(false);
-  const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<Record<string, any> | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [selected, setSelected] = useState<any>(null);
+  const [openForm, setOpenForm] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
+  const [viewData, setViewData] = useState<Record<string, any> | null>(null);
 
   const debouncedSearch = useDebounce(search, 500);
 
+  // 🔹 Load course categories for filter & form
+  const loadCategories = async () => {
+    try {
+      const res = await getCourseCategories();
+      const list = Array.isArray(res) ? res : res?.data || [];
+      setCategories(list);
+    } catch (err) {
+      console.error("Error loading categories:", err);
+    }
+  };
+
+  // 🔹 Load publications with filters, pagination, search
   const loadPublications = async () => {
     try {
-      const res = await getPublications(page, 10, debouncedSearch);
+      const status =
+        filters.status && filters.status !== "" ? Number(filters.status) : undefined;
+      const category_id =
+        filters.category_id && filters.category_id !== ""
+          ? Number(filters.category_id)
+          : undefined;
+
+      const res = await getPublications(
+        page,
+        10,
+        debouncedSearch,
+        status,
+        category_id
+      );
+
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
@@ -40,23 +69,15 @@ export default function PublicationPage() {
     }
   };
 
-  const loadCategories = async () => {
-    try {
-      const res = await getPublicationCategories();
-      setCategories(res?.data || res || []);
-    } catch (err) {
-      console.error("Error loading categories:", err);
-    }
-  };
-
   useEffect(() => {
     loadCategories();
   }, []);
+
   useEffect(() => {
     loadPublications();
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, filters]);
 
-  // 🔹 Handle row click - open view modal
+  // 🔹 Handle view modal
   const handleView = async (row: any) => {
     try {
       const res = await getPublicationById(row.book_id);
@@ -70,16 +91,18 @@ export default function PublicationPage() {
           </p>
         ),
         "Book Price": p.book_price ? `₹${p.book_price}` : "—",
-        "Author": p.book_author || "—",
-        "Language": p.book_language || "—",
-        "Category ID": p.category_id || "—",
+        Author: p.book_author || "—",
+        Language: p.book_language || "—",
+        Category:
+          categories.find((c) => c.category_id === p.category_id)?.category_name ||
+          "—",
         "Book Image": p.book_image ? (
           <div className="flex justify-end">
-          <img
-            src={p.book_image}
-            alt="Book"
-            className="w-16 h-16 object-cover rounded-md"
-          />
+            <img
+              src={p.book_image}
+              alt="Book"
+              className="w-16 h-16 object-cover rounded-md"
+            />
           </div>
         ) : (
           "—"
@@ -91,12 +114,12 @@ export default function PublicationPage() {
             rel="noopener noreferrer"
             className="text-cyan-700 underline"
           >
-           {p.book_file}
+            {p.book_file}
           </a>
         ) : (
           "—"
         ),
-        "Status":
+        Status:
           p.status === 1 || p.status === "1" ? (
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
               Active
@@ -112,9 +135,6 @@ export default function PublicationPage() {
         "Updated At": p.updated_at
           ? new Date(p.updated_at).toLocaleString("en-IN")
           : "—",
-        // "Created By": p.created_by || "—",
-        // "Updated By": p.updated_by || "—",
-        // "Book ID": p.book_id || "—",
       };
 
       setViewData(formatted);
@@ -124,11 +144,13 @@ export default function PublicationPage() {
     }
   };
 
+  // 🔹 Category dropdown options for filter + modal
   const categoryOptions = categories.map((c: any) => ({
     label: c.category_name,
     value: String(c.category_id),
   }));
 
+  // 🔹 Fields for Create/Edit Modal
   const fields = [
     { name: "book_title", label: "Book Title", type: "text", required: true },
     {
@@ -164,17 +186,46 @@ export default function PublicationPage() {
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Publications</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Publication <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Filter Button (Status + Category) */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+              {
+                key: "category_id",
+                label: "Category",
+                options: [
+                  ...categoryOptions,
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Create Publication <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Data Table */}
@@ -194,35 +245,28 @@ export default function PublicationPage() {
             render: (r) => (r.book_price ? `₹${r.book_price}` : "—"),
           },
           {
-            key: "book_image",
-            label: "Image",
+            key: "category_id",
+            label: "Category",
             render: (r) =>
-              r.book_image ? (
-                <img
-                  src={r.book_image}
-                  className="w-10 h-10 object-cover rounded-full"
-                  alt="Book"
-                />
-              ) : (
-                "—"
-              ),
+              categories.find((c) => c.category_id === r.category_id)
+                ?.category_name || "—",
           },
-          {
-            key: "book_file",
-            label: "File",
-            render: (r) =>
-              r.book_file ? (
-                <a
-                  href={r.book_file}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-cyan-700 underline"
-                >
-                  View File
-                </a>
-              ) : (
-                "—"
-              ),
+          { 
+             key: "book_image",
+             label: "Image",
+             render: (r) => (
+               <div className="flex gap-1">
+                 {r.book_image ? (
+                   <img
+                     src={r.book_image}
+                     className="w-8 h-8 rounded object-cover"
+                     alt="Book"
+                   />
+                 ) : (
+                   "—"
+                 )}
+               </div>
+             )
           },
           {
             key: "status",
@@ -260,7 +304,7 @@ export default function PublicationPage() {
         onRowClick={handleView}
       />
 
-      {/* Modals */}
+      {/* Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Publication" : "Create Publication"}
         isOpen={openForm}
@@ -274,6 +318,7 @@ export default function PublicationPage() {
         onSuccess={loadPublications}
       />
 
+      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -288,6 +333,7 @@ export default function PublicationPage() {
         message={`Are you sure you want to delete "${selected?.book_title}"?`}
       />
 
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

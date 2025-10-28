@@ -19,7 +19,7 @@ interface DataTableProps {
   setSearch: (search: string) => void;
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
-  onRowClick?: (row: any) => void; // ✅ new
+  onRowClick?: (row: any) => void;
 }
 
 export default function DataTable({
@@ -36,8 +36,8 @@ export default function DataTable({
 }: DataTableProps) {
   return (
     <div className="bg-white shadow rounded-lg overflow-x-auto">
-      {/* Search bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3">
+      {/* ✅ Top Search Field */}
+      <div className="flex items-center justify-between p-4 gap-3">
         <input
           type="text"
           placeholder="Search..."
@@ -47,7 +47,7 @@ export default function DataTable({
         />
       </div>
 
-      {/* Table */}
+      {/* ✅ Table */}
       <table className="min-w-full divide-y divide-gray-200 text-sm">
         <thead className="bg-cyan-50">
           <tr>
@@ -66,6 +66,7 @@ export default function DataTable({
             )}
           </tr>
         </thead>
+
         <tbody className="divide-y divide-gray-100">
           {data.length === 0 ? (
             <tr>
@@ -87,11 +88,10 @@ export default function DataTable({
               >
                 {columns.map((col) => (
                   <td key={col.key} className="px-4 py-2 text-gray-700">
-                    {col.render
-                      ? col.render(row, idx)
-                      : row[col.key] ?? "—"}
+                    {col.render ? col.render(row, idx) : row[col.key] ?? "—"}
                   </td>
                 ))}
+
                 {(onEdit || onDelete) && (
                   <td
                     className="px-4 py-2 text-right space-x-5"
@@ -100,7 +100,7 @@ export default function DataTable({
                     {onEdit && (
                       <button
                         onClick={() => onEdit(row)}
-                        className="text-cyan-600 cursor-pointer hover:text-cyan-800"
+                        className="text-cyan-600 hover:text-cyan-800"
                       >
                         <IconEdit />
                       </button>
@@ -108,7 +108,7 @@ export default function DataTable({
                     {onDelete && (
                       <button
                         onClick={() => onDelete(row)}
-                        className="text-red-400 cursor-pointer hover:text-red-600"
+                        className="text-red-400 hover:text-red-600"
                       >
                         <IconTrashX />
                       </button>
@@ -121,7 +121,7 @@ export default function DataTable({
         </tbody>
       </table>
 
-      {/* Pagination */}
+      {/* ✅ Pagination */}
       <div className="flex justify-between items-center px-4 py-3 border-t border-gray-200">
         <button
           disabled={page <= 1}

@@ -5,6 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
+import TableFilter from "@/components/filter_button"; 
 import { useDebounce } from "@/hooks/debounce";
 import {
   getResults,
@@ -29,20 +30,12 @@ export default function ResultsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [courses, setCourses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [filters, setFilters] = useState<Record<string, string>>({});
   const [basedType, setBasedType] = useState<string>("");
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const loadResults = async () => {
-    try {
-      const res = await getResults(page, 10, debouncedSearch);
-      setData(res?.data || []);
-      setTotalPages(res?.totalPages || 1);
-    } catch (err) {
-      console.error("Error loading results:", err);
-    }
-  };
-
+  // 🔹 Load Courses and Categories
   const loadCourses = async () => {
     try {
       const res = await getCourses(1, 100, "");
@@ -63,27 +56,54 @@ export default function ResultsPage() {
       setCategories(arr);
     } catch (err) {
       console.error("Error loading categories:", err);
-      setCategories([]);
+    }
+  };
+
+  // 🔹 Load Results with Filters
+  const loadResults = async () => {
+    try {
+      const { status, based_type, result_type, course_id, category_id } =
+        filters;
+
+      const res = await getResults(
+        page,
+        10,
+        debouncedSearch,
+        status,
+        based_type,
+        result_type,
+        based_type === "1" ? course_id : undefined,
+        based_type === "2" ? category_id : undefined
+      );
+
+      setData(res?.data || []);
+      setTotalPages(res?.totalPages || 1);
+    } catch (err) {
+      console.error("Error loading results:", err);
     }
   };
 
   useEffect(() => {
-    loadResults();
     loadCourses();
     loadCategories();
-  }, [page, debouncedSearch]);
+  }, []);
 
-  const courseOptions = courses.map((c: any) => ({
+  useEffect(() => {
+    loadResults();
+  }, [page, debouncedSearch, filters]);
+
+  // 🔹 Dropdown Options
+  const courseOptions = courses.map((c) => ({
     label: c.course_name,
     value: String(c.course_id),
   }));
 
-  const categoryOptions = categories.map((c: any) => ({
+  const categoryOptions = categories.map((c) => ({
     label: c.category_name,
     value: String(c.category_id),
   }));
 
-  // ✅ View modal formatting (same design logic as services/success stories)
+  // 🔹 View Modal Data
   const handleRowClick = async (row: any) => {
     try {
       const res = await getResultById(row.result_id);
@@ -152,8 +172,14 @@ export default function ResultsPage() {
     }
   };
 
+  // 🔹 Fields for Modal
   const fields = [
-    { name: "result_title", label: "Result Title", type: "text", required: true },
+    {
+      name: "result_title",
+      label: "Result Title",
+      type: "text",
+      required: true,
+    },
     {
       name: "result_description",
       label: "Description",
@@ -198,7 +224,12 @@ export default function ResultsPage() {
       required: false,
       disabled: basedType !== "2",
     },
-    { name: "result_file", label: "Result File", type: "file", required: false },
+    {
+      name: "result_file",
+      label: "Result File",
+      type: "file",
+      required: false,
+    },
     {
       name: "status",
       label: "Status",
@@ -214,21 +245,76 @@ export default function ResultsPage() {
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Results</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setBasedType("");
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Result <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Dynamic Filter */}
+          <TableFilter
+            fields={[
+              {
+                key: "based_type",
+                label: "Based Type",
+                type: "select",
+                options: [
+                  { label: "Course", value: "1" },
+                  { label: "Category", value: "2" },
+                ],
+              },
+              {
+                key: "course_id",
+                label: "Course",
+                type: "select",
+                options: courseOptions,
+                showIf: { field: "based_type", value: "1" }, // ✅ Only show if based_type = 1
+              },
+              {
+                key: "category_id",
+                label: "Category",
+                type: "select",
+                options: categoryOptions,
+                showIf: { field: "based_type", value: "2" }, // ✅ Only show if based_type = 2
+              },
+              {
+                key: "result_type",
+                label: "Result Type",
+                type: "select",
+                options: [
+                  { label: "Notification", value: "1" },
+                  { label: "Result", value: "2" },
+                ],
+              },
+              {
+                key: "status",
+                label: "Status",
+                type: "select",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setBasedType("");
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Create Result <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* Data Table */}
       <DataTable
         columns={[
           {
@@ -258,8 +344,7 @@ export default function ResultsPage() {
           {
             key: "result_type",
             label: "Result Type",
-            render: (r) =>
-              r.result_type === 1 ? "Notification" : "Result",
+            render: (r) => (r.result_type === 1 ? "Notification" : "Result"),
           },
           {
             key: "result_file",
