@@ -14,6 +14,7 @@ import {
   deletePublication,
   getPublicationCategories,
 } from "@/lib/api/publication";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function PublicationPage() {
   const [data, setData] = useState<any[]>([]);
@@ -21,7 +22,7 @@ export default function PublicationPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<any>(null);
+  const [viewData, setViewData] = useState<Record<string, any> | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -32,8 +33,8 @@ export default function PublicationPage() {
   const loadPublications = async () => {
     try {
       const res = await getPublications(page, 10, debouncedSearch);
-      setData(res.data || []);
-      setTotalPages(res.totalPages || 1);
+      setData(res?.data || []);
+      setTotalPages(res?.totalPages || 1);
     } catch (err) {
       console.error("Error loading publications:", err);
     }
@@ -42,7 +43,7 @@ export default function PublicationPage() {
   const loadCategories = async () => {
     try {
       const res = await getPublicationCategories();
-      setCategories(res || []);
+      setCategories(res?.data || res || []);
     } catch (err) {
       console.error("Error loading categories:", err);
     }
@@ -55,20 +56,75 @@ export default function PublicationPage() {
     loadPublications();
   }, [page, debouncedSearch]);
 
-  // 🔹 Row click handler
+  // 🔹 Handle row click - open view modal
   const handleView = async (row: any) => {
     try {
       const res = await getPublicationById(row.book_id);
-      if (res?.data) {
-        setViewData(res.data);
-        setOpenView(true);
-      }
+      const p = res?.data || res;
+
+      const formatted: Record<string, any> = {
+        "Book Title": p.book_title,
+        "Description": (
+          <p className="text-gray-700 whitespace-pre-line">
+            {p.book_description || "—"}
+          </p>
+        ),
+        "Book Price": p.book_price ? `₹${p.book_price}` : "—",
+        "Author": p.book_author || "—",
+        "Language": p.book_language || "—",
+        "Category ID": p.category_id || "—",
+        "Book Image": p.book_image ? (
+          <div className="flex justify-end">
+          <img
+            src={p.book_image}
+            alt="Book"
+            className="w-16 h-16 object-cover rounded-md"
+          />
+          </div>
+        ) : (
+          "—"
+        ),
+        "Book File": p.book_file ? (
+          <a
+            href={p.book_file}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-700 underline"
+          >
+           {p.book_file}
+          </a>
+        ) : (
+          "—"
+        ),
+        "Status":
+          p.status === 1 || p.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "Created At": p.created_at
+          ? new Date(p.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": p.updated_at
+          ? new Date(p.updated_at).toLocaleString("en-IN")
+          : "—",
+        // "Created By": p.created_by || "—",
+        // "Updated By": p.updated_by || "—",
+        // "Book ID": p.book_id || "—",
+      };
+
+      setViewData(formatted);
+      setOpenView(true);
     } catch (err) {
       console.error("Error fetching publication details:", err);
     }
   };
 
-  const categoryOptions = categories.map((c) => ({
+  const categoryOptions = categories.map((c: any) => ({
     label: c.category_name,
     value: String(c.category_id),
   }));
@@ -115,12 +171,13 @@ export default function PublicationPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Publication
+          Create Publication <IconPlus size={20} />
         </button>
       </div>
 
+      {/* Data Table */}
       <DataTable
         columns={[
           {
@@ -128,7 +185,6 @@ export default function PublicationPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "book_id", label: "ID" },
           { key: "book_title", label: "Title" },
           { key: "book_author", label: "Author" },
           { key: "book_language", label: "Language" },
@@ -172,14 +228,14 @@ export default function PublicationPage() {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status ? (
-                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+              r.status === 1 || r.status === "1" ? (
+                <span className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
-                </div>
+                </span>
               ) : (
-                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <span className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Inactive
-                </div>
+                </span>
               ),
           },
         ]}
@@ -204,6 +260,7 @@ export default function PublicationPage() {
         onRowClick={handleView}
       />
 
+      {/* Modals */}
       <DynamicFormModal
         title={selected ? "Edit Publication" : "Create Publication"}
         isOpen={openForm}
@@ -237,7 +294,7 @@ export default function PublicationPage() {
           setOpenView(false);
           setViewData(null);
         }}
-        title="View Publication"
+        title="View Publication Details"
         data={viewData}
       />
     </div>

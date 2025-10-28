@@ -6,6 +6,10 @@ export const getUsers = async (page = 1, search = "", limit = 10) => {
   return apiRequest(`/api/users?${params.toString()}`, "GET");
 };
 
+export const getUserById = async (id: number | string) => {
+  return apiRequest(`/api/users/${id}`, "GET");
+};
+
 export const createUser = async (payload: any) => {
   return apiRequest("/api/users", "POST", payload);
 };

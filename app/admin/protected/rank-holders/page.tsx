@@ -15,6 +15,7 @@ import {
 } from "@/lib/api/rankHolders";
 import { getCourses } from "@/lib/api/course";
 import { getCourseCategories } from "@/lib/api/courseCategory";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function RankHoldersPage() {
   const [data, setData] = useState<any[]>([]);
@@ -26,13 +27,13 @@ export default function RankHoldersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
   const [courses, setCourses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [basedType, setBasedType] = useState<string>("");
 
   const debouncedSearch = useDebounce(search, 500);
 
+  // --- Loaders ---
   const loadRankHolders = async () => {
     try {
       const res = await getRankHolders(page, 10, debouncedSearch);
@@ -73,16 +74,55 @@ export default function RankHoldersPage() {
     loadCategories();
   }, [page, debouncedSearch]);
 
+  // --- Row click handler ---
   const handleRowClick = async (row: any) => {
     try {
       const res = await getRankHolderById(row.rank_holder_id);
-      setViewData(res?.data || res);
+      const d = res?.data || res;
+
+      const formattedData = {
+        "Student Name": d.student_name || "—",
+        "Student Photo": d.student_photo ? (
+          <div className="flex justify-end">
+            <img
+              src={d.student_photo}
+              alt="Student"
+              className="w-14 h-14 object-cover rounded"
+            />
+          </div>
+        ) : (
+          "—"
+        ),
+        "Student Rank": d.student_rank || "—",
+        "Based Type":
+          d.based_type === 1
+            ? "Course"
+            : d.based_type === 2
+            ? "Course Category"
+            : "—",
+        "Exam Name": d.exam_name || "—",
+        Year: d.year || "—",
+        "Joining Date": d.joining_date
+          ? new Date(d.joining_date).toLocaleDateString()
+          : "—",
+        "Office Name": d.name_of_office || "—",
+        Place: d.place || "—",
+        "Phone No": d.phone_no || "—",
+        "Approval Status":
+          d.approval_status === 1 || d.approval_status === "1"
+            ? "Approved"
+            : "Pending",
+        Status: d.status === 1 || d.status === "1" ? "Active" : "Inactive",
+      };
+
+      setViewData(formattedData);
       setOpenView(true);
     } catch (err) {
       console.error("Error fetching rank holder details:", err);
     }
   };
 
+  // --- Options ---
   const courseOptions = courses.map((c: any) => ({
     label: c.course_name,
     value: String(c.course_id),
@@ -93,6 +133,7 @@ export default function RankHoldersPage() {
     value: String(c.category_id),
   }));
 
+  // --- Form fields ---
   const fields = [
     {
       name: "student_name",
@@ -188,12 +229,13 @@ export default function RankHoldersPage() {
             setBasedType("");
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bbg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Rank Holder
+          Create Rank Holder <IconPlus size={20} />
         </button>
       </div>
 
+      {/* Table */}
       <DataTable
         columns={[
           {
@@ -286,6 +328,7 @@ export default function RankHoldersPage() {
         onRowClick={handleRowClick}
       />
 
+      {/* Modals */}
       <DynamicFormModal
         title={selected ? "Edit Rank Holder" : "Create Rank Holder"}
         isOpen={openForm}
@@ -316,7 +359,7 @@ export default function RankHoldersPage() {
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}
-        title="View Rank Holder Details"
+        title="Rank Holder Details"
         data={viewData}
       />
     </div>

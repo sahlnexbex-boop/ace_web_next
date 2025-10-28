@@ -13,6 +13,7 @@ import {
   updateBlog,
   deleteBlog,
 } from "@/lib/api/blogs";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function BlogsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -26,7 +27,7 @@ export default function BlogsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const debouncedSearch = useDebounce(search, 500);
 
-  // Load list
+  // Load blogs list
   const loadBlogs = async () => {
     try {
       const res = await getBlogs(page, 10, debouncedSearch);
@@ -41,6 +42,7 @@ export default function BlogsPage() {
     loadBlogs();
   }, [page, debouncedSearch]);
 
+  // Normalize tags before sending
   const normalizeTagsFormData = (fd: FormData) => {
     const tagsValue = fd.get("tags");
     if (!tagsValue) {
@@ -80,32 +82,62 @@ export default function BlogsPage() {
     try {
       const res = await getBlogById(row.blog_id);
       if (res?.data) {
-        const blog = res.data;
+        const b = res.data;
 
-        let parsedTags = "";
+        // Parse tags
+        let parsedTags = "—";
         try {
-          parsedTags = Array.isArray(JSON.parse(blog.tags))
-            ? JSON.parse(blog.tags).join(", ")
-            : blog.tags;
+          const tagsArray = JSON.parse(b.tags);
+          if (Array.isArray(tagsArray) && tagsArray.length > 0) {
+            parsedTags = tagsArray.join(", ");
+          }
         } catch {
-          parsedTags = blog.tags;
+          parsedTags = b.tags || "—";
         }
 
-        const formattedData = {
-          "Blog Title": blog.blog_title,
-          "Blog Author": blog.blog_author,
-          "Blog Content": blog.blog_content,
-          "Publishing Date": new Date(blog.publishing_date).toLocaleDateString(
-            "en-IN"
+        // Format for modal (consistent with your service format)
+        const formatted: Record<string, React.ReactNode> = {
+          "Blog Title": b.blog_title || "—",
+          "Blog Author": b.blog_author || "—",
+          "Blog Content": (
+            <p className="text-gray-700 whitespace-pre-line">
+              {b.blog_content || "—"}
+            </p>
           ),
-          Tags: parsedTags || "—",
-          Status: blog.status ? "Active" : "Inactive",
-          "Blog Image": blog.blog_image ? blog.blog_image :  "—",
-          "Created At": new Date(blog.created_at).toLocaleString("en-IN"),
-          "Updated At": new Date(blog.updated_at).toLocaleString("en-IN"),
+          "Publishing Date": b.publishing_date
+            ? new Date(b.publishing_date).toLocaleDateString("en-IN")
+            : "—",
+          Tags: parsedTags,
+          Status:
+            b.status === 1 || b.status === "1" ? (
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                Active
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+                Inactive
+              </span>
+            ),
+          "Blog Image": b.blog_image ? (
+            <div className="flex justify-end">
+              <img
+                src={b.blog_image}
+                alt="Blog Image"
+                className="w-14 h-14 object-cover rounded"
+              />
+            </div>
+          ) : (
+            "—"
+          ),
+          "Created At": b.created_at
+            ? new Date(b.created_at).toLocaleString("en-IN")
+            : "—",
+          "Updated At": b.updated_at
+            ? new Date(b.updated_at).toLocaleString("en-IN")
+            : "—",
         };
 
-        setViewData(formattedData);
+        setViewData(formatted);
         setOpenView(true);
       }
     } catch (err) {
@@ -157,9 +189,9 @@ export default function BlogsPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Blog
+          Create Blog <IconPlus size={20} />
         </button>
       </div>
 
@@ -170,7 +202,7 @@ export default function BlogsPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "blog_id", label: "ID" },
+          // { key: "blog_id", label: "ID" },
           {
             key: "blog_image",
             label: "Image",
@@ -214,7 +246,7 @@ export default function BlogsPage() {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status ? (
+              r.status == 1 || r.status == "1" ? (
                 <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
                 </div>
@@ -261,6 +293,7 @@ export default function BlogsPage() {
         onRowClick={handleView}
       />
 
+      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Blog" : "Create Blog"}
         isOpen={openForm}
@@ -271,6 +304,7 @@ export default function BlogsPage() {
         onSuccess={loadBlogs}
       />
 
+      {/* Delete Confirmation */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -285,6 +319,7 @@ export default function BlogsPage() {
         message={`Are you sure you want to delete "${selected?.blog_title}"?`}
       />
 
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

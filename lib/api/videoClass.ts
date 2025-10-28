@@ -19,6 +19,9 @@ export const getVideoClasses = async (
   return apiRequest(`/api/video-class?${params.toString()}`, "GET");
 };
 
+export const getVideoClassById = (id: number) =>
+  apiRequest(`/api/video-class/${id}`, "GET");
+
 export const createVideoClass = (data: FormData) =>
   apiRequest("/api/video-class", "POST", data, true);
 

@@ -15,6 +15,7 @@ import {
   deleteSuccessStory,
   getSuccessCategoryOptions,
 } from "@/lib/api/successStories";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function SuccessStoriesPage() {
   const [data, setData] = useState<any[]>([]);
@@ -69,7 +70,61 @@ export default function SuccessStoriesPage() {
   const handleRowClick = async (row: any) => {
     try {
       const res = await getSuccessStoryById(row.stories_id);
-      setViewData(res?.data || res);
+      const s = res?.data || res;
+
+      // ✅ Format all fields consistently
+      const formatted: Record<string, React.ReactNode> = {
+        "Story Title": s.stories_title,
+        "Candidate Name": s.name_of_candidate,
+        Year: s.year || "—",
+        Description: (
+          <p className="text-gray-700 whitespace-pre-line">
+            {s.description || "—"}
+          </p>
+        ),
+        Category: s.category?.category_name || "—",
+        "YouTube Video": s.youtube_video_link ? (
+          <a
+            href={s.youtube_video_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            {s.youtube_video_link}
+          </a>
+        ) : (
+          "—"
+        ),
+        Status:
+          s.status === 1 || s.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "Thumbnail Image": s.thumbnail_image ? (
+          <div className="flex justify-end">
+            <img
+              src={s.thumbnail_image}
+              alt="Thumbnail"
+              className="w-16 h-16 object-cover rounded"
+            />
+          </div>
+        ) : (
+          "—"
+        ),
+        "Created At": s.created_at
+          ? new Date(s.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": s.updated_at
+          ? new Date(s.updated_at).toLocaleString("en-IN")
+          : "—",
+      };
+
+      setViewData(formatted);
       setOpenView(true);
     } catch (err) {
       console.error("Error fetching story details:", err);
@@ -139,12 +194,13 @@ export default function SuccessStoriesPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Story
+          Create Story <IconPlus size={20} />
         </button>
       </div>
 
+      {/* Filters */}
       <div className="flex gap-2 mb-4">
         <input
           type="text"
@@ -155,6 +211,7 @@ export default function SuccessStoriesPage() {
         />
       </div>
 
+      {/* Table */}
       <DataTable
         columns={[
           {
@@ -240,6 +297,7 @@ export default function SuccessStoriesPage() {
         onRowClick={handleRowClick}
       />
 
+      {/* Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Success Story" : "Create Success Story"}
         isOpen={openForm}
@@ -253,6 +311,7 @@ export default function SuccessStoriesPage() {
         onSuccess={loadSuccessStories}
       />
 
+      {/* Delete Confirmation */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -267,6 +326,7 @@ export default function SuccessStoriesPage() {
         message={`Are you sure you want to delete "${selected?.stories_title}"?`}
       />
 
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

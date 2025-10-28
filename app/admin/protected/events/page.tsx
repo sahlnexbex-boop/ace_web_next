@@ -13,6 +13,7 @@ import {
   updateEvent,
   deleteEvent,
 } from "@/lib/api/events";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function EventsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -20,7 +21,7 @@ export default function EventsPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<any>(null);
+  const [viewData, setViewData] = useState<Record<string, any> | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -44,7 +45,54 @@ export default function EventsPage() {
   const handleRowClick = async (row: any) => {
     try {
       const res = await getEventById(row.event_id);
-      setViewData(res?.data || res);
+      const e = res?.data || res;
+
+      // 🧩 Format view data (consistent across all pages)
+      const formatted: Record<string, React.ReactNode> = {
+        "Event Title": e.event_title || "—",
+        Description: (
+          <p className="text-gray-700 whitespace-pre-line">
+            {e.event_description || "—"}
+          </p>
+        ),
+        "Event Type": e.event_type || "—",
+        "Event Location": e.event_location || "—",
+        "Event Date & Time": e.date_time
+          ? new Date(e.date_time).toLocaleString("en-IN", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : "—",
+        Status:
+          e.status === 1 || e.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "Event Image": e.event_image ? (
+          <div className="flex justify-end">
+            <img
+              src={e.event_image}
+              alt="Event"
+              className="w-14 h-14 object-cover rounded"
+            />
+          </div>
+        ) : (
+          "—"
+        ),
+        "Created At": e.created_at
+          ? new Date(e.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": e.updated_at
+          ? new Date(e.updated_at).toLocaleString("en-IN")
+          : "—",
+      };
+
+      setViewData(formatted);
       setOpenView(true);
     } catch (err) {
       console.error("Failed to load event details:", err);
@@ -105,15 +153,16 @@ export default function EventsPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Event
+          Create Event <IconPlus size={20} />
         </button>
       </div>
 
+      {/* Table */}
       <DataTable
         columns={[
-           {
+          {
             key: "sno",
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
@@ -185,9 +234,10 @@ export default function EventsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick} 
+        onRowClick={handleRowClick}
       />
 
+      {/* Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Event" : "Create Event"}
         isOpen={openForm}
@@ -201,6 +251,7 @@ export default function EventsPage() {
         onSuccess={loadEvents}
       />
 
+      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -215,6 +266,7 @@ export default function EventsPage() {
         message={`Are you sure you want to delete "${selected?.event_title}"?`}
       />
 
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

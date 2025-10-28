@@ -13,6 +13,7 @@ import {
   updateSocialService,
   deleteSocialService,
 } from "@/lib/api/socialService";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function SocialServicesPage() {
   const [data, setData] = useState<any[]>([]);
@@ -20,11 +21,13 @@ export default function SocialServicesPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<any>(null);
+  const [viewData, setViewData] = useState<Record<
+    string,
+    React.ReactNode
+  > | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
   const debouncedSearch = useDebounce(search, 500);
 
   const loadSocialServices = async () => {
@@ -41,11 +44,76 @@ export default function SocialServicesPage() {
     loadSocialServices();
   }, [page, debouncedSearch]);
 
+  // 🔹 Handle View Modal (row click)
   const handleView = async (row: any) => {
     try {
       const res = await getSocialServiceById(row.service_id);
       if (res?.data) {
-        setViewData(res.data);
+        const s = res.data;
+
+        // Parse other images safely
+        let otherImgs: string[] = [];
+        try {
+          otherImgs = JSON.parse(s.other_images || "[]");
+        } catch {
+          otherImgs = [];
+        }
+
+        const formatted: Record<string, React.ReactNode> = {
+          "Service Title": s.service_title,
+          Description: (
+            <p className="text-gray-700 whitespace-pre-line">
+              {s.service_description}
+            </p>
+          ),
+          Date: s.service_date
+            ? new Date(s.service_date).toLocaleDateString("en-IN")
+            : "—",
+          Location: s.service_location || "—",
+          Status:
+            s.status === 1 || s.status === "1" ? (
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                Active
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+                Inactive
+              </span>
+            ),
+          "Main Image": s.service_image ? (
+            <div className="flex justify-end">
+            <img
+              src={s.service_image}
+              alt="Main Service"
+              className="w-14 h-14 object-cover rounded"
+            />
+            </div>
+          ) : (
+            "—"
+          ),
+          "Other Images": otherImgs.length ? (
+            <div className="grid grid-cols-3 gap-1">
+              {otherImgs.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt={`Other ${i + 1}`}
+                  className="w-14 h-14 object-cover rounded"
+                />
+              ))}
+            </div>
+          ) : (
+            "—"
+          ),
+          "Created At": s.created_at
+            ? new Date(s.created_at).toLocaleString("en-IN")
+            : "—",
+          "Updated At": s.updated_at
+            ? new Date(s.updated_at).toLocaleString("en-IN")
+            : "—",
+        };
+
+        setViewData(formatted);
         setOpenView(true);
       }
     } catch (error) {
@@ -53,11 +121,32 @@ export default function SocialServicesPage() {
     }
   };
 
+  // 🔹 Fields for form modal
   const fields = [
-    { name: "service_title", label: "Service Title", type: "text", required: true },
-    { name: "service_description", label: "Description", type: "textarea", required: true },
-    { name: "service_date", label: "Service Date", type: "date", required: true },
-    { name: "service_location", label: "Location", type: "text", required: true },
+    {
+      name: "service_title",
+      label: "Service Title",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "service_description",
+      label: "Description",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "service_date",
+      label: "Service Date",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "service_location",
+      label: "Location",
+      type: "text",
+      required: true,
+    },
     {
       name: "status",
       label: "Status",
@@ -68,7 +157,12 @@ export default function SocialServicesPage() {
       ],
       required: true,
     },
-    { name: "service_image", label: "Main Image", type: "file", required: false },
+    {
+      name: "service_image",
+      label: "Main Image",
+      type: "file",
+      required: false,
+    },
     {
       name: "other_images",
       label: "Other Images",
@@ -82,18 +176,21 @@ export default function SocialServicesPage() {
     <div className="p-4 sm:p-6">
       {/* Header */}
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-cyan-700">Social Services</h1>
+        <h1 className="text-2xl font-semibold text-cyan-700">
+          Social Services
+        </h1>
         <button
           onClick={() => {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Service
+          Create Service <IconPlus size={20} />
         </button>
       </div>
 
+      {/* Table */}
       <DataTable
         columns={[
           {
@@ -131,17 +228,19 @@ export default function SocialServicesPage() {
             render: (r) => {
               try {
                 const imgs = JSON.parse(r.other_images || "[]");
-                return (
+                return imgs.length ? (
                   <div className="flex gap-1">
                     {imgs.slice(0, 3).map((img: string, i: number) => (
                       <img
                         key={i}
                         src={img}
-                        className="w-8 h-8 rounded object-cover"
+                        className="w-8 h-8 rounded object-cover border"
                         alt="Other"
                       />
                     ))}
                   </div>
+                ) : (
+                  "—"
                 );
               } catch {
                 return "—";
@@ -186,6 +285,7 @@ export default function SocialServicesPage() {
         onRowClick={handleView}
       />
 
+      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Social Service" : "Create Social Service"}
         isOpen={openForm}
@@ -199,6 +299,7 @@ export default function SocialServicesPage() {
         onSuccess={loadSocialServices}
       />
 
+      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -213,6 +314,7 @@ export default function SocialServicesPage() {
         message={`Are you sure you want to delete "${selected?.service_title}"?`}
       />
 
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

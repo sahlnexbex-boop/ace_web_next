@@ -1,8 +1,8 @@
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (user_name: string, password: string) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ user_name, password }),
   });
 
   const data = await res.json();
@@ -45,3 +45,4 @@ export const resetPassword = async (data: { email: string; newPassword: string }
   if (!res.ok) throw new Error(result.message || "Failed to reset password");
   return result;
 };
+

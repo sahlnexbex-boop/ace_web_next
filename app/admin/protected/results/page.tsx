@@ -15,6 +15,7 @@ import {
 } from "@/lib/api/result";
 import { getCourses } from "@/lib/api/course";
 import { getCourseCategories } from "@/lib/api/courseCategory";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function ResultsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -26,7 +27,6 @@ export default function ResultsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
   const [courses, setCourses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [basedType, setBasedType] = useState<string>("");
@@ -73,16 +73,6 @@ export default function ResultsPage() {
     loadCategories();
   }, [page, debouncedSearch]);
 
-  const handleRowClick = async (row: any) => {
-    try {
-      const res = await getResultById(row.result_id);
-      setViewData(res?.data || res);
-      setOpenView(true);
-    } catch (err) {
-      console.error("Error fetching result details:", err);
-    }
-  };
-
   const courseOptions = courses.map((c: any) => ({
     label: c.course_name,
     value: String(c.course_id),
@@ -92,6 +82,75 @@ export default function ResultsPage() {
     label: c.category_name,
     value: String(c.category_id),
   }));
+
+  // ✅ View modal formatting (same design logic as services/success stories)
+  const handleRowClick = async (row: any) => {
+    try {
+      const res = await getResultById(row.result_id);
+      const r = res?.data || res;
+
+      const formatted: Record<string, React.ReactNode> = {
+        "Result Title": r.result_title,
+        Description: (
+          <p className="text-gray-700 whitespace-pre-line">
+            {r.result_description || "—"}
+          </p>
+        ),
+        "Result Date": r.result_date
+          ? new Date(r.result_date).toLocaleDateString("en-IN")
+          : "—",
+        "Result Type":
+          r.result_type === 1 || r.result_type === "1"
+            ? "Notification"
+            : "Result",
+        "Based On":
+          r.based_type === 1 || r.based_type === "1"
+            ? "Course"
+            : r.based_type === 2 || r.based_type === "2"
+            ? "Category"
+            : "—",
+        "Linked Course":
+          r.course?.course_name ||
+          (r.based_type === 1 ? "No linked course" : "—"),
+        "Linked Course Category":
+          r.category?.category_name ||
+          (r.based_type === 2 ? "No linked category" : "—"),
+        "Result File": r.result_file ? (
+          <a
+            href={r.result_file}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            {r.result_file}
+          </a>
+        ) : (
+          "—"
+        ),
+        Status:
+          r.status === 1 || r.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "Created At": r.created_at
+          ? new Date(r.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": r.updated_at
+          ? new Date(r.updated_at).toLocaleString("en-IN")
+          : "—",
+      };
+
+      setViewData(formatted);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Error fetching result details:", err);
+    }
+  };
 
   const fields = [
     { name: "result_title", label: "Result Title", type: "text", required: true },
@@ -163,12 +222,13 @@ export default function ResultsPage() {
             setBasedType("");
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Result
+          Create Result <IconPlus size={20} />
         </button>
       </div>
 
+      {/* Table */}
       <DataTable
         columns={[
           {
@@ -261,6 +321,7 @@ export default function ResultsPage() {
         onRowClick={handleRowClick}
       />
 
+      {/* Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Result" : "Create Result"}
         isOpen={openForm}
@@ -274,6 +335,7 @@ export default function ResultsPage() {
         onSuccess={loadResults}
       />
 
+      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -288,6 +350,7 @@ export default function ResultsPage() {
         }}
       />
 
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

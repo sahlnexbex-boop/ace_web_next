@@ -13,6 +13,7 @@ import {
   deleteEnquiry,
   getEnquiryById,
 } from "@/lib/api/enquiry";
+import { IconPlus } from "@tabler/icons-react";
 
 // Label maps
 const ENQUIRY_TYPE: Record<number, string> = {
@@ -71,7 +72,46 @@ export default function EnquiryPage() {
   const handleRowClick = async (row: any) => {
     try {
       const res = await getEnquiryById(row.enquiry_id);
-      setViewData(res?.data || res);
+      if (!res?.data) return;
+      const d = res.data;
+
+      // ✅ Same format logic as your “Service” example
+      const formatted: Record<string, React.ReactNode> = {
+        "Customer Name": d.cstmr_name || "—",
+        "Email": d.cstmr_email || "—",
+        "Phone": d.cstmr_phone || "—",
+        "Message": (
+          <p className="text-gray-700 whitespace-pre-line">
+            {d.cstmr_message || "—"}
+          </p>
+        ),
+        "Enquiry Type": ENQUIRY_TYPE[d.enquiry_type] || "—",
+        "Enquiry Status": ENQUIRY_STATUS[d.enquiry_status] || "—",
+        "Submitted On": d.submit_date
+          ? new Date(d.submit_date).toLocaleString("en-IN", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : "—",
+        Status:
+          d.status === 1 || d.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "Created At": d.created_at
+          ? new Date(d.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": d.updated_at
+          ? new Date(d.updated_at).toLocaleString("en-IN")
+          : "—",
+      };
+
+      setViewData(formatted);
       setOpenView(true);
     } catch (err) {
       console.error("Failed to load enquiry details", err);
@@ -130,9 +170,9 @@ export default function EnquiryPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Enquiry
+          Create Enquiry <IconPlus size={20} />
         </button>
       </div>
 
@@ -172,11 +212,11 @@ export default function EnquiryPage() {
             label: "Status",
             render: (r) =>
               r.status === 1 || r.status === "1" ? (
-                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <div className="bg-green-100 text-green-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
                   Active
                 </div>
               ) : (
-                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <div className="bg-red-100 text-red-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
                   Inactive
                 </div>
               ),

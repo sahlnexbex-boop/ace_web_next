@@ -18,6 +18,9 @@ export const getCurrentAffairs = async (
   return apiRequest(`/api/affairs?${params.toString()}`, "GET");
 };
 
+export const getCurrentAffairById = (id: number) =>
+  apiRequest(`/api/affairs/${id}`, "GET");
+
 export const createCurrentAffair = (data: FormData) =>
   apiRequest("/api/affairs", "POST", data, true);
 

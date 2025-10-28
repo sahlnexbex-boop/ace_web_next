@@ -7,6 +7,7 @@ import { sendOtp, verifyOtp, resetPassword, loginUser } from "@/lib/api/auth";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
+  const [user_name, setUser_name] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
@@ -21,7 +22,7 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await loginUser(email, password);
+      const res = await loginUser(user_name, password);
       setToken(res.accessToken);
       router.push("/admin/protected/dashboard");
     } catch (err: any) {
@@ -138,11 +139,11 @@ export default function AdminLoginPage() {
         {stage === "login" && (
           <form onSubmit={handleLoginSubmit}>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={user_name}
+              onChange={(e) => setUser_name(e.target.value)}
               className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-4 text-white placeholder-gray-300"
-              placeholder="Your Email"
+              placeholder="Your Username"
               required
             />
             <input

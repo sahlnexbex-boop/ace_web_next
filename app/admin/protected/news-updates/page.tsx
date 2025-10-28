@@ -13,6 +13,7 @@ import {
   updateNews,
   deleteNews,
 } from "@/lib/api/news";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function NewsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -20,7 +21,7 @@ export default function NewsPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<any>(null);
+  const [viewData, setViewData] = useState<Record<string, any> | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -41,11 +42,54 @@ export default function NewsPage() {
     loadNews();
   }, [page, debouncedSearch]);
 
-
   const handleRowClick = async (row: any) => {
     try {
       const res = await getNewsById(row.news_id);
-      setViewData(res?.data || res);
+      const n = res?.data || res;
+
+      const formatted: Record<string, React.ReactNode> = {
+        "News Title": n.news_title || "—",
+        Description: (
+          <p className="text-gray-700 whitespace-pre-line">
+            {n.news_description || "—"}
+          </p>
+        ),
+        "Date & Time": n.date_time
+          ? new Date(n.date_time).toLocaleString("en-IN", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : "—",
+        Status:
+          n.status === 1 || n.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "News Image": n.news_image ? (
+          <div className="flex justify-end">
+            <img
+              src={n.news_image}
+              alt="News"
+              className="w-14 h-14 object-cover rounded"
+            />
+          </div>
+        ) : (
+          "—"
+        ),
+        "Created At": n.created_at
+          ? new Date(n.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": n.updated_at
+          ? new Date(n.updated_at).toLocaleString("en-IN")
+          : "—",
+      };
+
+      setViewData(formatted);
       setOpenView(true);
     } catch (err) {
       console.error("Failed to load news details:", err);
@@ -94,9 +138,9 @@ export default function NewsPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create News
+          Create News <IconPlus size={20} />
         </button>
       </div>
 
@@ -180,9 +224,10 @@ export default function NewsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick} 
+        onRowClick={handleRowClick}
       />
 
+      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit News" : "Create News"}
         isOpen={openForm}
@@ -196,6 +241,7 @@ export default function NewsPage() {
         onSuccess={loadNews}
       />
 
+      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -210,6 +256,7 @@ export default function NewsPage() {
         message={`Are you sure you want to delete "${selected?.news_title}"?`}
       />
 
+      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

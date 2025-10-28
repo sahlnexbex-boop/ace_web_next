@@ -15,6 +15,9 @@ export const getCourseCategories = async (
   return apiRequest(`/api/course-category?${params.toString()}`, "GET");
 };
 
+export const getCourseCategoryById = async (id: number) =>
+  apiRequest(`/api/course-category/${id}`, "GET");
+
 export const createCourseCategory = (data: FormData) =>
   apiRequest("/api/course-category", "POST", data, true);
 export const updateCourseCategory = (id: number, data: FormData) =>

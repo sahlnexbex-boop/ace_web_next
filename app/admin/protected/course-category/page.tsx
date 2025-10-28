@@ -1,25 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
-import DataTable from "@/components/dynamicTable";
+import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 
 import {
   getCourseCategories,
+  getCourseCategoryById,
   createCourseCategory,
   updateCourseCategory,
   deleteCourseCategory,
 } from "@/lib/api/courseCategory";
-
 import { getCourseTypes } from "@/lib/api/courseType";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function CourseCategoryPage() {
   const [data, setData] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
@@ -46,44 +50,159 @@ export default function CourseCategoryPage() {
     }
   };
 
-  useEffect(() => { loadCourseTypes(); }, []);
-  useEffect(() => { loadCategories(); }, [page, debouncedSearch]);
+  useEffect(() => {
+    loadCourseTypes();
+  }, []);
 
-  const typeOptions = courseTypes.map(t => ({ label: t.type_name, value: String(t.type_id) }));
+  useEffect(() => {
+    loadCategories();
+  }, [page, debouncedSearch]);
+
+  const typeOptions = courseTypes.map((t) => ({
+    label: t.type_name,
+    value: String(t.type_id),
+  }));
+
+  // ✅ Handle View (Row Click)
+  const handleView = async (row: any) => {
+    try {
+      const res = await getCourseCategoryById(row.category_id);
+      if (res?.data) {
+        const c = res.data;
+
+        const formatted: Record<string, React.ReactNode> = {
+          "Category Name": c.category_name || "—",
+          Description: (
+            <p className="text-gray-700 whitespace-pre-line">
+              {c.category_description || "—"}
+            </p>
+          ),
+          "Course Type": c.courseType?.type_name || "—",
+          "Category Image": c.category_image ? (
+            <div className="flex justify-end">
+              <img
+                src={c.category_image}
+                alt="Category"
+                className="w-16 h-16 rounded object-cover"
+              />
+            </div>
+          ) : (
+            "—"
+          ),
+          Status:
+            c.status === 1 || c.status === "1" ? (
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                Active
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+                Inactive
+              </span>
+            ),
+          "Created At": c.created_at
+            ? new Date(c.created_at).toLocaleString("en-IN")
+            : "—",
+          "Updated At": c.updated_at
+            ? new Date(c.updated_at).toLocaleString("en-IN")
+            : "—",
+        };
+
+        setViewData(formatted);
+        setOpenView(true);
+      }
+    } catch (err) {
+      console.error("Error fetching category details:", err);
+    }
+  };
 
   const fields = [
-    { name: "category_name", label: "Category Name", type: "text", required: true },
-    { name: "category_description", label: "Category Description", type: "textarea", required: true },
-    { name: "course_type_id", label: "Course Type", type: "select", options: typeOptions, required: true },
-    { name: "category_image", label: "Category Image", type: "file", required: false },
+    {
+      name: "category_name",
+      label: "Category Name",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "category_description",
+      label: "Category Description",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "course_type_id",
+      label: "Course Type",
+      type: "select",
+      options: typeOptions,
+      required: true,
+    },
+    {
+      name: "category_image",
+      label: "Category Image",
+      type: "file",
+      required: false,
+    },
   ];
 
   return (
     <div className="p-4 sm:p-6">
+      {/* Header */}
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-cyan-700">Course Categories</h1>
+        <h1 className="text-2xl font-semibold text-cyan-700">
+          Course Categories
+        </h1>
         <button
-          onClick={() => { setSelected(null); setOpenForm(true); }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          onClick={() => {
+            setSelected(null);
+            setOpenForm(true);
+          }}
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Category
+          Create Category <IconPlus size={20} />
         </button>
       </div>
 
+      {/* Data Table */}
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, idx) => idx + 1 + (page - 1) * 10 },
-          { key: "category_id", label: "ID" },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "category_name", label: "Name" },
           { key: "category_description", label: "Description" },
-          { key: "courseType.type_name", label: "Course Type", render: r => r.courseType?.type_name || "—" },
-          { key: "category_image", label: "Image", render: r =>
-            r.category_image ? <img src={r.category_image} className="w-10 h-10 object-cover rounded-full" /> : "—"
+          {
+            key: "courseType.type_name",
+            label: "Course Type",
+            render: (r) => r.courseType?.type_name || "—",
           },
-          // { key: "created_at", label: "Created At", render: r =>
-          //   new Date(r.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" })
-          // },
-          { key: "status", label: "Status", render: (r) => r.status ? (<div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">Active</div>): (<div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">Inactive</div>) },
+          {
+            key: "category_image",
+            label: "Image",
+            render: (r) =>
+              r.category_image ? (
+                <img
+                  src={r.category_image}
+                  className="w-10 h-10 object-cover rounded-full"
+                />
+              ) : (
+                "—"
+              ),
+          },
+          {
+            key: "status",
+            label: "Status",
+            render: (r) =>
+              r.status ? (
+                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+                  Active
+                </div>
+              ) : (
+                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                  Inactive
+                </div>
+              ),
+          },
         ]}
         data={data}
         page={page}
@@ -91,10 +210,21 @@ export default function CourseCategoryPage() {
         search={search}
         setPage={setPage}
         setSearch={setSearch}
-        onEdit={(row) => { setSelected({ ...row, course_type_id: String(row.course_type_id) }); setOpenForm(true); }}
-        onDelete={(row) => { setSelected(row); setOpenDelete(true); }}
+        onEdit={(row) => {
+          setSelected({
+            ...row,
+            course_type_id: String(row.course_type_id),
+          });
+          setOpenForm(true);
+        }}
+        onDelete={(row) => {
+          setSelected(row);
+          setOpenDelete(true);
+        }}
+        onRowClick={handleView} // ✅ View Modal Trigger
       />
 
+      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Category" : "Create Category"}
         isOpen={openForm}
@@ -108,6 +238,7 @@ export default function CourseCategoryPage() {
         onSuccess={loadCategories}
       />
 
+      {/* Delete Confirmation */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -120,6 +251,17 @@ export default function CourseCategoryPage() {
         }}
         title="Delete Category"
         message={`Are you sure you want to delete "${selected?.category_name}"?`}
+      />
+
+      {/* ✅ View Modal */}
+      <DynamicViewModal
+        isOpen={openView}
+        onClose={() => {
+          setOpenView(false);
+          setViewData(null);
+        }}
+        title="View Course Category"
+        data={viewData}
       />
     </div>
   );

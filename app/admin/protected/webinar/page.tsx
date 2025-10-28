@@ -14,6 +14,7 @@ import {
   deleteWebinar,
   getCourseCategoryOptions,
 } from "@/lib/api/webinar";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function WebinarsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -40,7 +41,7 @@ export default function WebinarsPage() {
     }
   };
 
-  // ✅ Load categories
+  // ✅ Load course categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategoryOptions();
@@ -60,18 +61,75 @@ export default function WebinarsPage() {
     loadCategories();
   }, [page, debouncedSearch]);
 
-  // ✅ Handle row click to show Dynamic View Modal
+  // ✅ Handle row click to open View Modal
   const handleRowClick = async (row: any) => {
     try {
       const res = await getWebinarById(row.webinar_id);
-      setViewData(res?.data || res);
+      const w = res?.data || res;
+
+      const formatted: Record<string, React.ReactNode> = {
+        "Webinar Title": w.webinar_title,
+        "Course Category": w.category?.category_name || "—",
+        "Date & Time": w.date_time
+          ? new Date(w.date_time).toLocaleString("en-IN", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : "—",
+        Duration: w.webinar_duration || "—",
+        "Speaker Name": w.speaker_name || "—",
+        "Speaker Position": w.speaker_position || "—",
+        "Webinar Link": (
+          <a
+            href={w.webinar_link}
+            target="_blank"
+            className="text-blue-600 underline"
+          >
+            {w.webinar_link}
+          </a>
+        ),
+        Description: (
+          <p className="text-gray-700 whitespace-pre-line">
+            {w.webinar_description || "—"}
+          </p>
+        ),
+        Status:
+          w.status === 1 || w.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "Webinar Image": w.webinar_image ? (
+          <div className="flex justify-end">
+            <img
+              src={w.webinar_image}
+              alt="Webinar"
+              className="w-20 h-20 object-cover rounded-lg"
+            />
+          </div>
+        ) : (
+          "—"
+        ),
+        "Created At": w.created_at
+          ? new Date(w.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": w.updated_at
+          ? new Date(w.updated_at).toLocaleString("en-IN")
+          : "—",
+      };
+
+      setViewData(formatted);
       setOpenView(true);
     } catch (err) {
       console.error("Failed to load webinar details:", err);
     }
   };
 
-  // ✅ Form fields
+  // ✅ Form Fields
   const fields = [
     { name: "webinar_title", label: "Webinar Title", type: "text", required: true },
     { name: "date_time", label: "Date & Time", type: "datetime-local", required: true },
@@ -110,13 +168,13 @@ export default function WebinarsPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Webinar
+          Create Webinar <IconPlus size={20} />
         </button>
       </div>
 
-      {/* Data Table */}
+      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -189,10 +247,10 @@ export default function WebinarsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick} // 👈 View Modal trigger
+        onRowClick={handleRowClick}
       />
 
-      {/* Create/Edit Modal */}
+      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Webinar" : "Create Webinar"}
         isOpen={openForm}
@@ -206,7 +264,7 @@ export default function WebinarsPage() {
         onSuccess={loadWebinars}
       />
 
-      {/* Delete Modal */}
+      {/* ✅ Delete Confirmation */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -221,7 +279,7 @@ export default function WebinarsPage() {
         message={`Are you sure you want to delete "${selected?.webinar_title}"?`}
       />
 
-      {/* View Modal */}
+      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

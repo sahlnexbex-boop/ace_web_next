@@ -8,11 +8,12 @@ import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getTestimonials,
+  getTestimonialById,
   createTestimonial,
   updateTestimonial,
   deleteTestimonial,
-  getTestimonialById,
 } from "@/lib/api/testimonial";
+import { IconPlus } from "@tabler/icons-react";
 
 export default function TestimonialsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -24,9 +25,9 @@ export default function TestimonialsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
   const debouncedSearch = useDebounce(search, 500);
 
+  // 🔹 Fetch list
   const loadTestimonials = async () => {
     try {
       const res = await getTestimonials(page, 10, debouncedSearch);
@@ -41,19 +42,63 @@ export default function TestimonialsPage() {
     loadTestimonials();
   }, [page, debouncedSearch]);
 
+  // 🔹 Handle view (row click)
   const handleRowClick = async (row: any) => {
     try {
       const res = await getTestimonialById(row.testimonial_id);
-      setViewData(res?.data || res);
-      setOpenView(true);
+      const t = res?.data;
+      if (t) {
+        const formattedData = {
+          "Candidate Name": t.name_of_candidate,
+          "Position": t.position_of_candidate,
+          "Content": <p className="text-gray-700">{t.content}</p>,
+          "Status":
+            t.status === 1 || t.status === "1" ? (
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                Active
+              </span>
+            ) : (
+              <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+                Inactive
+              </span>
+            ),
+          "Candidate Image": t.image_of_candidate ? (
+            <div className="flex justify-end">
+              <img
+                src={t.image_of_candidate}
+                alt={t.name_of_candidate}
+                className="w-16 h-16 rounded-full object-cover border"
+              />
+            </div>
+          ) : (
+            "—"
+          ),
+          "Created At": new Date(t.created_at).toLocaleString("en-IN"),
+          "Updated At": new Date(t.updated_at).toLocaleString("en-IN"),
+        };
+
+        setViewData(formattedData);
+        setOpenView(true);
+      }
     } catch (err) {
-      console.error("Failed to load details", err);
+      console.error("Failed to load testimonial details:", err);
     }
   };
 
+  // 🔹 Form fields
   const fields = [
-    { name: "name_of_candidate", label: "Candidate Name", type: "text", required: true },
-    { name: "position_of_candidate", label: "Position", type: "text", required: true },
+    {
+      name: "name_of_candidate",
+      label: "Candidate Name",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "position_of_candidate",
+      label: "Position",
+      type: "text",
+      required: true,
+    },
     { name: "content", label: "Content", type: "textarea", required: true },
     {
       name: "status",
@@ -65,12 +110,17 @@ export default function TestimonialsPage() {
       ],
       required: true,
     },
-    { name: "image_of_candidate", label: "Candidate Image", type: "file", required: false },
+    {
+      name: "image_of_candidate",
+      label: "Candidate Image",
+      type: "file",
+      required: false,
+    },
   ];
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
+      {/* 🔹 Header */}
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold text-cyan-700">Testimonials</h1>
         <button
@@ -78,13 +128,13 @@ export default function TestimonialsPage() {
             setSelected(null);
             setOpenForm(true);
           }}
-          className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
+          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
         >
-          Create Testimonial
+          Create Testimonial <IconPlus size={20} />
         </button>
       </div>
 
-      {/* Data Table */}
+      {/* 🔹 Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -142,9 +192,10 @@ export default function TestimonialsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick} 
+        onRowClick={handleRowClick}
       />
 
+      {/* 🔹 Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Testimonial" : "Create Testimonial"}
         isOpen={openForm}
@@ -158,6 +209,7 @@ export default function TestimonialsPage() {
         onSuccess={loadTestimonials}
       />
 
+      {/* 🔹 Delete Confirmation */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -172,6 +224,7 @@ export default function TestimonialsPage() {
         message={`Are you sure you want to delete "${selected?.name_of_candidate}"?`}
       />
 
+      {/* 🔹 View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

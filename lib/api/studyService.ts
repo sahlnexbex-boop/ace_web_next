@@ -14,10 +14,14 @@ export const getStudyServices = async (
 
   if (search) params.append("search", search);
   if (status !== undefined) params.append("status", String(status));
-  if (service_type !== undefined) params.append("service_type", String(service_type));
+  if (service_type !== undefined)
+    params.append("service_type", String(service_type));
 
   return apiRequest(`/api/study-service?${params.toString()}`, "GET");
 };
+
+export const getStudyServiceById = async (id: number) =>
+  apiRequest(`/api/study-service/${id}`, "GET");
 
 export const createStudyService = (data: FormData) =>
   apiRequest("/api/study-service", "POST", data, true);
