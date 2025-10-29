@@ -32,7 +32,3 @@ export const updateWebinar = (id: number, data: FormData) =>
 export const deleteWebinar = (id: number) =>
   apiRequest(`/api/webinars/${id}`, "DELETE", undefined, true);
 
-export const getCourseCategoryOptions = async () => {
-  const res = await apiRequest("/api/course-category", "GET");
-  return res.data || [];
-};

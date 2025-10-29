@@ -1,20 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import ProtectedRoute from "@/components/protectedRoute";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  Star,
+  GraduationCap,
   BookOpen,
-  PlayCircle,
+  Video,
+  Newspaper,
+  Award,
+  FolderOpen,
+  MessageSquare,
+  Star,
+  Calendar,
+  Globe,
+  BarChart3,
   FileText,
   HelpCircle,
+  PlayCircle,
+  Trophy,
+  ClipboardList,
   Menu,
-  ChevronLeft,
   ChevronRight,
+  ChevronLeft,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 const menuItems = [
@@ -22,84 +35,88 @@ const menuItems = [
   { name: "Users", icon: Users, path: "/admin/protected/users" },
   {
     name: "Course Management",
-    icon: Star,
+    icon: GraduationCap,
     children: [
-      { name: "Course Tyepes", icon: FileText, path: "/admin/protected/course-types" },
-      { name: "Course Categories", icon: FileText, path: "/admin/protected/course-category" },
-      { name: "courses", icon: HelpCircle, path: "/admin/protected/courses" },
+      { name: "Course Types", icon: ClipboardList, path: "/admin/protected/course-types" },
+      { name: "Course Categories", icon: FolderOpen, path: "/admin/protected/course-category" },
+      { name: "Courses", icon: BookOpen, path: "/admin/protected/courses" },
     ],
   },
   {
-    name: "Learning Managament",
+    name: "Learning Management",
     icon: BookOpen,
     children: [
-      { name: "current Affairs", icon: FileText, path: "/admin/protected/affairs" },
+      { name: "Current Affairs", icon: Newspaper, path: "/admin/protected/affairs" },
       { name: "Video Class", icon: PlayCircle, path: "/admin/protected/video-class" },
       { name: "Study Service", icon: FileText, path: "/admin/protected/study-service" },
     ],
   },
   {
     name: "Insights",
-    icon: Star,
+    icon: BarChart3,
     children: [
-      { name: "Blogs", icon: FileText, path: "/admin/protected/blogs" },
-      { name: "Publications", icon: HelpCircle, path: "/admin/protected/publication" },
-      { name: "Social Services", icon: FileText, path: "/admin/protected/social-service" },
-      { name: "Results", icon: FileText, path: "/admin/protected/results" },
+      { name: "Blogs", icon: Globe, path: "/admin/protected/blogs" },
+      { name: "Publications", icon: BookOpen, path: "/admin/protected/publication" },
+      { name: "Social Services", icon: MessageSquare, path: "/admin/protected/social-service" },
+      { name: "Results", icon: Award, path: "/admin/protected/results" },
     ],
   },
   {
     name: "Highlights",
     icon: Star,
     children: [
-      { name: "Success Stories", icon: FileText, path: "/admin/protected/success-stories" },
-      { name: "Testimonials", icon: FileText, path: "/admin/protected/testimonial" },
-      { name: "Webinars", icon: HelpCircle, path: "/admin/protected/webinar" },
-      { name: "Events", icon: FileText, path: "/admin/protected/events" },
-      { name: "News & Updates", icon: FileText, path: "/admin/protected/news-updates" },
+      { name: "Success Stories", icon: Trophy, path: "/admin/protected/success-stories" },
+      { name: "Testimonials", icon: MessageSquare, path: "/admin/protected/testimonial" },
+      { name: "Webinars", icon: Video, path: "/admin/protected/webinar" },
+      { name: "Events", icon: Calendar, path: "/admin/protected/events" },
+      { name: "News & Updates", icon: Newspaper, path: "/admin/protected/news-updates" },
     ],
   },
   {
-    name: "Rank Mangement",
-    icon: Star,
+    name: "Rank Management",
+    icon: Award,
     children: [
-      { name: "Rank holders", icon: FileText, path: "/admin/protected/rank-holders" },
-      { name: "Toppers", icon: FileText, path: "/admin/protected/topper" },
+      { name: "Rank Holders", icon: Trophy, path: "/admin/protected/rank-holders" },
+      { name: "Toppers", icon: GraduationCap, path: "/admin/protected/topper" },
     ],
   },
-  { name: "Enquiry's", icon: Users, path: "/admin/protected/enquiry" },
+  { name: "Enquiry's", icon: HelpCircle, path: "/admin/protected/enquiry" },
 ];
 
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+// 🧩 Sidebar Component (memoized — won't blink)
+const Sidebar = memo(
+  ({
+    pathname,
+    isCollapsed,
+    toggleSidebar,
+    mobileOpen,
+    setMobileOpen,
+  }: {
+    pathname: string;
+    isCollapsed: boolean;
+    toggleSidebar: () => void;
+    mobileOpen: boolean;
+    setMobileOpen: (v: boolean) => void;
+  }) => {
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const lastPathRef = useRef(pathname);
 
-  // Auto-open parent when a child is active
-  useEffect(() => {
-    const activeParent = menuItems.find((item) =>
-      item.children?.some((child) => pathname.startsWith(child.path))
-    );
-    if (activeParent) setOpenDropdown(activeParent.name);
-  }, [pathname]);
+    // Auto-open parent when a child is active (only on route change)
+    useEffect(() => {
+      if (lastPathRef.current === pathname) return;
+      lastPathRef.current = pathname;
+      const activeParent = menuItems.find((item) =>
+        item.children?.some((child) => pathname.startsWith(child.path))
+      );
+      if (activeParent) setOpenDropdown(activeParent.name);
+    }, [pathname]);
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const toggleDropdown = (name: string) =>
-    setOpenDropdown(openDropdown === name ? null : name);
+    const toggleDropdown = (name: string) => {
+      setOpenDropdown((prev) => (prev === name ? null : name));
+    };
 
-  return (
-    <ProtectedRoute>
-      <div className="flex min-h-screen bg-gray-50 text-gray-900">
-        {/* Mobile Toggle Button */}
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="lg:hidden p-3 fixed top-4 left-4 z-50 bg-cyan-600 text-white rounded-md"
-        >
-          <Menu size={20} />
-        </button>
-
-        {/* Sidebar */}
+    return (
+      <>
         <aside
           className={`fixed lg:static min-h-screen top-0 left-0 h-full z-40 bg-cyan-800 text-white transition-all duration-300 
             ${isCollapsed ? "w-20" : "w-64"} 
@@ -134,29 +151,45 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
                 <div key={item.name}>
                   <button
                     onClick={() => toggleDropdown(item.name)}
-                    className={`flex items-center w-full px-4 py-3 text-sm font-medium transition 
+                    className={`flex items-center justify-between w-full px-4 py-3 text-sm font-medium transition 
                       ${isActiveParent ? "bg-cyan-700" : "hover:bg-cyan-700"}`}
                   >
-                    <item.icon size={20} className="mr-3" />
-                    {!isCollapsed && <span>{item.name}</span>}
-                  </button>
-                  {openDropdown === item.name && !isCollapsed && (
-                    <div className="ml-8 mt-1 space-y-1">
-                      {item.children.map((child) => (
-                        <Link
-                          href={child.path}
-                          key={child.name}
-                          className={`block px-3 py-2 rounded-s-lg text-sm transition ${
-                            pathname === child.path
-                              ? "bg-cyan-600 text-white"
-                              : "hover:bg-cyan-700"
-                          }`}
-                        >
-                          {child.name}
-                        </Link>
-                      ))}
+                    <div className="flex items-center">
+                      <item.icon size={20} className="mr-3" />
+                      {!isCollapsed && <span>{item.name}</span>}
                     </div>
-                  )}
+                    {!isCollapsed && (
+                      <span className="cursor-pointer">
+                        {openDropdown === item.name ? (
+                          <ChevronUp size={18} />
+                        ) : (
+                          <ChevronDown size={18} />
+                        )}
+                      </span>
+                    )}
+                  </button>
+
+                  <div
+                    className={`ml-8 mt-1 space-y-1 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+                      openDropdown === item.name && !isCollapsed
+                        ? "max-h-60 opacity-100"
+                        : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    {item.children.map((child) => (
+                      <Link
+                        href={child.path}
+                        key={child.name}
+                        className={`block px-3 py-2 rounded-s-lg text-sm transition ${
+                          pathname === child.path
+                            ? "bg-cyan-600 text-white"
+                            : "hover:bg-cyan-700"
+                        }`}
+                      >
+                        {child.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <Link
@@ -173,19 +206,49 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           </nav>
         </aside>
 
-        {/* Overlay for mobile */}
         {mobileOpen && (
           <div
             className="fixed inset-0 bg-black/40 z-30 lg:hidden"
             onClick={() => setMobileOpen(false)}
           />
         )}
+      </>
+    );
+  }
+);
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 lg:ml-0 mt-16 lg:mt-0 transition-all">
-          {children}
-        </main>
-      </div>
-    </ProtectedRoute>
+Sidebar.displayName = "Sidebar";
+
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const toggleSidebar = () => setIsCollapsed((prev) => !prev);
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+      {/* Mobile Toggle */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden p-3 fixed top-4 left-4 z-50 bg-cyan-600 text-white rounded-md"
+      >
+        <Menu size={20} />
+      </button>
+
+      {/* Sidebar (Memoized – no flicker) */}
+      <Sidebar
+        pathname={pathname}
+        isCollapsed={isCollapsed}
+        toggleSidebar={toggleSidebar}
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
+      />
+
+      {/* Main Content */}
+      <main className="flex-1 p-6 lg:ml-0 mt-16 lg:mt-0 transition-all">
+        <ProtectedRoute>{children}</ProtectedRoute>
+      </main>
+    </div>
   );
 }

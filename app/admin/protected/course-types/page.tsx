@@ -42,6 +42,40 @@ export default function CourseTypesPage() {
     loadData();
   }, [page, debouncedSearch, filters]);
 
+  // ✅ View Handler (formatted like Category page)
+  const handleView = async (row: any) => {
+    try {
+      const res = await getCourseTypeById(row.type_id);
+      if (!res?.data) return;
+      const t = res.data;
+
+      const formatted = {
+        "Course Type Name": t.type_name || "—",
+        Status:
+          t.status === 1 || t.status === "1" ? (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Active
+            </span>
+          ) : (
+            <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">
+              Inactive
+            </span>
+          ),
+        "Created At": t.created_at
+          ? new Date(t.created_at).toLocaleString("en-IN")
+          : "—",
+        "Updated At": t.updated_at
+          ? new Date(t.updated_at).toLocaleString("en-IN")
+          : "—",
+      };
+
+      setViewData(formatted);
+      setOpenView(true);
+    } catch (err) {
+      console.error("Error fetching course type details:", err);
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
@@ -124,14 +158,10 @@ export default function CourseTypesPage() {
           setSelected(r);
           setOpenDelete(true);
         }}
-        onRowClick={async (r) => {
-          const res = await getCourseTypeById(r.type_id);
-          setViewData(res.data);
-          setOpenView(true);
-        }}
+        onRowClick={handleView} // ✅ replaced with formatted version
       />
 
-      {/* Modals (same as before) */}
+      {/* Modals */}
       <DynamicFormModal
         title={selected ? "Edit Course Type" : "Create Course Type"}
         isOpen={openForm}

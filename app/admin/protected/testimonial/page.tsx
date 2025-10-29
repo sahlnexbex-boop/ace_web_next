@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
+
 import {
   getTestimonials,
   getTestimonialById,
@@ -13,7 +16,6 @@ import {
   updateTestimonial,
   deleteTestimonial,
 } from "@/lib/api/testimonial";
-import { IconPlus } from "@tabler/icons-react";
 
 export default function TestimonialsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -25,14 +27,15 @@ export default function TestimonialsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState<{ status?: string }>({});
   const debouncedSearch = useDebounce(search, 500);
 
-  // 🔹 Fetch list
+  // ✅ Load Testimonials
   const loadTestimonials = async () => {
     try {
-      const res = await getTestimonials(page, 10, debouncedSearch);
-      setData(res?.data || []);
-      setTotalPages(res?.totalPages || 1);
+      const res = await getTestimonials(page, 10, debouncedSearch, filters);
+      setData(res.data || []);
+      setTotalPages(res.totalPages || 1);
     } catch (err) {
       console.error("Error loading testimonials:", err);
     }
@@ -40,20 +43,21 @@ export default function TestimonialsPage() {
 
   useEffect(() => {
     loadTestimonials();
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, filters]);
 
-  // 🔹 Handle view (row click)
-  const handleRowClick = async (row: any) => {
+  // ✅ View Logic
+  const handleView = async (row: any) => {
     try {
       const res = await getTestimonialById(row.testimonial_id);
-      const t = res?.data;
-      if (t) {
-        const formattedData = {
-          "Candidate Name": t.name_of_candidate,
-          "Position": t.position_of_candidate,
-          "Content": <p className="text-gray-700">{t.content}</p>,
-          "Status":
-            t.status === 1 || t.status === "1" ? (
+      if (res?.data) {
+        const t = res.data;
+
+        const formatted = {
+          "Candidate Name": t.name_of_candidate || "—",
+          Position: t.position_of_candidate || "—",
+          Content: <p className="text-gray-700 whitespace-pre-line">{t.content || "—"}</p>,
+          Status:
+            t.status == 1 || t.status == "1" ? (
               <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
                 Active
               </span>
@@ -67,38 +71,32 @@ export default function TestimonialsPage() {
               <img
                 src={t.image_of_candidate}
                 alt={t.name_of_candidate}
-                className="w-16 h-16 rounded-full object-cover border"
+                className="w-16 h-16 object-cover rounded"
               />
             </div>
           ) : (
             "—"
           ),
-          "Created At": new Date(t.created_at).toLocaleString("en-IN"),
-          "Updated At": new Date(t.updated_at).toLocaleString("en-IN"),
+          "Created At": t.created_at
+            ? new Date(t.created_at).toLocaleString("en-IN")
+            : "—",
+          "Updated At": t.updated_at
+            ? new Date(t.updated_at).toLocaleString("en-IN")
+            : "—",
         };
 
-        setViewData(formattedData);
+        setViewData(formatted);
         setOpenView(true);
       }
     } catch (err) {
-      console.error("Failed to load testimonial details:", err);
+      console.error("Error fetching testimonial details:", err);
     }
   };
 
-  // 🔹 Form fields
+  // ✅ Form Fields
   const fields = [
-    {
-      name: "name_of_candidate",
-      label: "Candidate Name",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "position_of_candidate",
-      label: "Position",
-      type: "text",
-      required: true,
-    },
+    { name: "name_of_candidate", label: "Candidate Name", type: "text", required: true },
+    { name: "position_of_candidate", label: "Position", type: "text", required: true },
     { name: "content", label: "Content", type: "textarea", required: true },
     {
       name: "status",
@@ -120,21 +118,43 @@ export default function TestimonialsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* 🔹 Header */}
-      <div className="flex justify-between mb-4">
+      {/* Header + Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Testimonials</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Testimonial <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Filter Button */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* ✅ Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-cyan-800"
+          >
+            Create Testimonial <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
-      {/* 🔹 Data Table */}
+      {/* ✅ Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -167,7 +187,7 @@ export default function TestimonialsPage() {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status === 1 || r.status === "1" ? (
+              r.status == 1 || r.status === "1" ? (
                 <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
                 </div>
@@ -192,10 +212,10 @@ export default function TestimonialsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick}
+        onRowClick={handleView}
       />
 
-      {/* 🔹 Create/Edit Modal */}
+      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Testimonial" : "Create Testimonial"}
         isOpen={openForm}
@@ -209,7 +229,7 @@ export default function TestimonialsPage() {
         onSuccess={loadTestimonials}
       />
 
-      {/* 🔹 Delete Confirmation */}
+      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -224,11 +244,14 @@ export default function TestimonialsPage() {
         message={`Are you sure you want to delete "${selected?.name_of_candidate}"?`}
       />
 
-      {/* 🔹 View Modal */}
+      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
-        onClose={() => setOpenView(false)}
-        title="View Testimonial Details"
+        onClose={() => {
+          setOpenView(false);
+          setViewData(null);
+        }}
+        title="View Testimonial"
         data={viewData}
       />
     </div>

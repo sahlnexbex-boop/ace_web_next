@@ -4,7 +4,7 @@ export const getTestimonials = async (
   page = 1,
   limit = 10,
   search = "",
-  status?: number
+  filters: { status?: string } = {}
 ) => {
   const params = new URLSearchParams({
     page: String(page),
@@ -12,14 +12,13 @@ export const getTestimonials = async (
   });
 
   if (search) params.append("search", search);
-  if (status !== undefined) params.append("status", String(status));
+  if (filters.status) params.append("status", filters.status);
 
   return apiRequest(`/api/testimonials?${params.toString()}`, "GET");
 };
 
-export const getTestimonialById = async (id: number) => {
-  return apiRequest(`/api/testimonials/${id}`, "GET");
-};
+export const getTestimonialById = async (id: number) =>
+  apiRequest(`/api/testimonials/${id}`, "GET");
 
 export const createTestimonial = (data: FormData) =>
   apiRequest("/api/testimonials", "POST", data, true);

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
+
 import {
   getEvents,
   getEventById,
@@ -13,24 +16,31 @@ import {
   updateEvent,
   deleteEvent,
 } from "@/lib/api/events";
-import { IconPlus } from "@tabler/icons-react";
 
 export default function EventsPage() {
   const [data, setData] = useState<any[]>([]);
+  const [filters, setFilters] = useState<{ status?: string; event_type?: string }>({});
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<Record<string, any> | null>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
 
   const debouncedSearch = useDebounce(search, 500);
 
+  // ✅ Load Events
   const loadEvents = async () => {
     try {
-      const res = await getEvents(page, 10, debouncedSearch);
+      const res = await getEvents(
+        page,
+        10,
+        debouncedSearch,
+        filters.status ? Number(filters.status) : undefined,
+        filters.event_type ? Number(filters.event_type) : undefined
+      );
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
@@ -40,22 +50,20 @@ export default function EventsPage() {
 
   useEffect(() => {
     loadEvents();
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, filters]);
 
-  const handleRowClick = async (row: any) => {
+  // ✅ View Logic
+  const handleView = async (row: any) => {
     try {
       const res = await getEventById(row.event_id);
       const e = res?.data || res;
 
-      // 🧩 Format view data (consistent across all pages)
-      const formatted: Record<string, React.ReactNode> = {
+      const formatted = {
         "Event Title": e.event_title || "—",
         Description: (
-          <p className="text-gray-700 whitespace-pre-line">
-            {e.event_description || "—"}
-          </p>
+          <p className="text-gray-700 whitespace-pre-line">{e.event_description || "—"}</p>
         ),
-        "Event Type": e.event_type || "—",
+        "Event Type": e.event_type === 1 ? "Online" : e.event_type === 2 ? "Offline" : "—",
         "Event Location": e.event_location || "—",
         "Event Date & Time": e.date_time
           ? new Date(e.date_time).toLocaleString("en-IN", {
@@ -78,7 +86,7 @@ export default function EventsPage() {
             <img
               src={e.event_image}
               alt="Event"
-              className="w-14 h-14 object-cover rounded"
+              className="w-20 h-20 object-cover rounded-lg"
             />
           </div>
         ) : (
@@ -99,6 +107,7 @@ export default function EventsPage() {
     }
   };
 
+  // ✅ Form Fields
   const fields = [
     { name: "event_title", label: "Event Title", type: "text", required: true },
     {
@@ -110,15 +119,14 @@ export default function EventsPage() {
     {
       name: "event_type",
       label: "Event Type",
-      type: "number",
+      type: "select",
+      options: [
+        { label: "Online", value: "1" },
+        { label: "Offline", value: "2" },
+      ],
       required: true,
     },
-    {
-      name: "event_location",
-      label: "Event Location",
-      type: "text",
-      required: true,
-    },
+    { name: "event_location", label: "Event Location", type: "text", required: true },
     {
       name: "date_time",
       label: "Event Date & Time",
@@ -135,45 +143,71 @@ export default function EventsPage() {
       ],
       required: true,
     },
-    {
-      name: "event_image",
-      label: "Event Image",
-      type: "file",
-      required: false,
-    },
+    { name: "event_image", label: "Event Image", type: "file", required: false },
   ];
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex justify-between mb-4">
+      {/* Header + Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Events</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Event <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Dynamic Filter */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+              {
+                key: "event_type",
+                label: "Event Type",
+                options: [
+                  { label: "Online", value: "1" },
+                  { label: "Offline", value: "2" },
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Create Event <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* ✅ Data Table */}
       <DataTable
         columns={[
-          {
-            key: "sno",
-            label: "S.No",
-            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
-          },
+          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "event_title", label: "Title" },
-          { key: "event_location", label: "Location" },
           {
             key: "event_type",
             label: "Type",
-            render: (r) => r.event_type || "—",
+            render: (r) =>
+              r.event_type === 1 || r.event_type === "1"
+                ? "Online"
+                : r.event_type === 2 || r.event_type === "2"
+                ? "Offline"
+                : "—",
           },
+          { key: "event_location", label: "Location" },
           {
             key: "date_time",
             label: "Date & Time",
@@ -192,7 +226,7 @@ export default function EventsPage() {
               r.event_image ? (
                 <img
                   src={r.event_image}
-                  className="w-10 h-10 object-cover rounded-md"
+                  className="w-10 h-10 object-cover rounded-full"
                   alt="Event"
                 />
               ) : (
@@ -203,7 +237,7 @@ export default function EventsPage() {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status === 1 || r.status === "1" ? (
+              r.status == 1 || r.status === "1" ? (
                 <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
                 </div>
@@ -224,6 +258,7 @@ export default function EventsPage() {
           setSelected({
             ...row,
             status: String(row.status),
+            event_type: String(row.event_type),
             date_time: row.date_time
               ? new Date(row.date_time).toISOString().slice(0, 16)
               : "",
@@ -234,10 +269,10 @@ export default function EventsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick}
+        onRowClick={handleView}
       />
 
-      {/* Create/Edit Modal */}
+      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Event" : "Create Event"}
         isOpen={openForm}
@@ -251,7 +286,7 @@ export default function EventsPage() {
         onSuccess={loadEvents}
       />
 
-      {/* Delete Modal */}
+      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -266,11 +301,14 @@ export default function EventsPage() {
         message={`Are you sure you want to delete "${selected?.event_title}"?`}
       />
 
-      {/* View Modal */}
+      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
-        onClose={() => setOpenView(false)}
-        title="View Event Details"
+        onClose={() => {
+          setOpenView(false);
+          setViewData(null);
+        }}
+        title="View Event"
         data={viewData}
       />
     </div>

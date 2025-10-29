@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
+
 import {
   getNews,
   getNewsById,
@@ -13,24 +16,30 @@ import {
   updateNews,
   deleteNews,
 } from "@/lib/api/news";
-import { IconPlus } from "@tabler/icons-react";
 
 export default function NewsPage() {
   const [data, setData] = useState<any[]>([]);
+  const [filters, setFilters] = useState<{ status?: string }>({});
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
-  const [viewData, setViewData] = useState<Record<string, any> | null>(null);
+  const [viewData, setViewData] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
 
   const debouncedSearch = useDebounce(search, 500);
 
+  // ✅ Load News
   const loadNews = async () => {
     try {
-      const res = await getNews(page, 10, debouncedSearch);
+      const res = await getNews(
+        page,
+        10,
+        debouncedSearch,
+        filters.status ? Number(filters.status) : undefined
+      );
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
@@ -40,14 +49,15 @@ export default function NewsPage() {
 
   useEffect(() => {
     loadNews();
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, filters]);
 
-  const handleRowClick = async (row: any) => {
+  // ✅ View Logic
+  const handleView = async (row: any) => {
     try {
       const res = await getNewsById(row.news_id);
       const n = res?.data || res;
 
-      const formatted: Record<string, React.ReactNode> = {
+      const formatted = {
         "News Title": n.news_title || "—",
         Description: (
           <p className="text-gray-700 whitespace-pre-line">
@@ -75,7 +85,7 @@ export default function NewsPage() {
             <img
               src={n.news_image}
               alt="News"
-              className="w-14 h-14 object-cover rounded"
+              className="w-20 h-20 object-cover rounded-lg"
             />
           </div>
         ) : (
@@ -96,18 +106,19 @@ export default function NewsPage() {
     }
   };
 
+  // ✅ Form Fields
   const fields = [
     { name: "news_title", label: "News Title", type: "text", required: true },
-    {
-      name: "date_time",
-      label: "Date & Time",
-      type: "datetime-local",
-      required: true,
-    },
     {
       name: "news_description",
       label: "Description",
       type: "textarea",
+      required: true,
+    },
+    {
+      name: "date_time",
+      label: "Date & Time",
+      type: "datetime-local",
       required: true,
     },
     {
@@ -120,37 +131,51 @@ export default function NewsPage() {
       ],
       required: true,
     },
-    {
-      name: "news_image",
-      label: "News Image",
-      type: "file",
-      required: false,
-    },
+    { name: "news_image", label: "News Image", type: "file", required: false },
   ];
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex justify-between mb-4">
+      {/* Header + Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">News</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create News <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Dynamic Filter */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Create News <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
+      {/* ✅ Data Table */}
       <DataTable
         columns={[
-          {
-            key: "sno",
-            label: "S.No",
-            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
-          },
+          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "news_title", label: "Title" },
           {
             key: "date_time",
@@ -167,10 +192,7 @@ export default function NewsPage() {
             key: "news_description",
             label: "Description",
             render: (r) => (
-              <div
-                className="truncate max-w-[250px]"
-                title={r.news_description}
-              >
+              <div className="truncate max-w-[250px]" title={r.news_description}>
                 {r.news_description || "—"}
               </div>
             ),
@@ -182,8 +204,8 @@ export default function NewsPage() {
               r.news_image ? (
                 <img
                   src={r.news_image}
+                  className="w-10 h-10 object-cover rounded-full"
                   alt="News"
-                  className="w-10 h-10 object-cover rounded-md"
                 />
               ) : (
                 "—"
@@ -193,7 +215,7 @@ export default function NewsPage() {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status === 1 || r.status === "1" ? (
+              r.status == 1 || r.status === "1" ? (
                 <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
                 </div>
@@ -224,10 +246,10 @@ export default function NewsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick}
+        onRowClick={handleView}
       />
 
-      {/* Form Modal */}
+      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit News" : "Create News"}
         isOpen={openForm}
@@ -241,7 +263,7 @@ export default function NewsPage() {
         onSuccess={loadNews}
       />
 
-      {/* Delete Modal */}
+      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -256,11 +278,14 @@ export default function NewsPage() {
         message={`Are you sure you want to delete "${selected?.news_title}"?`}
       />
 
-      {/* View Modal */}
+      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
-        onClose={() => setOpenView(false)}
-        title="View News Details"
+        onClose={() => {
+          setOpenView(false);
+          setViewData(null);
+        }}
+        title="View News"
         data={viewData}
       />
     </div>

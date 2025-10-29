@@ -1,28 +1,34 @@
 import { apiRequest } from "./apiClients";
 
 export const getRankHolders = async (
-  page = 1,
-  limit = 10,
-  search = "",
+  page: number,
+  limit: number,
+  search?: string,
   status?: number,
   based_type?: number,
   course_id?: number,
   category_id?: number,
-  year?: number
+  year?: number,
+  approval_status?: number 
 ) => {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
-
+  const params = new URLSearchParams();
   if (search) params.append("search", search);
   if (status !== undefined) params.append("status", String(status));
-  if (based_type) params.append("based_type", String(based_type));
-  if (course_id) params.append("course_id", String(course_id));
-  if (category_id) params.append("category_id", String(category_id));
-  if (year) params.append("year", String(year));
+  if (based_type !== undefined) params.append("based_type", String(based_type));
+  if (course_id !== undefined) params.append("course_id", String(course_id));
+  if (category_id !== undefined) params.append("category_id", String(category_id));
+  if (year !== undefined) params.append("year", String(year));
+  if (approval_status !== undefined)
+    params.append("approval_status", String(approval_status)); 
 
-  return apiRequest(`/api/rankholders?${params.toString()}`, "GET");
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/rankholders?page=${page}&limit=${limit}&${params.toString()}`,
+    {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    }
+  );
+
+  return await res.json();
 };
 
 export const getRankHolderById = (id: number) =>

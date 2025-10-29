@@ -11,9 +11,8 @@ interface FilterOption {
 interface FilterField {
   key: string;
   label: string;
-  type?: "select" | "date";
+  type?: "select" | "date" | "year"; // ✅ added 'year'
   options?: FilterOption[];
-  // ✅ Optional conditional visibility (based on another field)
   showIf?: {
     field: string;
     value: string | number;
@@ -41,17 +40,20 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Trigger change on filter update
+  // ✅ Trigger change when filters update
   useEffect(() => {
     onChange(filters);
   }, [filters]);
 
-  // ✅ Helper to check visibility of conditional filters
+  // ✅ Conditional visibility
   const shouldShowField = (field: FilterField) => {
     if (!field.showIf) return true;
     const targetValue = filters[field.showIf.field];
     return targetValue === String(field.showIf.value);
   };
+
+  // ✅ Extract only the year from "YYYY-MM" value
+  const extractYear = (monthValue: string) => monthValue?.split("-")[0] || "";
 
   return (
     <div className="relative" ref={filterRef}>
@@ -76,8 +78,8 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
                     {field.label}
                   </label>
 
-                  {/* Date Input */}
-                  {field.type === "date" ? (
+                  {/* ✅ Normal Date Picker */}
+                  {field.type === "date" && (
                     <input
                       type="date"
                       value={filters[field.key] ?? ""}
@@ -89,8 +91,31 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
                       }
                       className="mt-1 w-full border rounded-md p-2 text-sm"
                     />
-                  ) : (
-                    /* Select Input */
+                  )}
+
+                  {/* ✅ Year-Only Picker */}
+                  {field.type === "year" && (
+                    <input
+                      type="month"
+                      value={
+                        filters[field.key]
+                          ? `${filters[field.key]}-01`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const year = extractYear(e.target.value);
+                        setFilters((prev) => ({
+                          ...prev,
+                          [field.key]: year,
+                        }));
+                      }}
+                      className="mt-1 w-full border rounded-md p-2 text-sm"
+                      onFocus={(e) => e.target.showPicker?.()} // auto open picker if supported
+                    />
+                  )}
+
+                  {/* ✅ Select Dropdown */}
+                  {(!field.type || field.type === "select") && (
                     <select
                       value={filters[field.key] ?? ""}
                       onChange={(e) =>

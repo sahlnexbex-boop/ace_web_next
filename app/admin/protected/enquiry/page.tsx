@@ -5,6 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
+import TableFilter from "@/components/filter_button";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getEnquiries,
@@ -15,7 +16,7 @@ import {
 } from "@/lib/api/enquiry";
 import { IconPlus } from "@tabler/icons-react";
 
-// Label maps
+// ✅ Label maps
 const ENQUIRY_TYPE: Record<number, string> = {
   1: "General",
   2: "Course",
@@ -40,23 +41,24 @@ export default function EnquiryPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
-  const [statusFilter, setStatusFilter] = useState<number | undefined>();
-  const [typeFilter, setTypeFilter] = useState<number | undefined>();
-  const [statusTypeFilter, setStatusTypeFilter] = useState<number | undefined>();
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
   const debouncedSearch = useDebounce(search, 500);
 
+  // ✅ Load Enquiries (with filters)
   const loadEnquiries = async () => {
     try {
+      const { status, enquiry_type, enquiry_status } = filters;
+
       const res = await getEnquiries(
         page,
         10,
         debouncedSearch,
-        statusFilter,
-        typeFilter,
-        statusTypeFilter
+        status ? Number(status) : undefined,
+        enquiry_type ? Number(enquiry_type) : undefined,
+        enquiry_status ? Number(enquiry_status) : undefined
       );
+
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
@@ -66,21 +68,20 @@ export default function EnquiryPage() {
 
   useEffect(() => {
     loadEnquiries();
-  }, [page, debouncedSearch, statusFilter, typeFilter, statusTypeFilter]);
+  }, [page, debouncedSearch, filters]);
 
-  // Row click handler for dynamic view modal
+  // ✅ Row click (View Modal)
   const handleRowClick = async (row: any) => {
     try {
       const res = await getEnquiryById(row.enquiry_id);
       if (!res?.data) return;
       const d = res.data;
 
-      // ✅ Same format logic as your “Service” example
       const formatted: Record<string, React.ReactNode> = {
         "Customer Name": d.cstmr_name || "—",
-        "Email": d.cstmr_email || "—",
-        "Phone": d.cstmr_phone || "—",
-        "Message": (
+        Email: d.cstmr_email || "—",
+        Phone: d.cstmr_phone || "—",
+        Message: (
           <p className="text-gray-700 whitespace-pre-line">
             {d.cstmr_message || "—"}
           </p>
@@ -118,6 +119,7 @@ export default function EnquiryPage() {
     }
   };
 
+  // ✅ Form Fields
   const fields = [
     { name: "cstmr_name", label: "Customer Name", type: "text", required: true },
     { name: "cstmr_email", label: "Email", type: "email", required: true },
@@ -162,21 +164,62 @@ export default function EnquiryPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex justify-between mb-4">
+      {/* ✅ Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Enquiries</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Enquiry <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Filter */}
+          <TableFilter
+            fields={[
+              {
+                key: "enquiry_type",
+                label: "Enquiry Type",
+                type: "select",
+                options: Object.entries(ENQUIRY_TYPE).map(([val, label]) => ({
+                  value: val,
+                  label,
+                })),
+              },
+              {
+                key: "enquiry_status",
+                label: "Enquiry Status",
+                type: "select",
+                options: Object.entries(ENQUIRY_STATUS).map(([val, label]) => ({
+                  value: val,
+                  label,
+                })),
+              },
+              {
+                key: "status",
+                label: "Status",
+                type: "select",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* Create Enquiry */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800"
+          >
+            Create Enquiry <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
-      {/* Data Table */}
+      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -244,7 +287,7 @@ export default function EnquiryPage() {
         }}
       />
 
-      {/* Form Modal */}
+      {/* ✅ Modals */}
       <DynamicFormModal
         title={selected ? "Edit Enquiry" : "Create Enquiry"}
         isOpen={openForm}
@@ -259,7 +302,6 @@ export default function EnquiryPage() {
         onSuccess={loadEnquiries}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -274,7 +316,6 @@ export default function EnquiryPage() {
         message={`Are you sure you want to delete "${selected?.cstmr_name}"?`}
       />
 
-      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

@@ -1,24 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IconPlus } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
+
 import {
   getWebinars,
   getWebinarById,
   createWebinar,
   updateWebinar,
   deleteWebinar,
-  getCourseCategoryOptions,
 } from "@/lib/api/webinar";
-import { IconPlus } from "@tabler/icons-react";
+import { getCourseCategories } from "@/lib/api/courseCategory";
 
 export default function WebinarsPage() {
   const [data, setData] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [filters, setFilters] = useState<{ status?: string; course_category_id?: string }>({});
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
@@ -30,10 +33,26 @@ export default function WebinarsPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
+  // ✅ Load categories
+  const loadCategories = async () => {
+    try {
+      const res = await getCourseCategories(1, 100);
+      setCategories(res?.data || []);
+    } catch (err) {
+      console.error("Error loading categories:", err);
+    }
+  };
+
   // ✅ Load webinars
   const loadWebinars = async () => {
     try {
-      const res = await getWebinars(page, 10, debouncedSearch);
+      const res = await getWebinars(
+        page,
+        10,
+        debouncedSearch,
+        filters.status ? Number(filters.status) : undefined,
+        filters.course_category_id ? Number(filters.course_category_id) : undefined
+      );
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
@@ -41,33 +60,28 @@ export default function WebinarsPage() {
     }
   };
 
-  // ✅ Load course categories
-  const loadCategories = async () => {
-    try {
-      const res = await getCourseCategoryOptions();
-      setCategories(
-        res.map((cat: any) => ({
-          label: cat.category_name,
-          value: cat.category_id,
-        }))
-      );
-    } catch (err) {
-      console.error("Error loading course categories:", err);
-    }
-  };
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     loadWebinars();
-    loadCategories();
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, filters]);
 
-  // ✅ Handle row click to open View Modal
-  const handleRowClick = async (row: any) => {
+  const categoryOptions = Array.isArray(categories)
+    ? categories.map((c) => ({
+        label: c.category_name,
+        value: String(c.category_id),
+      }))
+    : [];
+
+  // ✅ View logic
+  const handleView = async (row: any) => {
     try {
       const res = await getWebinarById(row.webinar_id);
       const w = res?.data || res;
 
-      const formatted: Record<string, React.ReactNode> = {
+      const formatted = {
         "Webinar Title": w.webinar_title,
         "Course Category": w.category?.category_name || "—",
         "Date & Time": w.date_time
@@ -83,15 +97,14 @@ export default function WebinarsPage() {
           <a
             href={w.webinar_link}
             target="_blank"
-            className="text-blue-600 underline"
+            className="text-cyan-700 underline"
+            rel="noopener noreferrer"
           >
             {w.webinar_link}
           </a>
         ),
         Description: (
-          <p className="text-gray-700 whitespace-pre-line">
-            {w.webinar_description || "—"}
-          </p>
+          <p className="text-gray-700 whitespace-pre-line">{w.webinar_description || "—"}</p>
         ),
         Status:
           w.status === 1 || w.status === "1" ? (
@@ -105,11 +118,7 @@ export default function WebinarsPage() {
           ),
         "Webinar Image": w.webinar_image ? (
           <div className="flex justify-end">
-            <img
-              src={w.webinar_image}
-              alt="Webinar"
-              className="w-20 h-20 object-cover rounded-lg"
-            />
+            <img src={w.webinar_image} alt="Webinar" className="w-20 h-20 object-cover rounded-lg" />
           </div>
         ) : (
           "—"
@@ -138,7 +147,7 @@ export default function WebinarsPage() {
       name: "course_category_id",
       label: "Course Category",
       type: "select",
-      options: categories,
+      options: categoryOptions,
       required: true,
     },
     { name: "speaker_name", label: "Speaker Name", type: "text", required: true },
@@ -160,28 +169,51 @@ export default function WebinarsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex justify-between mb-4">
+      {/* Header + Filters */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Webinars</h1>
-        <button
-          onClick={() => {
-            setSelected(null);
-            setOpenForm(true);
-          }}
-          className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
-        >
-          Create Webinar <IconPlus size={20} />
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* ✅ Dynamic Filter */}
+          <TableFilter
+            fields={[
+              {
+                key: "status",
+                label: "Status",
+                options: [
+                  { label: "Active", value: "1" },
+                  { label: "Inactive", value: "0" },
+                ],
+              },
+              {
+                key: "course_category_id",
+                label: "Course Category",
+                options: categoryOptions,
+              },
+            ]}
+            onChange={(f) => {
+              setFilters(f);
+              setPage(1);
+            }}
+          />
+
+          {/* Create Button */}
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpenForm(true);
+            }}
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
+          >
+            Create Webinar <IconPlus size={20} />
+          </button>
+        </div>
       </div>
 
       {/* ✅ Data Table */}
       <DataTable
         columns={[
-          {
-            key: "sno",
-            label: "S.No",
-            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
-          },
+          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "webinar_title", label: "Title" },
           {
             key: "date_time",
@@ -194,9 +226,9 @@ export default function WebinarsPage() {
                   })
                 : "—",
           },
-          { key: "webinar_duration", label: "Duration" },
           { key: "speaker_name", label: "Speaker Name" },
           { key: "speaker_position", label: "Speaker Position" },
+          { key: "course_category_id", label: "Category", render: (r) => r.category?.category_name || "—" },
           {
             key: "webinar_image",
             label: "Image",
@@ -204,8 +236,8 @@ export default function WebinarsPage() {
               r.webinar_image ? (
                 <img
                   src={r.webinar_image}
-                  alt="Webinar"
                   className="w-10 h-10 object-cover rounded-full"
+                  alt="Webinar"
                 />
               ) : (
                 "—"
@@ -215,7 +247,7 @@ export default function WebinarsPage() {
             key: "status",
             label: "Status",
             render: (r) =>
-              r.status === 1 || r.status === "1" ? (
+              r.status == 1 || r.status === "1" ? (
                 <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
                   Active
                 </div>
@@ -236,7 +268,7 @@ export default function WebinarsPage() {
           setSelected({
             ...row,
             status: String(row.status),
-            course_category_id: row.course_category_id || "",
+            course_category_id: String(row.course_category_id),
             date_time: row.date_time
               ? new Date(row.date_time).toISOString().slice(0, 16)
               : "",
@@ -247,7 +279,7 @@ export default function WebinarsPage() {
           setSelected(row);
           setOpenDelete(true);
         }}
-        onRowClick={handleRowClick}
+        onRowClick={handleView}
       />
 
       {/* ✅ Create/Edit Modal */}
@@ -264,7 +296,7 @@ export default function WebinarsPage() {
         onSuccess={loadWebinars}
       />
 
-      {/* ✅ Delete Confirmation */}
+      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -282,8 +314,11 @@ export default function WebinarsPage() {
       {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
-        onClose={() => setOpenView(false)}
-        title="View Webinar Details"
+        onClose={() => {
+          setOpenView(false);
+          setViewData(null);
+        }}
+        title="View Webinar"
         data={viewData}
       />
     </div>
