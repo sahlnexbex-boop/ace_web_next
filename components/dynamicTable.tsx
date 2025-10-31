@@ -126,7 +126,7 @@ export default function DataTable({
         <button
           disabled={page <= 1}
           onClick={() => setPage(page - 1)}
-          className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50"
+          className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50 cursor-pointer"
         >
           Previous
         </button>
@@ -136,7 +136,7 @@ export default function DataTable({
         <button
           disabled={page >= totalPages}
           onClick={() => setPage(page + 1)}
-          className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50"
+          className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50 cursor-pointer"
         >
           Next
         </button>

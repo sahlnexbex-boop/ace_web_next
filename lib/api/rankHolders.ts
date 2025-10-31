@@ -9,7 +9,7 @@ export const getRankHolders = async (
   course_id?: number,
   category_id?: number,
   year?: number,
-  approval_status?: number 
+  approval_status?: number
 ) => {
   const params = new URLSearchParams();
   if (search) params.append("search", search);
@@ -19,7 +19,7 @@ export const getRankHolders = async (
   if (category_id !== undefined) params.append("category_id", String(category_id));
   if (year !== undefined) params.append("year", String(year));
   if (approval_status !== undefined)
-    params.append("approval_status", String(approval_status)); 
+    params.append("approval_status", String(approval_status));
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/rankholders?page=${page}&limit=${limit}&${params.toString()}`,
@@ -35,10 +35,10 @@ export const getRankHolderById = (id: number) =>
   apiRequest(`/api/rankholders/${id}`, "GET");
 
 export const createRankHolder = (data: FormData) =>
-  apiRequest("/api/rankholders", "POST", data, true);
+  apiRequest("/api/rankholders", "POST", data, true); 
 
 export const updateRankHolder = (id: number, data: FormData) =>
-  apiRequest(`/api/rankholders/${id}`, "PUT", data, true);
+  apiRequest(`/api/rankholders/${id}`, "PUT", data, true); 
 
 export const deleteRankHolder = (id: number) =>
-  apiRequest(`/api/rankholders/${id}`, "DELETE", undefined, true);
+  apiRequest(`/api/rankholders/${id}`, "DELETE", undefined, false);

@@ -6,7 +6,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
-import TableFilter from "@/components/filter_button"; // ✅ Reusable Filter
+import TableFilter from "@/components/filter_button"; 
 import { useDebounce } from "@/hooks/debounce";
 
 import {

@@ -1,42 +1,37 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { Card, CardContent } from "@/components/ui/card";
+import { getNews } from "@/lib/api/news";
+import Loader from "./loader";
 
 export default function LatestNews() {
-  const router =  useRouter();
-  const news = [
-    {
-      id: 1,
-      title: "New Computer Lab Inauguration, SM Building",
-      description:
-        "Our institute proudly opened a state-of-the-art computer lab equipped with 50 la...",
-      image: "/computer_lab.png",
-      date: "2024",
-    },
-    {
-      id: 2,
-      title: "Cultural Fest 2025 Announcement",
-      description:
-        "The annual cultural fest will be held in March 2025 featuring music, dance on st...",
-      image: "/announcement.png",
-      date: "2025",
-    },
-    {
-      id: 3,
-      title: "Placement Drive 2025 - Success Meeting",
-      description:
-        "Over 150 students got placed in top companies during the placement drive or...",
-      image: "/meeting.png",
-      date: "2025",
-    },
-  ];
-
+  const router = useRouter();
   const gridRef = useRef<HTMLDivElement | null>(null);
 
+  const [news, setNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await getNews(1, 3, "", 1);
+        setNews(res?.data?.rows || res?.data || []);
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  useEffect(() => {
+    if (!news.length) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -62,7 +57,7 @@ export default function LatestNews() {
     return () => {
       if (gridRef.current) observer.unobserve(gridRef.current);
     };
-  }, []);
+  }, [news]);
 
   return (
     <section className="md:py-16 py-10 bg-blue-50">
@@ -80,34 +75,42 @@ export default function LatestNews() {
           </div>
         </div>
 
-        <div
-          ref={gridRef}
-          className="grid md:grid-cols-3 md:gap-12 gap-8"
-        >
-          {news.map((item) => (
-            <Card
-              onClick={()=>router.push(`/public/highlights/news/${item.id}`)}
-              key={item.id}
-              className="news-card opacity-0 overflow-hidden hover:shadow-lg transition-shadow rounded-xl cursor-pointer"
-            >
-              <div className="aspect-video overflow-hidden">
-                <img
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <CardContent className="px-6 pb-6">
-                <h3 className="text-xl font-bold mb-2 text-gray-900">
-                  {item.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {item.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Loader or Grid */}
+        {loading ? (
+          <Loader />
+        ) : news.length === 0 ? (
+          <div className="w-full flex justify-center items-center py-10">
+            <img src="/no_data.png" alt="No Data" className="w-52 opacity-50" />
+          </div>
+        ) : (
+          <div ref={gridRef} className="grid md:grid-cols-3 md:gap-12 gap-8">
+            {news.map((item) => (
+              <Card
+                onClick={() =>
+                  router.push(`/public/highlights/news/${item.news_id}`)
+                }
+                key={item.news_id}
+                className="news-card opacity-0 overflow-hidden hover:shadow-lg transition-shadow rounded-xl cursor-pointer"
+              >
+                <div className="aspect-video overflow-hidden">
+                  <img
+                    src={item.news_image || "/placeholder.svg"}
+                    alt={item.news_title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <CardContent className="px-6 pb-6">
+                  <h3 className="text-xl font-bold mb-2 text-gray-900 line-clamp-2">
+                    {item.news_title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                    {item.news_description || "No description available."}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

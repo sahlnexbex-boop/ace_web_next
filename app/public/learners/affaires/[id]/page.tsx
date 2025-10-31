@@ -1,31 +1,57 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { getCurrentAffairById } from "@/lib/api/current-affair";
+
+interface AffairData {
+  affair_id: number;
+  affair_title: string;
+  affair_description: string;
+  publishing_date: string;
+  affair_file: string;
+  category?: {
+    category_id: number;
+    category_name: string;
+  };
+}
 
 export default function AffairDetail() {
   const { id } = useParams();
   const router = useRouter();
 
-  const affairData = {
-    title: "January 2025 Current Affairs",
-    published: "Jan 15, 2025",
-    content1:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-    content2:
-      "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters.",
-    recent: [{ title: "Latest Current Affairs", date: "September 20, 2025" }],
-  };
+  const [affairData, setAffairData] = useState<AffairData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const breadcrumbRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const publishedRef = useRef<HTMLParagraphElement>(null);
-  const contentRefs = useRef<HTMLParagraphElement[]>([]);
+  const contentRef = useRef<HTMLParagraphElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const recentRefs = useRef<HTMLDivElement[]>([]);
 
+  // ✅ Fetch current affair by ID
   useEffect(() => {
+    const fetchAffair = async () => {
+      try {
+        if (!id) return;
+        setLoading(true);
+        const res = await getCurrentAffairById(Number(id));
+        if (res?.data) {
+          setAffairData(res.data);
+        }
+      } catch (err) {
+        console.error("Error fetching affair:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAffair();
+  }, [id]);
+
+  // ✅ GSAP Animation
+  useEffect(() => {
+    if (!affairData) return;
     const ctx = gsap.context(() => {
       gsap.from(breadcrumbRef.current, {
         opacity: 0,
@@ -43,11 +69,10 @@ export default function AffairDetail() {
         delay: 0.2,
       });
 
-      gsap.from(contentRefs.current, {
+      gsap.from(contentRef.current, {
         opacity: 0,
         y: 30,
         duration: 0.8,
-        stagger: 0.2,
         ease: "power3.out",
         delay: 0.4,
       });
@@ -59,19 +84,30 @@ export default function AffairDetail() {
         ease: "power2.out",
         delay: 0.6,
       });
-
-      gsap.from(recentRefs.current, {
-        opacity: 0,
-        x: 20,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power2.out",
-        delay: 0.8,
-      });
     });
-
     return () => ctx.revert();
-  }, []);
+  }, [affairData]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <p className="text-gray-600">Loading Current Affair...</p>
+      </div>
+    );
+  }
+
+  if (!affairData) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <p className="text-gray-500">No Current Affair found.</p>
+      </div>
+    );
+  }
+
+  const formattedDate = new Date(affairData.publishing_date).toLocaleDateString(
+    "en-IN",
+    { year: "numeric", month: "short", day: "numeric" }
+  );
 
   return (
     <div className="bg-gray-50 px-6 md:px-24 md:py-18 py-8">
@@ -85,60 +121,60 @@ export default function AffairDetail() {
         </span>{" "}
         /{" "}
         <span
-          onClick={() => router.push("/public/learners")}
+          onClick={() => router.push("/public/learners?type=current")}
           className="hover:text-blue-600 cursor-pointer"
         >
           Current Affairs
         </span>{" "}
         /{" "}
-        <span className="text-gray-800 font-medium">{affairData.title}</span>
+        <span className="text-gray-800 font-medium">
+          {affairData.affair_title}
+        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 md:gap-20 gap-8">
+        {/* Main Content */}
         <div className="md:col-span-2">
           <h1
             ref={titleRef}
             className="text-2xl md:text-3xl font-bold text-gray-900 mb-2"
           >
-            {affairData.title}
+            {affairData.affair_title}
           </h1>
           <p ref={publishedRef} className="text-sm text-cyan-600 mb-6">
-            Published: {affairData.published}
+            Published: {formattedDate}
           </p>
+
           <p
-            ref={(el) => {
-              if (el) contentRefs.current[0] = el;
-            }}
-            className="text-gray-700 mb-4 leading-relaxed"
+            ref={contentRef}
+            className="text-gray-700 leading-relaxed whitespace-pre-line"
           >
-            {affairData.content1}
+            {affairData.affair_description}
           </p>
-          <p
-            ref={(el) => {
-              if (el) contentRefs.current[1] = el;
-            }}
-            className="text-gray-700 leading-relaxed"
-          >
-            {affairData.content2}
-          </p>
+
+          
         </div>
 
-        <div ref={sidebarRef} className="p-5 rounded-xl">
+        {/* Sidebar */}
+        <div
+          ref={sidebarRef}
+          className="p-5 rounded-xl bg-white shadow-sm border border-gray-100 h-fit"
+        >
           <h3 className="font-semibold text-gray-800 mb-3">
-            Recent Current Affairs
+            Files Information
           </h3>
-          {affairData.recent.map((r, i) => (
-            <div
-              key={i}
-              ref={(el) => {
-                if (el) recentRefs.current[i] = el;
-              }}
-              className="mb-2"
-            >
-              <p className="text-gray-700 text-sm">{r.title}</p>
-              <p className="text-cyan-600 text-sm">{r.date}</p>
+          {affairData.affair_file && (
+            <div className="mt-6">
+              <a
+                href={affairData.affair_file}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium py-2 px-4 rounded-md transition"
+              >
+                 View Attached File
+              </a>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

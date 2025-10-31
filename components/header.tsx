@@ -87,17 +87,20 @@ export default function Header() {
   };
 
   const isActive = (href: string, label?: string) => {
-    if (
-      label === "Insights" &&
-      (pathname.startsWith("/public/blog") ||
-        pathname.startsWith("/public/notification") ||
-        pathname.startsWith("/public/publication"))
-    ) {
-      return true;
-    }
+  const cleanPath = pathname.replace(/\/$/, ""); 
+  const cleanHref = href.replace(/\/$/, "");
+  if (
+    label === "Insights" &&
+    ["/public/blog", "/public/notification", "/public/publication"].some((path) =>
+      cleanPath.startsWith(path)
+    )
+  ) {
+    return true;
+  }
 
-    return pathname === href || pathname.startsWith(href + "/public/");
-  };
+  return cleanPath === cleanHref || cleanPath.startsWith(`${cleanHref}/`);
+};
+
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">

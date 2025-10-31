@@ -23,14 +23,18 @@ export const getCourseTypes = async (
   return apiRequest(`/api/course-types?${params.toString()}`, "GET");
 };
 
-export const getCourseTypeById = async (id: number) =>
-  apiRequest(`/api/course-types/${id}`, "GET");
+// ✅ Get single course type by ID
+export const getCourseTypeById = async (id: number | string) =>
+  apiRequest(`/api/course-types/${String(id)}`, "GET");
 
+// ✅ Create course type
 export const createCourseType = (data: any) =>
   apiRequest("/api/course-types", "POST", data);
 
-export const updateCourseType = (id: number, data: any) =>
-  apiRequest(`/api/course-types/${id}`, "PUT", data);
+// ✅ Update course type
+export const updateCourseType = (id: number | string, data: any) =>
+  apiRequest(`/api/course-types/${String(id)}`, "PUT", data);
 
-export const deleteCourseType = (id: number) =>
-  apiRequest(`/api/course-types/${id}`, "DELETE");
+// ✅ Delete course type
+export const deleteCourseType = (id: number | string) =>
+  apiRequest(`/api/course-types/${String(id)}`, "DELETE");

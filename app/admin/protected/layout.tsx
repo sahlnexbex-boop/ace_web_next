@@ -28,17 +28,51 @@ import {
   ChevronLeft,
   ChevronUp,
   ChevronDown,
+  Fan,
+  Home,
 } from "lucide-react";
 
 const menuItems = [
-  { name: "Dashboard", icon: LayoutDashboard, path: "/admin/protected/dashboard" },
-  { name: "Users", icon: Users, path: "/admin/protected/users" },
+  {
+    name: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/admin/protected/dashboard",
+  },
+  {
+    name: "Home",
+    icon: Home,
+    children: [
+      {
+        name: "Users",
+        icon: Users,
+        path: "/admin/protected/users",
+      },
+      {
+        name: "Carousel",
+        icon: Fan,
+        path: "/admin/protected/carousel",
+      },
+       {
+        name: "Shorts",
+        icon: Fan,
+        path: "/admin/protected/shorts",
+      },
+    ],
+  },
   {
     name: "Course Management",
     icon: GraduationCap,
     children: [
-      { name: "Course Types", icon: ClipboardList, path: "/admin/protected/course-types" },
-      { name: "Course Categories", icon: FolderOpen, path: "/admin/protected/course-category" },
+      {
+        name: "Course Types",
+        icon: ClipboardList,
+        path: "/admin/protected/course-types",
+      },
+      {
+        name: "Course Categories",
+        icon: FolderOpen,
+        path: "/admin/protected/course-category",
+      },
       { name: "Courses", icon: BookOpen, path: "/admin/protected/courses" },
     ],
   },
@@ -46,9 +80,21 @@ const menuItems = [
     name: "Learning Management",
     icon: BookOpen,
     children: [
-      { name: "Current Affairs", icon: Newspaper, path: "/admin/protected/affairs" },
-      { name: "Video Class", icon: PlayCircle, path: "/admin/protected/video-class" },
-      { name: "Study Service", icon: FileText, path: "/admin/protected/study-service" },
+      {
+        name: "Current Affairs",
+        icon: Newspaper,
+        path: "/admin/protected/affairs",
+      },
+      {
+        name: "Video Class",
+        icon: PlayCircle,
+        path: "/admin/protected/video-class",
+      },
+      {
+        name: "Study Service",
+        icon: FileText,
+        path: "/admin/protected/study-service",
+      },
     ],
   },
   {
@@ -56,8 +102,16 @@ const menuItems = [
     icon: BarChart3,
     children: [
       { name: "Blogs", icon: Globe, path: "/admin/protected/blogs" },
-      { name: "Publications", icon: BookOpen, path: "/admin/protected/publication" },
-      { name: "Social Services", icon: MessageSquare, path: "/admin/protected/social-service" },
+      {
+        name: "Publications",
+        icon: BookOpen,
+        path: "/admin/protected/publication",
+      },
+      {
+        name: "Social Services",
+        icon: MessageSquare,
+        path: "/admin/protected/social-service",
+      },
       { name: "Results", icon: Award, path: "/admin/protected/results" },
     ],
   },
@@ -65,18 +119,34 @@ const menuItems = [
     name: "Highlights",
     icon: Star,
     children: [
-      { name: "Success Stories", icon: Trophy, path: "/admin/protected/success-stories" },
-      { name: "Testimonials", icon: MessageSquare, path: "/admin/protected/testimonial" },
+      {
+        name: "Success Stories",
+        icon: Trophy,
+        path: "/admin/protected/success-stories",
+      },
+      {
+        name: "Testimonials",
+        icon: MessageSquare,
+        path: "/admin/protected/testimonial",
+      },
       { name: "Webinars", icon: Video, path: "/admin/protected/webinar" },
       { name: "Events", icon: Calendar, path: "/admin/protected/events" },
-      { name: "News & Updates", icon: Newspaper, path: "/admin/protected/news-updates" },
+      {
+        name: "News & Updates",
+        icon: Newspaper,
+        path: "/admin/protected/news-updates",
+      },
     ],
   },
   {
     name: "Rank Management",
     icon: Award,
     children: [
-      { name: "Rank Holders", icon: Trophy, path: "/admin/protected/rank-holders" },
+      {
+        name: "Rank Holders",
+        icon: Trophy,
+        path: "/admin/protected/rank-holders",
+      },
       { name: "Toppers", icon: GraduationCap, path: "/admin/protected/topper" },
     ],
   },
@@ -101,7 +171,6 @@ const Sidebar = memo(
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const lastPathRef = useRef(pathname);
 
-    // Auto-open parent when a child is active (only on route change)
     useEffect(() => {
       if (lastPathRef.current === pathname) return;
       lastPathRef.current = pathname;
@@ -120,7 +189,9 @@ const Sidebar = memo(
         <aside
           className={`fixed lg:static min-h-screen top-0 left-0 h-full z-40 bg-cyan-800 text-white transition-all duration-300 
             ${isCollapsed ? "w-20" : "w-64"} 
-            ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+            ${
+              mobileOpen ? "translate-x-0" : "-translate-x-full"
+            } lg:translate-x-0`}
         >
           <div className="flex items-center justify-between p-4 border-b border-cyan-700">
             <img
@@ -137,7 +208,11 @@ const Sidebar = memo(
               onClick={toggleSidebar}
               className="hidden cursor-pointer lg:block text-cyan-200 hover:text-white"
             >
-              {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              {isCollapsed ? (
+                <ChevronRight size={20} />
+              ) : (
+                <ChevronLeft size={20} />
+              )}
             </button>
           </div>
 
@@ -196,7 +271,11 @@ const Sidebar = memo(
                   key={item.name}
                   href={item.path}
                   className={`flex items-center px-4 py-3 text-sm font-medium transition 
-                    ${pathname === item.path ? "bg-cyan-600" : "hover:bg-cyan-700"}`}
+                    ${
+                      pathname === item.path
+                        ? "bg-cyan-600"
+                        : "hover:bg-cyan-700"
+                    }`}
                 >
                   <item.icon size={20} className="mr-3" />
                   {!isCollapsed && <span>{item.name}</span>}
@@ -219,7 +298,11 @@ const Sidebar = memo(
 
 Sidebar.displayName = "Sidebar";
 
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+export default function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);

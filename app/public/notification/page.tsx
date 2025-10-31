@@ -3,48 +3,70 @@ import React, { useEffect, useRef, useState } from "react";
 import { Download, ChevronRight } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { getResults } from "@/lib/api/result";
+import Loader from "@/components/loader";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface ResultItem {
+  result_id: number;
+  result_title: string;
+  result_description: string;
+  result_date: string;
+  result_type: number | string;
+  based_type: number;
+  course_id: number;
+  category_id: number | null;
+  result_file: string | null;
+  status: number;
+  created_at: string;
+  updated_at: string;
+  course?: { course_id: number; course_name: string };
+  category?: { category_id: number; category_name: string } | null;
+}
+
 export default function NotificationsPage() {
-  const [activeTab, setActiveTab] = useState<"notifications" | "results">("notifications");
+  const [activeTab, setActiveTab] = useState<"notifications" | "results">(
+    "notifications"
+  );
+  const [notifications, setNotifications] = useState<ResultItem[]>([]);
+  const [results, setResults] = useState<ResultItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const notifications = [
-    { title: "Semester Exam Notification - March 2025", date: "Published: 20 Sep 2025", course: "UG - B.Sc" },
-    { title: "Mid-Term Exam Schedule - Feb 2025", date: "Published: 10 Feb 2025", course: "PG - MBA" },
-    { title: "Entrance Exam Notification - 2025 Batch", date: "Published: 13 Jan 2025", course: "UG/PG - All Courses" },
-    { title: "Supplementary Exam Notification - April 2025", date: "Published: 28 Mar 2025", course: "UG - B.Com" },
-    { title: "Practical Exam Timetable - June 2025", date: "Published: 15 Jun 2025", course: "UG/PG - All Science Streams" },
-    { title: "Online Exam Guidelines - July 2025", date: "Published: 05 Jul 2025", course: "PG - MCA" },
-    { title: "Revaluation Notification - Aug 2025", date: "Published: 08 Aug 2025", course: "UG - Arts & Science" },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await getResults(1, 10, "", "1");
 
-  const results = [
-    { title: "Final Year Results - B.Sc Computer Science 2025", date: "Published: 15 Sep 2025", course: "UG - B.Sc" },
-    { title: "MBA Semester Results - June 2025", date: "Published: 09 Jul 2025", course: "PG - MBA" },
-    { title: "Entrance Exam Results - 2025 Batch", date: "Published: 30 Apr 2025", course: "UG/PG - All Courses" },
-    { title: "Supplementary Results - B.Com April 2025", date: "Published: 25 May 2025", course: "UG - B.Com" },
-    { title: "MCA Final Year Results - July 2025", date: "Published: 20 Jul 2025", course: "PG - MCA" },
-  ];
+        const data: ResultItem[] = res?.data?.data || res?.data || [];
+
+        const notifs = data.filter((item) => Number(item.result_type) === 1);
+        const resItems = data.filter((item) => Number(item.result_type) === 2);
+
+        setNotifications(notifs);
+        setResults(resItems);
+      } catch (error) {
+        console.error("Error fetching results:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (listRef.current) {
       const cards = listRef.current.querySelectorAll(".notify-card");
-
       gsap.fromTo(
         cards,
         { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: "power3.out",
-        }
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power3.out" }
       );
     }
-  }, [activeTab]);
+  }, [activeTab, notifications, results]);
 
   useEffect(() => {
     gsap.from(".page-header", {
@@ -54,6 +76,8 @@ export default function NotificationsPage() {
       ease: "power3.out",
     });
   }, []);
+
+  const activeData = activeTab === "notifications" ? notifications : results;
 
   return (
     <div className="max-w-6xl mx-auto px-5 md:px-10 md:py-14 py-8">
@@ -101,31 +125,55 @@ export default function NotificationsPage() {
       </div>
 
       <div ref={listRef} className="space-y-4">
-        {(activeTab === "notifications" ? notifications : results).map((item, index) => (
-          <div
-            key={index}
-            className="notify-card flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white shadow-sm hover:shadow-md border border-gray-100 rounded-lg p-4 transition-all hover:-translate-y-1"
-          >
-            <div className="text-left w-full sm:w-auto">
-              <h3 className="text-cyan-800 font-semibold text-base md:text-lg">
-                {item.title}
-              </h3>
-              <p className="text-sm text-gray-500 mt-1">
-                {item.date} | {item.course}
-              </p>
-            </div>
-
-            {activeTab === "notifications" ? (
-              <button className="cursor-pointer flex items-center gap-1 mt-3 sm:mt-0 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all">
-                View Details <ChevronRight size={16} />
-              </button>
-            ) : (
-              <button className="cursor-pointer flex items-center gap-2 mt-3 sm:mt-0 bg-red-50 text-red-600 hover:bg-red-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all">
-                <Download size={16} /> Download
-              </button>
-            )}
+        {loading ? (
+          <Loader />
+        ) : activeData.length === 0 ? (
+          <div className="flex justify-center items-center min-h-[70vh] md:min-h-auto">
+            <img src="../../no_data.png" alt="no data" className="opacity-30" />
           </div>
-        ))}
+        ) : (
+          activeData.map((item) => (
+            <div
+              key={item.result_id}
+              className="notify-card flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white shadow-sm hover:shadow-md border border-gray-100 rounded-lg p-4 transition-all hover:-translate-y-1"
+            >
+              <div className="text-left w-full sm:w-auto">
+                <h3 className="text-cyan-800 font-semibold text-base md:text-lg">
+                  {item.result_title}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Published:{" "}
+                  {new Date(item.result_date).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}{" "}
+                  | {item.course?.course_name || item.category?.category_name || "N/A"}
+                </p>
+              </div>
+
+              {activeTab === "notifications" ? (
+                <a
+                  href={`${item.result_file}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer flex items-center gap-1 mt-3 sm:mt-0 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all"
+                >
+                  View Details <ChevronRight size={16} />
+                </a>
+              ) : (
+                <a
+                  href={item.result_file || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer flex items-center gap-2 mt-3 sm:mt-0 bg-red-50 text-red-600 hover:bg-red-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all"
+                >
+                  <Download size={16} /> Download
+                </a>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

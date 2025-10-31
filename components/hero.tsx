@@ -1,170 +1,218 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState, useRef } from "react";
 import { gsap } from "gsap";
+import { getCarousels } from "@/lib/api/carousel";
 
 export default function Hero() {
-  const slides = [
-    {
-      id: 1,
-      heading: "Prepare Yourself for IT Era",
-      subheading: "Get Yourself Renovated",
-      texts: [
-        "Software Development, Web Designing & Development",
-        "Multimedia & Animation, Graphic Designing, Accounting Packages",
-        "PSC Approved Packages",
-      ],
-      image: "/hero_lady.png",
-      logo: "/logo_only.png",
-    },
-    {
-      id: 2,
-      heading: "Empower Your Future",
-      subheading: "Learn with Experts",
-      texts: [
-        "Industry-oriented courses crafted for the future",
-        "Hands-on mentorship from experienced professionals",
-        "Career assistance and placement support",
-      ],
-      image: "/hero_lady.png",
-      logo: "/logo_only.png",
-    },
-    {
-      id: 3,
-      heading: "Transform Your Skills",
-      subheading: "Join the Digital Revolution",
-      texts: [
-        "AI, Data Science, Cloud & Full Stack Programs",
-        "Collaborate with top mentors and peers",
-        "Shape your professional journey with ACE",
-      ],
-      image: "/hero_lady.png",
-      logo: "/logo_only.png",
-    },
-  ];
-
+  const [slides, setSlides] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const fetchCarousels = async () => {
+      try {
+        setLoading(true);
+        const res = await getCarousels(1, 10, "", 1);
+        if (res?.data) setSlides(res.data);
+      } catch (error) {
+        console.error("Error fetching carousels:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCarousels();
+  }, []);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    gsap.set([".hero-heading", ".hero-subheading", ".hero-text", ".hero-button"], {
-      clearProps: "all",
-    });
+    gsap.set(
+      [".hero-heading", ".hero-subheading", ".hero-text", ".hero-button"],
+      {
+        clearProps: "all",
+      }
+    );
 
     tl.fromTo(
       ".hero-heading",
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 1 }
-    );
-    tl.fromTo(
-      ".hero-subheading",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.6"
-    );
-    tl.fromTo(
-      ".hero-text",
-      { opacity: 0, x: -30 },
-      { opacity: 1, x: 0, duration: 0.55, stagger: 0.15 },
-      "-=0.45"
-    );
-    tl.fromTo(
-      ".hero-button",
-      { opacity: 0, scale: 0.95 },
-      { opacity: 1, scale: 1, duration: 0.45 },
-      "-=0.3"
-    );
+    )
+      .fromTo(
+        ".hero-subheading",
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        "-=0.6"
+      )
+      .fromTo(
+        ".hero-text",
+        { opacity: 0, x: -30 },
+        { opacity: 1, x: 0, duration: 0.55, stagger: 0.15 },
+        "-=0.45"
+      )
+      .fromTo(
+        ".hero-button",
+        { opacity: 0, scale: 0.95 },
+        { opacity: 1, scale: 1, duration: 0.45 },
+        "-=0.3"
+      );
 
     return () => {
       tl.kill();
     };
   }, [currentSlide]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const startAutoPlay = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 10000);
-    return () => clearInterval(interval);
-  }, [slides.length]);
+  };
 
-  return (
-    <section className="relative bg-gradient-to-r from-blue-500 via-cyan-500 to-cyan-200 md:min-h-[600px] min-h-[675px] flex items-center overflow-hidden z-10">
-      {slides.map((slide, index) => (
-        <div
-          key={slide.id}
-          aria-hidden={index !== currentSlide}
-          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-            index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-          }`}
-        >
-          {/* Background Layer */}
-          <div className="absolute bg-black/80 sm:bg-transparent inset-0 flex flex-col md:flex-row justify-center md:justify-between items-center md:px-0 z-0">
-            <img
-              src={slide.image}
-              alt="Hero Mobile"
-              className="block md:hidden w-full h-full object-cover object-[right_center] opacity-50"
-            />
+  useEffect(() => {
+    if (slides.length === 0) return;
+    startAutoPlay();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [slides]);
 
-            {/* Desktop Logo */}
-            <img
-              src={slide.logo}
-              alt="Logo"
-              className="hidden md:block w-[300px] lg:w-[450px] h-auto opacity-80"
-            />
+  useEffect(() => {
+    const currentVideo = videoRefs.current[currentSlide];
+    if (currentVideo) {
+      currentVideo.play().catch(() => {
+        currentVideo.muted = true;
+        currentVideo
+          .play()
+          .catch((err) => console.warn("Autoplay prevented:", err));
+      });
+    }
+  }, [currentSlide]);
 
-            <div className="hidden md:block relative w-3/5 h-full z-0">
-              <img
-                src={slide.image}
-                alt="Hero"
-                className="w-full h-full object-cover z-0"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#00ace5] to-transparent pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-l from-white/75 via-transparent to-transparent pointer-events-none" />
-            </div>
-          </div>
+  const handleDotClick = (index: number) => {
+    setCurrentSlide(index);
+    startAutoPlay();
+  };
 
-          <div className="relative max-w-7xl h-full flex justify-center items-center mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-28">
-            <div className="text-white text-center md:text-left">
-              <h1 className="hero-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-2">
-                {slide.heading}
-              </h1>
-              <p className="hero-subheading text-base sm:text-lg md:text-xl mb-6 text-cyan-100 font-light">
-                {slide.subheading}
-              </p>
-
-              <div className="space-y-2 mb-8 text-sm sm:text-base md:text-lg">
-                {slide.texts.map((text, i) => (
-                  <p key={i} className="hero-text">
-                    {text}
-                  </p>
-                ))}
-              </div>
-
-              <Button
-                size="lg"
-                className="hero-button bg-white text-gray-700 cursor-pointer hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold"
-              >
-                Explore Now
-              </Button>
+  if (loading) {
+    return (
+      <section className="relative md:min-h-[600px] min-h-[500px] bg-gray-100 flex items-center justify-center overflow-hidden">
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="animate-pulse w-full h-full flex flex-col items-center justify-center space-y-4">
+            <div className="bg-gray-300 h-full w-full" />
+            <div className="absolute bottom-10 flex space-x-3">
+              <div className="w-3 h-3 bg-gray-400 rounded-full" />
+              <div className="w-3 h-3 bg-gray-400 rounded-full" />
+              <div className="w-3 h-3 bg-gray-400 rounded-full" />
             </div>
           </div>
         </div>
-      ))}
+      </section>
+    );
+  }
 
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
+  if (slides.length === 0) {
+    return (
+      <section className="md:min-h-[600px] flex items-center justify-center bg-gray-100">
+        <p className="text-gray-500 text-lg">No carousel found</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="relative flex items-center overflow-hidden z-10 md:min-h-[600px] min-h-[600px]">
+      {slides.map((slide, index) => {
+        const displayFile = isMobile
+          ? slide.carousel_mobile_file || slide.carousel_file
+          : slide.carousel_file;
+
+        const isVideo = displayFile?.toLowerCase().endsWith(".mp4");
+
+        return (
+          <div
+            key={slide.carousel_id}
+            aria-hidden={index !== currentSlide}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              index === currentSlide
+                ? "opacity-100 z-10"
+                : "opacity-0 z-0 pointer-events-none"
+            }`}
+          >
+            <div className="absolute inset-0 flex justify-center items-center z-0">
+              {isVideo ? (
+                <video
+                  ref={(el: HTMLVideoElement | null) => {
+                    videoRefs.current[index] = el;
+                  }}
+                  src={displayFile}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  className="w-full h-full object-cover"
+                  onLoadedMetadata={(e) =>
+                    e.currentTarget.play().catch(() => {})
+                  }
+                />
+              ) : (
+                <img
+                  src={displayFile}
+                  alt={slide.carousel_title}
+                  className="w-full h-full object-cover"
+                />
+              )}
+              <div className="absolute inset-0 bg-black/20" />
+            </div>
+
+            <div className="relative max-w-7xl h-full flex justify-center md:justify-start items-center mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-28 text-center md:text-left">
+              <div className="text-white max-w-2xl">
+                <h1 className="hero-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-2">
+                  {slide.carousel_title}
+                </h1>
+                <p className="hero-subheading text-base sm:text-lg md:text-xl mb-4 text-cyan-100 font-light">
+                  {slide.carousel_sec_title}
+                </p>
+                <p className="hero-text text-sm sm:text-base md:text-lg leading-relaxed mb-6 md:me-20">
+                  {slide.carousel_description}
+                </p>
+
+                {slide.carousel_title && (
+                  <a
+                    href="/public/contact"
+                    className="hero-button inline-block bg-white rounded-xl text-gray-700 cursor-pointer hover:bg-gray-100 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
+                  >
+                    Explore Now
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
         {slides.map((_, i) => (
           <button
             key={i}
-            onClick={() => setCurrentSlide(i)}
+            onClick={() => handleDotClick(i)}
             aria-label={`Go to slide ${i + 1}`}
-            className={`w-3 h-3 rounded-full transition-all duration-200 ${
+            className={`w-3 h-3 rounded-full transition-all duration-200 cursor-pointer ${
               i === currentSlide
                 ? "bg-white scale-110 w-6"
                 : "bg-white/50 hover:bg-white/70"
             }`}
-            style={{ opacity: 1 }}
           />
         ))}
       </div>

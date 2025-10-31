@@ -1,200 +1,138 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { gsap } from "gsap";
+import { getResults } from "@/lib/api/result";
 
 export default function AboutUs() {
-  const tabs = [
-    {
-      text: "PAC Corner",
-      textColor: "text-green-600",
-      bg: "bg-green-300/10",
-      hover: "hover:bg-green-50",
-    },
-    {
-      text: "Exam & Results",
-      textColor: "text-purple-600",
-      bg: "bg-purple-300/10",
-      hover: "hover:bg-purple-50",
-    },
-    {
-      text: "Exam & Ans Keys",
-      textColor: "text-blue-600",
-      bg: "bg-blue-300/10",
-      hover: "hover:bg-blue-50",
-    },
-    {
-      text: "Rank Holder List",
-      textColor: "text-red-500",
-      bg: "bg-red-300/10",
-      hover: "hover:bg-red-50",
-    },
-    {
-      text: "Online Admission",
-      textColor: "text-teal-600",
-      bg: "bg-teal-300/10",
-      hover: "hover:bg-teal-50",
-    },
-    {
-      text: "Publications",
-      textColor: "text-gray-600",
-      bg: "bg-gray-300/10",
-      hover: "hover:bg-gray-50",
-    },
-    {
-      text: "Event Gallery",
-      textColor: "text-pink-600",
-      bg: "bg-pink-300/10",
-      hover: "hover:bg-pink-50",
-    },
-  ];
-
-  const yearsRef = useRef(null);
-  const studentsRef = useRef(null);
-  const facultyRef = useRef(null);
-  const statsRef = useRef(null);
-
+  const [notifications, setNotifications] = useState<any[]>([]);
   const router = useRouter();
 
+  const yearsRef = useRef<HTMLDivElement | null>(null);
+  const studentsRef = useRef<HTMLDivElement | null>(null);
+  const facultyRef = useRef<HTMLDivElement | null>(null);
+  const statsRef = useRef<HTMLDivElement | null>(null);
+
+  const tabs = [
+    { text: "PAC Corner", textColor: "text-green-600", bg: "bg-green-300/10", hover: "hover:bg-green-50" },
+    { text: "Exam & Results", textColor: "text-purple-600", bg: "bg-purple-300/10", hover: "hover:bg-purple-50" },
+    { text: "Exam & Ans Keys", textColor: "text-blue-600", bg: "bg-blue-300/10", hover: "hover:bg-blue-50" },
+    { text: "Rank Holder List", textColor: "text-red-500", bg: "bg-red-300/10", hover: "hover:bg-red-50" },
+    { text: "Online Admission", textColor: "text-teal-600", bg: "bg-teal-300/10", hover: "hover:bg-teal-50" },
+    { text: "Publications", textColor: "text-gray-600", bg: "bg-gray-300/10", hover: "hover:bg-gray-50" },
+    { text: "Event Gallery", textColor: "text-pink-600", bg: "bg-pink-300/10", hover: "hover:bg-pink-50" },
+  ];
+
   useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    const fetchNotifications = async () => {
+      try {
+        const res = await getResults(1, 10, "", "1", undefined, "1"); 
+        const data = res?.data || [];
+        const total = data.length;
 
-    tl.fromTo(
-      ".about-heading",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1 }
-    );
+        const placeholders = Array.from(
+          { length: Math.max(0, 6 - total) },
+          (_, i) => ({
+            result_id: `coming-soon-${i}`,
+            result_title: "Coming Soon",
+            result_date: "",
+            result_file: "",
+            placeholder: true,
+          })
+        );
 
-    tl.fromTo(
-      ".about-subheading",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.5"
-    );
-
-    tl.fromTo(
-      ".about-text",
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.7 },
-      "-=0.4"
-    );
-
-    tl.fromTo(
-      ".about-stat",
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, stagger: 0.2 },
-      "-=0.5"
-    );
-
-    tl.fromTo(
-      ".about-button",
-      { opacity: 0, scale: 0.8 },
-      { opacity: 1, scale: 1, duration: 0.5 },
-      "-=0.3"
-    );
-
-    tl.fromTo(
-      ".about-tab",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
-      "-=0.4"
-    );
-
-    tl.fromTo(
-      ".notifications-panel",
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 0.8 },
-      "-=0.5"
-    );
-
-    tl.fromTo(
-      ".notification-item",
-      { opacity: 0, x: 30 },
-      { opacity: 1, x: 0, duration: 0.6, stagger: 0.15 },
-      "-=0.4"
-    );
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          const counterTl = gsap.timeline({ defaults: { ease: "power3.out" } });
-          const counterDuration = 3;
-          counterTl.to(
-            yearsRef.current,
-            {
-              innerText: 20,
-              duration: counterDuration,
-              snap: { innerText: 1 },
-              delay: 0.5,
-              onUpdate: function () {
-                yearsRef.current.innerText =
-                  Math.ceil(this.targets()[0].innerText) + "+";
-              },
-            },
-            "start"
-          );
-          counterTl.to(
-            studentsRef.current,
-            {
-              innerText: 5000,
-              duration: counterDuration,
-              snap: { innerText: 100 },
-              delay: 0.5,
-              onUpdate: function () {
-                studentsRef.current.innerText =
-                  Math.ceil(this.targets()[0].innerText) + "+";
-              },
-            },
-            "start"
-          );
-          counterTl.to(
-            facultyRef.current,
-            {
-              innerText: 100,
-              duration: counterDuration,
-              snap: { innerText: 1 },
-              delay: 0.5,
-              onUpdate: function () {
-                facultyRef.current.innerText =
-                  Math.ceil(this.targets()[0].innerText) + "+";
-              },
-            },
-            "start"
-          );
-
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (statsRef.current) {
-      observer.observe(statsRef.current);
-    }
-
-    return () => {
-      tl.kill();
-      if (statsRef.current) {
-        observer.unobserve(statsRef.current);
+        setNotifications([...data, ...placeholders]);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
       }
     };
+    fetchNotifications();
   }, []);
+
+ useEffect(() => {
+  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+  // === Entrance Animations ===
+  tl.fromTo(".about-heading", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8 });
+  tl.fromTo(".about-subheading", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, "-=0.4");
+  tl.fromTo(".about-text", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, "-=0.3");
+  tl.fromTo(".about-stat", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.15 }, "-=0.3");
+  tl.fromTo(".about-button", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4 }, "-=0.3");
+  tl.fromTo(".about-tab", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 }, "-=0.4");
+
+  // ⏩ Notifications - Start Earlier (less delay)
+  tl.fromTo(
+    ".notifications-panel",
+    { opacity: 0, y: 30 },
+    { opacity: 1, y: 0, duration: 0.6 },
+    "-=0.4" // was -0.5, start earlier
+  );
+  tl.fromTo(
+    ".notification-item",
+    { opacity: 0, x: 25 },
+    { opacity: 1, x: 0, duration: 0.4, stagger: 0.12 },
+    "-=0.5"
+  );
+
+  // === Counter Animation (start & end simultaneously) ===
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        const duration = 2.5; // ⏱ same duration for all counters
+        const targetValues = [
+          { ref: yearsRef, end: 20, suffix: "+" },
+          { ref: studentsRef, end: 5000, suffix: "+" },
+          { ref: facultyRef, end: 100, suffix: "+" },
+        ];
+
+        // Animate all counters together
+        targetValues.forEach(({ ref, end, suffix }) => {
+          if (ref.current) {
+            gsap.to(ref.current, {
+              innerText: end,
+              duration,
+              ease: "power3.out",
+              snap: { innerText: 1 },
+              onUpdate() {
+                if (ref.current)
+                  ref.current.innerText = Math.ceil(this.targets()[0].innerText) + suffix;
+              },
+            });
+          }
+        });
+
+        observer.disconnect();
+      }
+    },
+    { threshold: 0.5 }
+  );
+
+  if (statsRef.current) observer.observe(statsRef.current);
+  return () => {
+    tl.kill();
+    if (statsRef.current) observer.unobserve(statsRef.current);
+  };
+}, []);
+
 
   return (
     <section className="md:py-16 py-10 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col-reverse lg:flex-row gap-12 items-start">
-          <div className="relative w-full lg:w-1/2 z-10">
+          <div className="relative w-full lg:w-1/2 z-0">
             <img
               src="/logo_full.png"
               alt="background_logo"
-              className="absolute right-28 blur-[1px] -bottom-10 z-1 hidden sm:block"
+              className="absolute right-28 blur-[1px] -bottom-10 z-0 hidden sm:block"
             />
-            <div className="notifications-panel bg-white/80 rounded-lg shadow-lg p-6 max-w-md !z-10 relative mx-auto lg:mx-0">
+            <div className="notifications-panel bg-white/80 rounded-lg shadow-lg p-6 max-w-md relative mx-auto lg:mx-0">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg cursor-pointer font-bold text-gray-900" onClick={()=>router.push("/public/notification")}>
+                <h3
+                  className="text-lg cursor-pointer font-bold text-gray-900"
+                  onClick={() => router.push("/public/notification")}
+                >
                   Notifications
                 </h3>
                 <svg
@@ -215,27 +153,51 @@ export default function AboutUs() {
                 </svg>
               </div>
 
-              <div className="space-y-4 max-h-[20rem] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => (
+              <div className="space-y-4 max-h-[21rem] relative z-10 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {notifications.map((item) => (
                   <div
-                    key={item}
+                    key={item.result_id}
                     className="notification-item flex items-center justify-between py-1 border-b border-gray-100 last:border-b-0"
                   >
                     <div>
-                      <p className="font-semibold text-sm text-gray-900">
-                        PCS Exam Result {item}
+                      <p
+                        className={`font-semibold text-sm ${
+                          item.placeholder ? "text-gray-400 italic" : "text-gray-900"
+                        }`}
+                      >
+                        {item.result_title}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        10 Apr 2025 10:25pm
-                      </p>
+                      {!item.placeholder && (
+                        <p className="text-xs text-gray-500">
+                          {item.result_date
+                            ? new Date(item.result_date).toLocaleString("en-IN", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : ""}
+                        </p>
+                      )}
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs px-3 py-1 text-cyan-600 bg-[#098B9F33] hover:text-cyan-800 cursor-pointer hover:bg-[#098B9F55]"
-                    >
-                      View Result
-                    </Button>
+                    {!item.placeholder ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(item.result_file, "_blank")}
+                        className="text-xs px-3 py-1 text-cyan-600 bg-[#098B9F33] hover:text-cyan-800 cursor-pointer hover:bg-[#098B9F55]"
+                      >
+                        View
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        disabled
+                        variant="outline"
+                        className="text-xs px-3 py-1 text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed"
+                      >
+                        Coming Soon
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -243,9 +205,7 @@ export default function AboutUs() {
           </div>
 
           <div className="w-full lg:w-1/2">
-            <h2 className="about-heading text-3xl md:text-4xl font-bold mb-2 text-gray-900">
-              About Us
-            </h2>
+            <h2 className="about-heading text-3xl md:text-4xl font-bold mb-2 text-gray-900">About Us</h2>
             <h3 className="about-subheading text-2xl md:text-3xl font-bold mb-6 text-cyan-600">
               Ace Institutions
             </h3>
@@ -254,10 +214,7 @@ export default function AboutUs() {
               2003 at Manjeri, Malappuram district of Kerala.
             </p>
 
-            <div
-              ref={statsRef}
-              className="about-stats grid grid-cols-3 gap-8 mb-8"
-            >
+            <div ref={statsRef} className="about-stats grid grid-cols-3 gap-8 mb-8">
               <div className="about-stat text-center">
                 <div
                   ref={yearsRef}
@@ -290,7 +247,7 @@ export default function AboutUs() {
             <Button
               size="lg"
               className="about-button cursor-pointer bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#176090] hover:to-[#0088c7] text-white px-8 py-3"
-              onClick={()=>router.push("/public/about")}
+              onClick={() => router.push("/public/about")}
             >
               Explore More
             </Button>
@@ -302,8 +259,7 @@ export default function AboutUs() {
             {tabs.map((tab) => (
               <button
                 key={tab.text}
-                className={`about-tab flex-shrink-0 snap-start px-6 py-2 cursor-pointer rounded-lg shadow-md transition 
-                  ${tab.textColor} ${tab.bg} ${tab.hover}`}
+                className={`about-tab flex-shrink-0 snap-start px-6 py-2 cursor-pointer rounded-lg shadow-md transition ${tab.textColor} ${tab.bg} ${tab.hover}`}
               >
                 {tab.text}
               </button>

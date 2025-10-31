@@ -1,8 +1,10 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { getPublicationById } from "@/lib/api/publication";
+import { IconBook } from "@tabler/icons-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,28 +15,38 @@ export default function PublicationDetails() {
   const containerRef = useRef<HTMLDivElement>(null);
   const relatedRef = useRef<HTMLDivElement>(null);
 
-  const books = [
-    { id: 1, title: "Mathematics Super Rank File", category: "HSA Maths", price: 160, author: "ACE Publication", language: "ENGLISH", image: "/book_01.png" },
-    { id: 2, title: "Mission LP/UP Super Rank File 7th Edition", category: "LPUP", price: 180, author: "ACE Publication", language: "MALAYALAM", image: "/book_02.png" },
-    { id: 3, title: "HIGH SCHOOL TEACHER MATHEMATICS", category: "HSA Maths", price: 580, author: "ACE Publication", language: "ENGLISH", image: "/book_03.png" },
-    { id: 4, title: "Malayalam Grammar File", category: "HSA Maths", price: 160, author: "ACE Publication", language: "MALAYALAM", image: "/book_04.png" },
-    { id: 11, title: "English Grammar Guide", category: "HSA Maths", price: 160, author: "ACE Publication", language: "ENGLISH", image: "/book_11.png" },
-    { id: 12, title: "Current Affairs Book", category: "HSA Maths", price: 580, author: "ACE Publication", language: "ENGLISH", image: "/book_12.png" },
-  ];
+  const [book, setBook] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const book = books.find((b) => b.id === Number(id));
-  if (!book) return <div className="p-10 text-center">Book not found.</div>;
+  // ✅ Fetch book details by ID from backend
+  useEffect(() => {
+    const fetchBook = async () => {
+      if (!id) return;
+      try {
+        const response = await getPublicationById(Number(id));
+        setBook(response?.data || null);
+      } catch (error) {
+        console.error("Failed to fetch publication details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBook();
+  }, [id]);
 
-  const related = books.filter((b) => b.category === book.category && b.id !== book.id);
-
+  // ✅ GSAP Animations
   useLayoutEffect(() => {
+    if (!book) return;
+
     const ctx = gsap.context(() => {
+      // Page fade-in
       gsap.fromTo(
         containerRef.current,
         { autoAlpha: 0, y: 40 },
         { autoAlpha: 1, y: 0, duration: 0.8, ease: "power2.out" }
       );
 
+      // Image animation
       gsap.fromTo(
         ".book-image",
         { opacity: 0, x: -40 },
@@ -47,6 +59,7 @@ export default function PublicationDetails() {
         }
       );
 
+      // Info animation
       gsap.fromTo(
         ".book-info",
         { opacity: 0, x: 40 },
@@ -60,6 +73,7 @@ export default function PublicationDetails() {
         }
       );
 
+      // Related cards (optional)
       if (relatedRef.current) {
         const cards = relatedRef.current.querySelectorAll(".related-card");
         gsap.fromTo(
@@ -80,6 +94,9 @@ export default function PublicationDetails() {
     return () => ctx.revert();
   }, [book]);
 
+  if (loading) return <div className="p-10 text-center text-gray-600">Loading publication...</div>;
+  if (!book) return <div className="p-10 text-center text-red-500">Book not found.</div>;
+
   return (
     <div ref={containerRef} className="max-w-7xl mx-auto px-6 md:px-10 md:py-16 py-8">
       {/* Breadcrumb */}
@@ -90,74 +107,52 @@ export default function PublicationDetails() {
         <span>/</span>
         <span>Publications</span>
         <span>/</span>
-        <span>{book.title}</span>
+        <span>{book.book_title}</span>
       </div>
 
+      {/* Book Section */}
       <div className="flex flex-col md:flex-row md:gap-32 gap-6 md:mt-12">
         <img
-          src={book.image}
-          alt={book.title}
+          src={book.book_image}
+          alt={book.book_title}
           className="book-image w-full md:w-1/4 object-contain rounded-lg shadow-sm"
         />
 
         <div className="book-info flex-1 flex flex-col justify-center items-start">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{book.title}</h1>
-          <p className="text-lg text-gray-700 mb-2">Author: <span className="font-semibold">{book.author}</span></p>
-          <p className="md:text-3xl text-xl font-bold text-cyan-700 mb-6">₹{book.price}</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{book.book_title}</h1>
+          <p className="text-gray-700 mb-4 text-justify leading-relaxed">
+            {book.book_description}
+          </p>
+          <p className="text-lg text-gray-700 mb-2">
+            Author: <span className="font-semibold">{book.book_author}</span>
+          </p>
+          <p className="md:text-3xl text-xl font-bold text-cyan-700 mb-6">₹{book.book_price}</p>
 
           <div className="text-sm text-gray-700 space-y-3 mb-8">
-            <p><strong>Category:</strong> {book.category}</p>
-            <p><strong>Language:</strong> {book.language}</p>
-            <p><strong>Author:</strong> {book.author}</p>
+            <p><strong>Category:</strong> {book.category?.category_name || "—"}</p>
+            <p><strong>Language:</strong> {book.book_language}</p>
             <p><strong>Paper:</strong> PAPER BACK</p>
           </div>
 
-          <button className="cursor-pointer border rounded-lg px-5 py-2 flex items-center gap-2 hover:bg-gray-100 transition-all duration-300 hover:shadow-md">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="red"
-              className="icon icon-tabler icons-tabler-filled icon-tabler-heart"
+          {/* Download / Wishlist buttons */}
+          <div className="flex flex-wrap gap-4">
+            <a
+              href={book.book_file}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer bg-cyan-600 text-white border border-cyan-600 rounded-lg px-5 py-2 flex items-center gap-2 hover:bg-cyan-700 transition-all duration-300"
             >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M6.979 3.074a6 6 0 0 1 4.988 1.425l.037 .033l.034 -.03a6 6 0 0 1 4.733 -1.44l.246 .036a6 6 0 0 1 3.364 10.008l-.18 .185l-.048 .041l-7.45 7.379a1 1 0 0 1 -1.313 .082l-.094 -.082l-7.493 -7.422a6 6 0 0 1 3.176 -10.215z" />
-            </svg>
-            Add To Wishlist
-          </button>
+              <IconBook stroke={2} /> View Book
+            </a>
+            {/* <button className="cursor-pointer border rounded-lg px-5 py-2 flex items-center gap-2 hover:bg-gray-100 transition-all duration-300 hover:shadow-md">
+              ❤️ Add To Wishlist
+            </button> */}
+          </div>
         </div>
       </div>
 
-      {related.length > 0 && (
-        <>
-          <h2 className="text-xl md:text-2xl font-bold text-center text-gray-900 my-10">
-            Other Books
-          </h2>
-          <div
-            ref={relatedRef}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 overflow-x-auto snap-x md:overflow-visible"
-          >
-            {related.map((r) => (
-              <div
-                key={r.id}
-                onClick={() => router.push(`/public/publication/${r.id}`)}
-                className="related-card bg-white border rounded-lg shadow-sm hover:shadow-lg transition-all p-3 cursor-pointer snap-center transform hover:-translate-y-1 hover:scale-[1.02]"
-              >
-                <img
-                  src={r.image}
-                  alt={r.title}
-                  className="w-full object-contain mb-2 transition-transform duration-300 hover:scale-105"
-                />
-                <h3 className="text-sm font-semibold text-center text-gray-800 line-clamp-2">
-                  {r.title}
-                </h3>
-                <p className="text-center text-gray-900 font-bold mt-1">₹{r.price}</p>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {/* Related Books (optional future addition) */}
+      <div ref={relatedRef} className="mt-12"></div>
     </div>
   );
 }

@@ -20,18 +20,14 @@ export const getCourseCategories = async (
   return apiRequest(`/api/course-category?${params.toString()}`, "GET");
 };
 
-// ✅ Get Category by ID
 export const getCourseCategoryById = async (id: number) =>
   apiRequest(`/api/course-category/${id}`, "GET");
 
-// ✅ Create New Category
 export const createCourseCategory = (data: FormData) =>
   apiRequest("/api/course-category", "POST", data, true);
 
-// ✅ Update Category
 export const updateCourseCategory = (id: number, data: FormData) =>
   apiRequest(`/api/course-category/${id}`, "PUT", data, true);
 
-// ✅ Delete Category
 export const deleteCourseCategory = (id: number) =>
   apiRequest(`/api/course-category/${id}`, "DELETE");

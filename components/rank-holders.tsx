@@ -4,21 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getRankHolders } from "@/lib/api/rankHolders";
 
 export default function RankHolders() {
   const gridRef = useRef<HTMLDivElement | null>(null);
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [rankHolders, setRankHolders] = useState<any[]>([]);
   const router = useRouter();
 
-  const rankHolders = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    rank: i + 1,
-    name: "Hashir Shan K",
-    position: "Ambulance Assistant",
-    image: `/rank_std_0${(i % 4) + 1}.png`,
-  }));
+  useEffect(() => {
+    const fetchRankHolders = async () => {
+      try {
+        const res = await getRankHolders(1, 10, "", 1, undefined, undefined, undefined, undefined, 2);
+        const data = res?.data || [];
+        setRankHolders(data);
+      } catch (error) {
+        console.error("Error fetching rank holders:", error);
+      }
+    };
+    fetchRankHolders();
+  }, []);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -30,16 +37,15 @@ export default function RankHolders() {
   useEffect(() => {
     if (!gridRef.current) return;
     const cards = gridRef.current.querySelectorAll(".rank-card");
-
-    gsap.set(cards, { opacity: 0, y: 40 });
+    gsap.set(cards, { opacity: 0, y: 50 });
     gsap.to(cards, {
       opacity: 1,
       y: 0,
-      duration: 0.6,
-      stagger: 0.1,
+      duration: 0.8,
+      stagger: 0.15,
       ease: "power3.out",
     });
-  }, []);
+  }, [rankHolders]);
 
   const nextSlide = () => {
     if (!sliderRef.current) return;
@@ -68,9 +74,11 @@ export default function RankHolders() {
   return (
     <section className="md:py-16 py-10 bg-white overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* Title */}
         <div className="relative mb-12 flex justify-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer" onClick={()=>router.push("/public/exams")}>
+          <h2
+            className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer"
+            onClick={() => router.push("/public/exams")}
+          >
             Rank Holders
           </h2>
           <img
@@ -80,8 +88,7 @@ export default function RankHolders() {
           />
         </div>
 
-        {/* Arrows (desktop only) */}
-        {!isMobile && (
+        {!isMobile && rankHolders.length > 4 && (
           <>
             <button
               onClick={prevSlide}
@@ -98,7 +105,6 @@ export default function RankHolders() {
           </>
         )}
 
-        {/* Slider Container */}
         <div
           ref={(el) => {
             sliderRef.current = el;
@@ -106,7 +112,7 @@ export default function RankHolders() {
           }}
           className={`flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory ${
             isMobile ? "pb-10" : "overflow-hidden pb-10"
-          } pl-0 pr-6`} // 👈 we’ll handle left space via first card margin
+          } pl-0 pr-6`}
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",
@@ -114,11 +120,11 @@ export default function RankHolders() {
         >
           {rankHolders.map((holder, idx) => (
             <div
-              key={holder.id}
+              key={holder.rank_holder_id}
               className={`rank-card snap-start flex-shrink-0 ${
                 isMobile ? "w-[80%]" : "w-[calc(25%-1rem)]"
               } text-center shadow-xl border-t-2 rounded-2xl py-4 relative cursor-pointer opacity-0 bg-white ${
-                !isMobile && idx === 0 ? "ml-6" : "" // 👈 fixed left margin only for first card
+                !isMobile && idx === 0 ? "ml-6" : ""
               }`}
             >
               <img
@@ -127,7 +133,6 @@ export default function RankHolders() {
                 className="absolute -top-8 h-[290px] opacity-40 pointer-events-none"
               />
 
-              {/* Image + Rank */}
               <div className="relative mb-6">
                 <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto relative">
                   <div className="absolute inset-0 opacity-30">
@@ -137,17 +142,20 @@ export default function RankHolders() {
 
                   <div className="absolute inset-0">
                     <img
-                      src={holder.image}
-                      alt={holder.name}
+                      src={
+                        holder.student_photo ||
+                        "/placeholder_student.png"
+                      }
+                      alt={holder.student_name}
                       className="w-full h-full object-cover rounded-full"
                     />
                   </div>
 
-                  <div className="absolute bottom-6 left-4 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg flex flex-col justify-center items-center">
-                    <span className="text-lg sm:text-xl text-gray-900 font-bold">
-                      {holder.rank}
+                  <div className="absolute bottom-0 px-2 left-4 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg flex flex-col justify-center items-center">
+                    <span className="text-md sm:text-xl text-gray-900 md:font-bold font-semibold">
+                      {holder.student_rank}
                     </span>
-                    <span className="text-[8px] sm:text-[9px] text-gray-900">
+                    <span className="text-[8px] sm:text-[10px] text-gray-900">
                       Rank
                     </span>
                   </div>
@@ -155,11 +163,26 @@ export default function RankHolders() {
               </div>
 
               <h3 className="text-base sm:text-lg font-bold text-gray-900">
-                {holder.name}
+                {holder.student_name}
               </h3>
-              <p className="text-sm text-cyan-600">{holder.position}</p>
+              <p className="text-sm text-cyan-600">
+                {holder.exam_name || "—"}
+              </p>
+              <p className="text-xs text-gray-500">
+                {holder.name_of_office || ""}
+              </p>
             </div>
           ))}
+
+          {rankHolders.length === 0 && (
+            <div className="w-full flex justify-center items-center py-10">
+              <img
+                src="/no_data.png"
+                alt="No Data"
+                className="w-52 opacity-50"
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>
