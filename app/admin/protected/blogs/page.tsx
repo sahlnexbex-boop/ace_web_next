@@ -30,7 +30,6 @@ export default function BlogsPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Blogs
   const loadData = async () => {
   try {
     const status =
@@ -48,7 +47,6 @@ export default function BlogsPage() {
     loadData();
   }, [page, debouncedSearch, filters]);
 
-  // ✅ Tags normalize helper
   const normalizeTagsFormData = (fd: FormData) => {
     const tagsValue = fd.get("tags");
     if (!tagsValue) {
@@ -80,12 +78,10 @@ export default function BlogsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* ✅ Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Blogs</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Reusable Filter */}
           <TableFilter
             fields={[
               {
@@ -103,7 +99,6 @@ export default function BlogsPage() {
             }}
           />
 
-          {/* ✅ Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -116,7 +111,6 @@ export default function BlogsPage() {
         </div>
       </div>
 
-      {/* ✅ Table */}
       <DataTable
         columns={[
           {
@@ -284,7 +278,6 @@ export default function BlogsPage() {
         }}
       />
 
-      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Blog" : "Create Blog"}
         isOpen={openForm}
@@ -316,7 +309,6 @@ export default function BlogsPage() {
         onSuccess={loadData}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -331,7 +323,6 @@ export default function BlogsPage() {
         message={`Are you sure you want to delete "${selected?.blog_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

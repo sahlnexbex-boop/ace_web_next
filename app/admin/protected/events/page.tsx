@@ -31,7 +31,6 @@ export default function EventsPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Events
   const loadEvents = async () => {
     try {
       const res = await getEvents(
@@ -52,7 +51,6 @@ export default function EventsPage() {
     loadEvents();
   }, [page, debouncedSearch, filters]);
 
-  // ✅ View Logic
   const handleView = async (row: any) => {
     try {
       const res = await getEventById(row.event_id);
@@ -107,7 +105,6 @@ export default function EventsPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     { name: "event_title", label: "Event Title", type: "text", required: true },
     {
@@ -148,12 +145,10 @@ export default function EventsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header + Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Events</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Dynamic Filter */}
           <TableFilter
             fields={[
               {
@@ -179,7 +174,6 @@ export default function EventsPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -192,7 +186,6 @@ export default function EventsPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -272,7 +265,6 @@ export default function EventsPage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Event" : "Create Event"}
         isOpen={openForm}
@@ -286,7 +278,6 @@ export default function EventsPage() {
         onSuccess={loadEvents}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -301,7 +292,6 @@ export default function EventsPage() {
         message={`Are you sure you want to delete "${selected?.event_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

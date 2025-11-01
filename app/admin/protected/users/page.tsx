@@ -31,7 +31,6 @@ export default function UsersPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Users
   const loadData = async () => {
     try {
       const res = await getUsers(page, debouncedSearch, 10, filters);
@@ -48,12 +47,10 @@ export default function UsersPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Users</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Reusable Filter Button */}
           <TableFilter
             fields={[
               {
@@ -71,7 +68,6 @@ export default function UsersPage() {
             }}
           />
 
-          {/* ✅ Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -84,7 +80,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -165,7 +160,6 @@ export default function UsersPage() {
         }}
       />
 
-      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit User" : "Create User"}
         isOpen={openForm}
@@ -202,7 +196,6 @@ export default function UsersPage() {
         onSuccess={loadData}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -217,7 +210,6 @@ export default function UsersPage() {
         message={`Are you sure you want to delete "${selected?.user_name}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

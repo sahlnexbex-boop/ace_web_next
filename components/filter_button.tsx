@@ -11,7 +11,7 @@ interface FilterOption {
 interface FilterField {
   key: string;
   label: string;
-  type?: "select" | "date" | "year"; // ✅ added 'year'
+  type?: "select" | "date" | "year"; 
   options?: FilterOption[];
   showIf?: {
     field: string;

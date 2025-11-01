@@ -26,7 +26,6 @@ export default function LearnersPortal() {
   const [activeTab, setActiveTab] = useState<string>(queryType || "current");
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
-  // ✅ Sync active tab with URL query param (Back/Forward navigation)
   useEffect(() => {
     if (queryType && queryType !== activeTab) {
       setActiveTab(queryType);
@@ -36,13 +35,13 @@ export default function LearnersPortal() {
     }
   }, [queryType]);
 
-  // ✅ Update URL when menu changes
+  //  Update URL when menu changes
   const handleMenuClick = (id: string) => {
     setActiveTab(id);
     router.push(`/public/learners?type=${id}`, { scroll: false });
   };
 
-  // ✅ Map service_type based on tab
+  //  Map service_type based on tab
   const serviceTypeMap: Record<string, number> = {
     syllabus: 1,
     study: 2,

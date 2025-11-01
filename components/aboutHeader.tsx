@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { gsap } from "gsap";
 import VideoModal from "@/components/videoModal";
+import EnquiryModal from "./enquiryModal";
 
 export default function AboutHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
 
   const yearsRef = useRef<HTMLSpanElement | null>(null);
   const studentsRef = useRef<HTMLSpanElement | null>(null);
@@ -193,12 +194,12 @@ export default function AboutHeader() {
               </div>
             </div>
 
-            <Button
-              size="lg"
-              className="about-button cursor-pointer bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#176090] hover:to-[#0088c7] text-white px-8 py-3 mt-6"
-            >
-              Enquire Now
-            </Button>
+           <button
+                onClick={() => setShowEnquiryModal(true)}
+                className="bg-gradient-to-r from-[#1F67A5] to-[#087fc2] hover:from-[#087fc2] hover:to-[#1F67A5] text-white font-semibold px-6 py-2.5 rounded-lg transition cursor-pointer"
+              >
+                Enquire Now
+              </button>
           </div>
         </div>
       </section>
@@ -208,6 +209,12 @@ export default function AboutHeader() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+
+      <EnquiryModal
+              isOpen={showEnquiryModal}
+              onClose={() => setShowEnquiryModal(false)}
+              enquiryType={1}
+            />
     </>
   );
 }

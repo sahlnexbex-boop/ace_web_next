@@ -9,9 +9,9 @@ interface ConfirmDeleteModalProps {
   onClose: () => void;
   title?: string;
   message?: string;
-  endpoint?: string; // optional to allow external onConfirm handling
+  endpoint?: string; 
   id?: number | string;
-  onConfirm?: () => Promise<void> | void; // 👈 added this for flexible use
+  onConfirm?: () => Promise<void> | void; 
   onSuccess?: () => void;
 }
 
@@ -36,10 +36,8 @@ export default function ConfirmDeleteModal({
 
     try {
       if (onConfirm) {
-        // If parent passed custom delete logic (like your category delete)
         await onConfirm();
       } else if (endpoint && id !== undefined) {
-        // Default API-based delete
         await apiRequest(`${endpoint}/${id}`, "DELETE");
       } else {
         throw new Error("No delete handler or endpoint provided.");

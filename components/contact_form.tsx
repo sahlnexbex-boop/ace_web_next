@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
 import { createEnquiry } from "@/lib/api/enquiry";
-import { Toast } from "primereact/toast";
+import { useToast } from "@/contexts/ToastContext";
 import {
   IconBrandFacebook,
   IconBrandInstagram,
@@ -9,80 +10,42 @@ import {
   IconBrandYoutube,
 } from "@tabler/icons-react";
 
+type FormValues = {
+  cstmr_name: string;
+  cstmr_email?: string;
+  cstmr_phone: string;
+  cstmr_message: string;
+};
+
 export default function ContactSection() {
-  const [formData, setFormData] = useState({
-    cstmr_name: "",
-    cstmr_email: "",
-    cstmr_phone: "",
-    cstmr_message: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const toast = useRef<Toast>(null);
+  const { showSuccess, showError } = useToast();
 
-  const showToast = (type: "success" | "error", message: string) => {
-    toast.current?.show({
-      severity: type,
-      summary: type === "success" ? "Success" : "Error",
-      detail: type === "success" ? "Enquiry sent successfully!" : message,
-      life: 5000,
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>();
 
-    });
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.cstmr_name.trim()) {
-      showToast("error", "Please enter your name.");
-      return;
-    }
-    if (!formData.cstmr_phone.trim()) {
-      showToast("error", "Please enter your phone number.");
-      return;
-    }
-    if (!formData.cstmr_message.trim()) {
-      showToast("error", "Please enter your message.");
-      return;
-    }
-
+  const onSubmit = async (data: FormValues) => {
     try {
-      setLoading(true);
-      const payload = { ...formData, enquiry_type: 1 };
+      const payload = { ...data, enquiry_type: 1 };
       const response = await createEnquiry(payload);
 
       if (response?.message) {
-        showToast("success", "Enquiry sent successfully!");
-        setTimeout(() => {
-          setFormData({
-            cstmr_name: "",
-            cstmr_email: "",
-            cstmr_phone: "",
-            cstmr_message: "",
-          });
-        }, 800); // ✅ Small delay before clearing
+        showSuccess("success", "Enquiry sent successfully!");
+        reset();
       } else {
-        showToast("error", "Failed to send enquiry. Please try again.");
+        showError("Failed to send enquiry. Please try again.");
       }
     } catch (error) {
       console.error("Enquiry submission failed:", error);
-      showToast("error", "Something went wrong. Please try again later.");
-    } finally {
-      setLoading(false);
+      showError("Something went wrong. Please try again later.");
     }
   };
 
   return (
     <section className="bg-[#f7fbff] py-16 px-6 md:px-10">
-      {/* ✅ Toast Container */}
-      <Toast ref={toast} position="top-right" />
-
       <div className="max-w-7xl mx-auto space-y-16">
         <div className="bg-white shadow-md rounded-2xl p-4 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
           {/* LEFT CONTACT DETAILS */}
@@ -143,68 +106,110 @@ export default function ContactSection() {
               Enquiry Form
             </h3>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+              {/* NAME */}
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
                   Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  name="cstmr_name"
-                  value={formData.cstmr_name}
-                  onChange={handleChange}
+                  {...register("cstmr_name", {
+                    required: "Name is required",
+                  })}
                   className="w-full bg-blue-50 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
+                {errors.cstmr_name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.cstmr_name.message}
+                  </p>
+                )}
               </div>
 
+              {/* PHONE */}
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
                   Phone <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  name="cstmr_phone"
-                  value={formData.cstmr_phone}
-                  onChange={handleChange}
+                  {...register("cstmr_phone", {
+                    required: "Phone number is required",
+                    pattern: {
+                      value: /^[0-9]+$/,
+                      message: "Phone number must be numeric",
+                    },
+                    minLength: {
+                      value: 10,
+                      message: "Phone number must be at least 10 digits",
+                    },
+                    maxLength: {
+                      value: 17,
+                      message: "Phone number must be at most 17 digits",
+                    },
+                  })}
                   className="w-full bg-blue-50 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
+                {errors.cstmr_phone && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.cstmr_phone.message}
+                  </p>
+                )}
               </div>
 
+              {/* EMAIL */}
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
                   Email
                 </label>
                 <input
                   type="email"
-                  name="cstmr_email"
-                  value={formData.cstmr_email}
-                  onChange={handleChange}
+                  {...register("cstmr_email", {
+                    validate: (value) =>
+                      !value ||
+                      value.includes("@gmail.com") ||
+                      "Email must be a Gmail address",
+                  })}
                   className="w-full bg-blue-50 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
+                {errors.cstmr_email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.cstmr_email.message}
+                  </p>
+                )}
               </div>
 
+              {/* MESSAGE */}
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
                   Message <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   rows={4}
-                  name="cstmr_message"
-                  value={formData.cstmr_message}
-                  onChange={handleChange}
+                  {...register("cstmr_message", {
+                    required: "Message is required",
+                  })}
                   className="w-full bg-blue-50 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 ></textarea>
+                {errors.cstmr_message && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.cstmr_message.message}
+                  </p>
+                )}
               </div>
 
+              {/* SUBMIT BUTTON */}
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitting}
                   className={`bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#176090] hover:to-[#0088c7] text-white px-6 py-2 rounded-md transition ${
-                    loading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
+                    isSubmitting
+                      ? "opacity-70 cursor-not-allowed"
+                      : "cursor-pointer"
                   }`}
                 >
-                  {loading ? "Sending..." : "Send"}
+                  {isSubmitting ? "Sending..." : "Send"}
                 </button>
               </div>
             </form>

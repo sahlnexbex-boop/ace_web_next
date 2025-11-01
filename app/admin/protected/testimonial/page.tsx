@@ -30,7 +30,6 @@ export default function TestimonialsPage() {
   const [filters, setFilters] = useState<{ status?: string }>({});
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Testimonials
   const loadTestimonials = async () => {
     try {
       const res = await getTestimonials(page, 10, debouncedSearch, filters);
@@ -45,7 +44,6 @@ export default function TestimonialsPage() {
     loadTestimonials();
   }, [page, debouncedSearch, filters]);
 
-  // ✅ View Logic
   const handleView = async (row: any) => {
     try {
       const res = await getTestimonialById(row.testimonial_id);
@@ -93,7 +91,6 @@ export default function TestimonialsPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     { name: "name_of_candidate", label: "Candidate Name", type: "text", required: true },
     { name: "position_of_candidate", label: "Position", type: "text", required: true },
@@ -118,12 +115,10 @@ export default function TestimonialsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header + Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Testimonials</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Filter Button */}
           <TableFilter
             fields={[
               {
@@ -141,7 +136,6 @@ export default function TestimonialsPage() {
             }}
           />
 
-          {/* ✅ Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -154,7 +148,6 @@ export default function TestimonialsPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -215,7 +208,6 @@ export default function TestimonialsPage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Testimonial" : "Create Testimonial"}
         isOpen={openForm}
@@ -229,7 +221,6 @@ export default function TestimonialsPage() {
         onSuccess={loadTestimonials}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -244,7 +235,6 @@ export default function TestimonialsPage() {
         message={`Are you sure you want to delete "${selected?.name_of_candidate}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

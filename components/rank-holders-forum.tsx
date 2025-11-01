@@ -7,6 +7,8 @@ import { getCourses } from "@/lib/api/course";
 import { getCourseCategories } from "@/lib/api/courseCategory";
 import { createRankHolder } from "@/lib/api/rankHolders";
 import { X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function RankHoldersForum() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -15,32 +17,26 @@ export default function RankHoldersForum() {
 
   const [openModal, setOpenModal] = useState(false);
 
-  // Animation when section appears
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
           const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
           tl.fromTo(
             polygon1Ref.current,
             { opacity: 0, x: -50 },
             { opacity: 1, x: 0, duration: 0.8 }
-          );
-
-          tl.fromTo(
+          ).fromTo(
             polygon2Ref.current,
             { opacity: 0, x: 50 },
             { opacity: 1, x: 0, duration: 0.8 },
             "-=0.7"
           );
-
           observer.disconnect();
         }
       },
       { threshold: 0.5 }
     );
-
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
@@ -69,7 +65,6 @@ export default function RankHoldersForum() {
             </Button>
           </div>
 
-          {/* Right illustration */}
           <div className="relative flex justify-end">
             <img
               ref={polygon1Ref}
@@ -100,30 +95,39 @@ export default function RankHoldersForum() {
   );
 }
 
-// =========================
-// Modal Component
-// =========================
 function RankHolderModal({ onClose }: { onClose: () => void }) {
-  const [form, setForm] = useState({
-    student_name: "",
-    student_rank: "",
-    based_type: "1",
-    course_id: "",
-    category_id: "",
-    exam_name: "",
-    joining_date: "",
-    name_of_office: "",
-    place: "",
-    phone_no: "",
-    year: "",
-    student_photo: null as File | null,
-  });
+  const { showSuccess, showError } = useToast();
 
   const [courses, setCourses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [basedType, setBasedType] = useState("1");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Proper API calls (based on your provided format)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      student_name: "",
+      student_rank: "",
+      based_type: "1",
+      course_id: "",
+      category_id: "",
+      exam_name: "",
+      joining_date: "",
+      name_of_office: "",
+      place: "",
+      phone_no: "",
+      year: "",
+      student_photo: null,
+    },
+  });
+
+  const studentPhoto = watch("student_photo");
+
   useEffect(() => {
     (async () => {
       try {
@@ -131,65 +135,88 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
           getCourses(1, 100, ""),
           getCourseCategories(1, 100, ""),
         ]);
-
-        setCourses(courseRes?.data || courseRes?.rows || courseRes || []);
-        setCategories(
-          categoryRes?.data || categoryRes?.rows || categoryRes || []
-        );
+        setCourses(courseRes?.data || []);
+        setCategories(categoryRes?.data || []);
       } catch (err) {
         console.error("Error loading dropdowns:", err);
       }
     })();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const validateStudentRank = (val: string) => {
+    if (!/^\d+$/.test(val)) return "Rank must be numbers only";
+    if (val.length > 5) return "Rank must be at most 5 digits";
+    return true;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setForm((prev) => ({ ...prev, student_photo: file }));
+  const validateYear = (val: string) => {
+    const y = Number(val);
+    const currentYear = new Date().getFullYear();
+    if (!Number.isInteger(y)) return "Invalid year";
+    if (y < 2000) return "Year must be 2000 or later";
+    if (y > currentYear) return `Year cannot be in the future (${currentYear})`;
+    return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const validatePhone = (val: string) => {
+    const digits = val.replace(/\D/g, "");
+    if (digits.length < 10) return "Phone must be at least 10 digits";
+    if (digits.length > 17) return "Phone must be at most 17 digits";
+    return true;
+  };
 
+  const validateOfficePlace = (val: string) => {
+    if (!/^[A-Za-z0-9 .,'\-()]+$/.test(val)) return "Invalid characters";
+    return true;
+  };
+
+  const onSubmit = async (data: any) => {
     try {
+      setLoading(true);
+
       const formData = new FormData();
 
-      // ✅ Append all fields properly
-      Object.entries(form).forEach(([key, value]) => {
-        if (value !== null) formData.append(key, String(value));
-      });
+      formData.append("student_name", data.student_name);
+      formData.append("student_rank", data.student_rank);
+      formData.append("based_type", data.based_type);
+      formData.append("course_id", data.course_id || "0");
+      formData.append("category_id", data.category_id || "0");
+      formData.append("exam_name", data.exam_name);
+      formData.append("joining_date", data.joining_date);
+      formData.append("name_of_office", data.name_of_office);
+      formData.append("place", data.place);
+      formData.append("phone_no", data.phone_no);
+      formData.append("year", String(data.year));
 
+      if (data.student_photo && data.student_photo.length > 0) {
+        const file: File = data.student_photo[0];
+        formData.append("student_photo", file, file.name);
+      } else {
+        // If backend expects this field present even if empty, you may skip or send nothing
+      }
+
+      // Append fixed values
       formData.append("approval_status", "1");
       formData.append("status", "1");
 
-      if (form.student_photo) {
-        formData.set("student_photo", form.student_photo);
-      }
+      const res = await createRankHolder(formData);
 
-      await createRankHolder(formData);
-      alert("✅ Rank Holder submitted successfully!");
+      reset();
       onClose();
     } catch (err) {
-      console.error(err);
-      alert("❌ Submission failed!");
+      console.error("Rank holder submit error:", err);
+      showError?.("Failed, please try again");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex backdrop-blur-[1px]  items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex backdrop-blur-[1px] items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl relative p-6 max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-3 cursor-pointer hover:scale-120 right-3 text-gray-500 hover:text-gray-700"
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 cursor-pointer"
         >
           <X size={22} />
         </button>
@@ -198,62 +225,51 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
           Apply for Rank Holder
         </h3>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
           <input
             type="text"
-            name="student_name"
             placeholder="Student Name"
-            value={form.student_name}
-            onChange={handleChange}
-            required
+            {...register("student_name", { required: "Student name is required" })}
             className="border p-2 rounded"
           />
+          {errors.student_name && <span className="text-red-500 text-sm col-span-2">{errors.student_name.message}</span>}
 
           <input
             type="text"
-            name="student_rank"
             placeholder="Student Rank"
-            value={form.student_rank}
-            onChange={handleChange}
-            required
+            {...register("student_rank", {
+              required: "Student rank is required",
+              validate: validateStudentRank,
+            })}
             className="border p-2 rounded"
           />
+          {errors.student_rank && <span className="text-red-500 text-sm col-span-2">{errors.student_rank.message}</span>}
 
-          {/* Based Type */}
           <select
-            name="based_type"
-            value={form.based_type}
-            onChange={handleChange}
+            {...register("based_type")}
+            onChange={(e) => setBasedType(e.target.value)}
             className="border p-2 rounded col-span-2"
           >
             <option value="1">Course Based</option>
             <option value="2">Category Based</option>
           </select>
 
-          {/* Conditional selects */}
-          {form.based_type === "1" && (
+          {basedType === "1" && (
             <select
-              name="course_id"
-              value={form.course_id}
-              onChange={handleChange}
-              required
+              {...register("course_id", { required: "Select a course" })}
               className="border p-2 rounded col-span-2"
             >
               <option value="">Select Course</option>
-              {courses.map((course) => (
-                <option key={course.course_id} value={course.course_id}>
-                  {course.course_title || course.course_name}
+              {courses.map((c) => (
+                <option key={c.course_id} value={c.course_id}>
+                  {c.course_title || c.course_name}
                 </option>
               ))}
             </select>
           )}
-
-          {form.based_type === "2" && (
+          {basedType === "2" && (
             <select
-              name="category_id"
-              value={form.category_id}
-              onChange={handleChange}
-              required
+              {...register("category_id", { required: "Select a category" })}
               className="border p-2 rounded col-span-2"
             >
               <option value="">Select Category</option>
@@ -265,82 +281,72 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
             </select>
           )}
 
-          {/* Other fields */}
           <input
             type="text"
-            name="exam_name"
             placeholder="Exam Name"
-            value={form.exam_name}
-            onChange={handleChange}
-            required
+            {...register("exam_name", { required: "Exam name is required" })}
             className="border p-2 rounded"
           />
+          {errors.exam_name && <span className="text-red-500 text-sm col-span-2">{errors.exam_name.message}</span>}
 
           <input
             type="date"
-            name="joining_date"
-            value={form.joining_date}
-            onChange={handleChange}
-            required
+            {...register("joining_date", { required: "Joining date is required" })}
             className="border p-2 rounded"
           />
+          {errors.joining_date && <span className="text-red-500 text-sm col-span-2">{errors.joining_date.message}</span>}
 
           <input
             type="text"
-            name="name_of_office"
             placeholder="Name of Office"
-            value={form.name_of_office}
-            onChange={handleChange}
-            required
+            {...register("name_of_office", {
+              required: "Office name is required",
+              validate: validateOfficePlace,
+            })}
             className="border p-2 rounded"
           />
+          {errors.name_of_office && <span className="text-red-500 text-sm col-span-2">{errors.name_of_office.message}</span>}
 
           <input
             type="text"
-            name="place"
             placeholder="Place"
-            value={form.place}
-            onChange={handleChange}
-            required
+            {...register("place", {
+              required: "Place is required",
+              validate: validateOfficePlace,
+            })}
             className="border p-2 rounded"
           />
+          {errors.place && <span className="text-red-500 text-sm col-span-2">{errors.place.message}</span>}
 
           <input
             type="text"
-            name="phone_no"
             placeholder="Phone Number"
-            value={form.phone_no}
-            onChange={handleChange}
-            required
+            {...register("phone_no", { required: "Phone is required", validate: validatePhone })}
             className="border p-2 rounded"
           />
+          {errors.phone_no && <span className="text-red-500 text-sm col-span-2">{errors.phone_no.message}</span>}
 
           <input
             type="number"
-            name="year"
             placeholder="Year"
-            value={form.year}
-            onChange={handleChange}
-            required
+            {...register("year", { required: "Year is required", validate: validateYear })}
             className="border p-2 rounded"
           />
+          {errors.year && <span className="text-red-500 text-sm col-span-2">{errors.year.message}</span>}
 
-          {/* File upload */}
           <div className="col-span-2">
-            <label className="block text-gray-700 mb-1 font-medium">
-              Student Photo
-            </label>
+            <label className="block text-gray-700 mb-1 font-medium">Student Photo</label>
             <input
               type="file"
-              name="student_photo"
               accept="image/*"
-              onChange={handleFileChange}
-              required
+              {...register("student_photo", { required: "Student photo is required" })}
               className="border p-2 rounded w-full"
             />
+            {errors.student_photo && (
+              <span className="text-red-500 text-sm">{(errors.student_photo as any)?.message}</span>
+            )}
           </div>
 
-          {/* Submit */}
           <div className="col-span-2 flex justify-end mt-4">
             <Button
               type="submit"

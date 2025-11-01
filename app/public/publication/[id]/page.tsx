@@ -18,7 +18,6 @@ export default function PublicationDetails() {
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch book details by ID from backend
   useEffect(() => {
     const fetchBook = async () => {
       if (!id) return;
@@ -34,19 +33,16 @@ export default function PublicationDetails() {
     fetchBook();
   }, [id]);
 
-  // ✅ GSAP Animations
   useLayoutEffect(() => {
     if (!book) return;
 
     const ctx = gsap.context(() => {
-      // Page fade-in
       gsap.fromTo(
         containerRef.current,
         { autoAlpha: 0, y: 40 },
         { autoAlpha: 1, y: 0, duration: 0.8, ease: "power2.out" }
       );
 
-      // Image animation
       gsap.fromTo(
         ".book-image",
         { opacity: 0, x: -40 },
@@ -59,7 +55,6 @@ export default function PublicationDetails() {
         }
       );
 
-      // Info animation
       gsap.fromTo(
         ".book-info",
         { opacity: 0, x: 40 },
@@ -73,7 +68,6 @@ export default function PublicationDetails() {
         }
       );
 
-      // Related cards (optional)
       if (relatedRef.current) {
         const cards = relatedRef.current.querySelectorAll(".related-card");
         gsap.fromTo(

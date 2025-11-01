@@ -30,7 +30,6 @@ export default function AffairDetail() {
   const contentRef = useRef<HTMLParagraphElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Fetch current affair by ID
   useEffect(() => {
     const fetchAffair = async () => {
       try {
@@ -49,7 +48,6 @@ export default function AffairDetail() {
     fetchAffair();
   }, [id]);
 
-  // ✅ GSAP Animation
   useEffect(() => {
     if (!affairData) return;
     const ctx = gsap.context(() => {

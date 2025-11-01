@@ -49,6 +49,10 @@ export default function CourseDetailsPage({
     })();
   }, [params.courseId]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const tickMark = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -282,6 +286,7 @@ export default function CourseDetailsPage({
       <EnquiryModal
         isOpen={showEnquiryModal}
         onClose={() => setShowEnquiryModal(false)}
+        enquiryType={2}
       />
     </div>
   );

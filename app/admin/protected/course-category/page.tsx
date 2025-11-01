@@ -36,7 +36,6 @@ export default function CourseCategoryPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Course Types
   const loadCourseTypes = async () => {
     try {
       const res = await getCourseTypes(1, "");
@@ -46,7 +45,6 @@ export default function CourseCategoryPage() {
     }
   };
 
-  // ✅ Load Course Categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories(page, 10, debouncedSearch, filters);
@@ -70,7 +68,6 @@ export default function CourseCategoryPage() {
     value: String(t.type_id),
   }));
 
-  // ✅ Handle View
   const handleView = async (row: any) => {
     try {
       const res = await getCourseCategoryById(row.category_id);
@@ -121,7 +118,6 @@ export default function CourseCategoryPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     {
       name: "category_name",
@@ -162,14 +158,12 @@ export default function CourseCategoryPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* ✅ Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">
           Course Categories
         </h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Reusable Filter Component */}
           <TableFilter
             fields={[
               {
@@ -181,7 +175,7 @@ export default function CourseCategoryPage() {
                 ],
               },
               {
-                key: "type_id", // ✅ backend expects `type_id`, not `course_type_id`
+                key: "type_id", 
                 label: "Course Type",
                 options: typeOptions,
               },
@@ -192,7 +186,6 @@ export default function CourseCategoryPage() {
             }}
           />
 
-          {/* ✅ Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -205,7 +198,6 @@ export default function CourseCategoryPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -214,7 +206,7 @@ export default function CourseCategoryPage() {
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
           { key: "category_name", label: "Name" },
-          { key: "category_description", label: "Description" },
+          { key: "category_description", label: "Description", render: (r) => <p className="text-gray-700 whitespace-pre-line max-w-72 line-clamp-2">{r.category_description}</p> },
           {
             key: "courseType.type_name",
             label: "Course Type",
@@ -269,7 +261,6 @@ export default function CourseCategoryPage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Category" : "Create Category"}
         isOpen={openForm}
@@ -283,7 +274,6 @@ export default function CourseCategoryPage() {
         onSuccess={loadCategories}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -298,7 +288,6 @@ export default function CourseCategoryPage() {
         message={`Are you sure you want to delete "${selected?.category_name}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

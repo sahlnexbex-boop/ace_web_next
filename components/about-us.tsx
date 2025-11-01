@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { gsap } from "gsap";
 import { getResults } from "@/lib/api/result";
+import { link } from "fs";
 
 export default function AboutUs() {
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -16,14 +17,16 @@ export default function AboutUs() {
   const statsRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = [
-    { text: "PAC Corner", textColor: "text-green-600", bg: "bg-green-300/10", hover: "hover:bg-green-50" },
-    { text: "Exam & Results", textColor: "text-purple-600", bg: "bg-purple-300/10", hover: "hover:bg-purple-50" },
-    { text: "Exam & Ans Keys", textColor: "text-blue-600", bg: "bg-blue-300/10", hover: "hover:bg-blue-50" },
-    { text: "Rank Holder List", textColor: "text-red-500", bg: "bg-red-300/10", hover: "hover:bg-red-50" },
-    { text: "Online Admission", textColor: "text-teal-600", bg: "bg-teal-300/10", hover: "hover:bg-teal-50" },
-    { text: "Publications", textColor: "text-gray-600", bg: "bg-gray-300/10", hover: "hover:bg-gray-50" },
-    { text: "Event Gallery", textColor: "text-pink-600", bg: "bg-pink-300/10", hover: "hover:bg-pink-50" },
+    { text: "Exam & Results", textColor: "text-purple-600", bg: "bg-purple-300/10", hover: "hover:bg-purple-50", link: "/public/exams" },
+    { text: "Exam & Ans Keys", textColor: "text-blue-600", bg: "bg-blue-300/10", hover: "hover:bg-blue-50", link: "/public/learners?type=answer" },
+    { text: "Rank Holder List", textColor: "text-red-500", bg: "bg-red-300/10", hover: "hover:bg-red-50", link: "/public/exams" },
+    { text: "Publications", textColor: "text-gray-600", bg: "bg-gray-300/10", hover: "hover:bg-gray-50", link: "/public/publication" },
+    { text: "Blogs", textColor: "text-pink-600", bg: "bg-pink-300/10", hover: "hover:bg-pink-50", link: "/public/blog" },
   ];
+
+  const handleTabClick = (link: string) => {
+    router.push(link);
+  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -255,10 +258,11 @@ export default function AboutUs() {
         </div>
 
         <div className="md:mt-16 mt-8">
-          <div className="flex gap-4 overflow-x-auto no-scrollbar px-2 py-2 sm:px-0 snap-x">
+          <div className="flex justify-center gap-4 overflow-x-auto no-scrollbar px-2 py-2 sm:px-0 snap-x">
             {tabs.map((tab) => (
               <button
                 key={tab.text}
+                onClick={() => handleTabClick(tab.link)}
                 className={`about-tab flex-shrink-0 snap-start px-6 py-2 cursor-pointer rounded-lg shadow-md transition ${tab.textColor} ${tab.bg} ${tab.hover}`}
               >
                 {tab.text}

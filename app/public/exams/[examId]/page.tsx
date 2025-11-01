@@ -8,13 +8,12 @@ import Loader from "@/components/loader";
 export default function ExamDetails() {
   const { examId } = useParams<{ examId: string }>();
   const searchParams = useSearchParams();
-  const type = searchParams.get("type"); // "course" or "category"
+  const type = searchParams.get("type"); 
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   const [toppers, setToppers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch toppers dynamically
   useEffect(() => {
     const fetchToppers = async () => {
       try {
@@ -43,7 +42,6 @@ export default function ExamDetails() {
     if (examId && type) fetchToppers();
   }, [examId, type]);
 
-  // ✅ GSAP animation (kept from your version)
   useEffect(() => {
     if (!toppers.length) return;
 
@@ -102,7 +100,7 @@ export default function ExamDetails() {
 
   return (
     <div className="md:px-20 px-8 md:py-14 py-8">
-      {/* ✅ Breadcrumb */}
+      {/*  Breadcrumb */}
       <div className="text-sm text-gray-900 mb-10 md:mb-3 flex items-center flex-wrap gap-1">
         <span className="hover:underline cursor-pointer">
           <svg
@@ -131,10 +129,8 @@ export default function ExamDetails() {
         </span>
       </div>
 
-      {/* ✅ Page title */}
       <h1 className="md:text-3xl text-2xl font-bold mb-5 mt-10">{title}</h1>
 
-      {/* ✅ Grid of toppers */}
       {toppers.length > 0 ? (
         <div
           ref={gridRef}

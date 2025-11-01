@@ -31,7 +31,6 @@ export default function CourseTypesPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load data
   const loadData = async () => {
     const res = await getCourseTypes(page, debouncedSearch, 10, filters);
     setData(res.data || []);
@@ -42,7 +41,6 @@ export default function CourseTypesPage() {
     loadData();
   }, [page, debouncedSearch, filters]);
 
-  // ✅ View Handler (formatted like Category page)
   const handleView = async (row: any) => {
     try {
       const res = await getCourseTypeById(row.type_id);
@@ -78,12 +76,10 @@ export default function CourseTypesPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Course Types</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Reusable Filter Component */}
           <TableFilter
             fields={[
               {
@@ -101,7 +97,6 @@ export default function CourseTypesPage() {
             }}
           />
 
-          {/* ✅ Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -114,7 +109,6 @@ export default function CourseTypesPage() {
         </div>
       </div>
 
-      {/* Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 },
@@ -158,10 +152,9 @@ export default function CourseTypesPage() {
           setSelected(r);
           setOpenDelete(true);
         }}
-        onRowClick={handleView} // ✅ replaced with formatted version
+        onRowClick={handleView} 
       />
 
-      {/* Modals */}
       <DynamicFormModal
         title={selected ? "Edit Course Type" : "Create Course Type"}
         isOpen={openForm}

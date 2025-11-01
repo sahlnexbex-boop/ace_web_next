@@ -35,7 +35,6 @@ export default function ToppersPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // --- Load courses & categories ---
   const loadCourses = async () => {
     try {
       const res = await getCourses(1, 100, "");
@@ -60,7 +59,6 @@ export default function ToppersPage() {
     }
   };
 
-  // --- Load toppers (with filters) ---
   const loadToppers = async () => {
     try {
       const { status, based_type, course_id, category_id, year } = filters;
@@ -92,7 +90,6 @@ export default function ToppersPage() {
     loadToppers();
   }, [page, debouncedSearch, filters]);
 
-  // --- Dropdown options ---
   const courseOptions = courses.map((c) => ({
     label: c.course_name,
     value: String(c.course_id),
@@ -103,7 +100,6 @@ export default function ToppersPage() {
     value: String(c.category_id),
   }));
 
-  // --- View Modal handler ---
   const handleView = async (row: any) => {
     try {
       const res = await getTopperById(row.topper_id);
@@ -160,7 +156,6 @@ export default function ToppersPage() {
     }
   };
 
-  // --- Form fields ---
   const fields = [
     { name: "topper_name", label: "Topper Name", type: "text", required: true },
     { name: "topper_rank", label: "Rank", type: "number", required: true },
@@ -206,12 +201,10 @@ export default function ToppersPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Toppers</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Filter */}
           <TableFilter
             fields={[
               {
@@ -240,7 +233,7 @@ export default function ToppersPage() {
               {
                 key: "year",
                 label: "Year",
-                type: "year", // ✅ year-only picker
+                type: "year",
               },
               {
                 key: "status",
@@ -258,7 +251,7 @@ export default function ToppersPage() {
             }}
           />
 
-          {/* Create Button */}
+          
           <button
             onClick={() => {
               setSelected(null);
@@ -272,7 +265,6 @@ export default function ToppersPage() {
         </div>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -344,7 +336,6 @@ export default function ToppersPage() {
         onRowClick={handleView}
       />
 
-      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Topper" : "Create Topper"}
         isOpen={openForm}
@@ -358,7 +349,6 @@ export default function ToppersPage() {
         onSuccess={loadToppers}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -373,7 +363,6 @@ export default function ToppersPage() {
         }}
       />
 
-      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

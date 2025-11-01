@@ -31,7 +31,6 @@ export default function CarouselPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Carousels
   const loadCarousels = async () => {
     try {
       const res = await getCarousels(
@@ -51,7 +50,6 @@ export default function CarouselPage() {
     loadCarousels();
   }, [page, debouncedSearch, filters]);
 
-  // ✅ View Details
   const handleView = async (row: any) => {
     try {
       const res = await getCarouselById(row.carousel_id);
@@ -114,7 +112,6 @@ export default function CarouselPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     {
       name: "carousel_title",
@@ -160,12 +157,10 @@ export default function CarouselPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header + Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Carousel</h1>
 
         <div className="flex items-center gap-3">
-          {/* Filter */}
           <TableFilter
             fields={[
               {
@@ -183,7 +178,6 @@ export default function CarouselPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -196,7 +190,6 @@ export default function CarouselPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -204,8 +197,8 @@ export default function CarouselPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "carousel_title", label: "Title" },
-          { key: "carousel_sec_title", label: "Sub Title" },
+          { key: "carousel_title", label: "Title", render: (r) => r.carousel_title|| "—" },
+          { key: "carousel_sec_title", label: "Sub Title", render: (r) => r.carousel_sec_title|| "—" },
           {
             key: "carousel_description",
             label: "Description",
@@ -287,7 +280,6 @@ export default function CarouselPage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Carousel" : "Create Carousel"}
         isOpen={openForm}
@@ -301,7 +293,6 @@ export default function CarouselPage() {
         onSuccess={loadCarousels}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -316,7 +307,6 @@ export default function CarouselPage() {
         message={`Are you sure you want to delete "${selected?.carousel_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

@@ -5,7 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
-import TableFilter from "@/components/filter_button"; // ✅ reusable filter
+import TableFilter from "@/components/filter_button"; 
 import { useDebounce } from "@/hooks/debounce";
 import {
   getSuccessStories,
@@ -35,7 +35,6 @@ export default function SuccessStoriesPage() {
   }>({});
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories();
@@ -47,7 +46,6 @@ export default function SuccessStoriesPage() {
     }
   };
 
-  // ✅ Load Success Stories
   const loadStories = async () => {
     try {
       const res = await getSuccessStories(
@@ -78,7 +76,6 @@ export default function SuccessStoriesPage() {
     value: String(c.category_id),
   }));
 
-  // ✅ View Modal
   const handleView = async (row: any) => {
     try {
       const res = await getSuccessStoryById(row.stories_id);
@@ -144,7 +141,6 @@ export default function SuccessStoriesPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     {
       name: "stories_title",
@@ -198,14 +194,12 @@ export default function SuccessStoriesPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header & Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">
           Success Stories
         </h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Reusable Filter Component */}
           <TableFilter
             fields={[
               {
@@ -233,7 +227,6 @@ export default function SuccessStoriesPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -246,7 +239,6 @@ export default function SuccessStoriesPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -330,7 +322,6 @@ export default function SuccessStoriesPage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Success Story" : "Create Success Story"}
         isOpen={openForm}
@@ -344,7 +335,6 @@ export default function SuccessStoriesPage() {
         onSuccess={loadStories}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -359,7 +349,6 @@ export default function SuccessStoriesPage() {
         message={`Are you sure you want to delete "${selected?.stories_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

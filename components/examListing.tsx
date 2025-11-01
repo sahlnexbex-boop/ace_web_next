@@ -12,7 +12,6 @@ export default function ExamListing() {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch course categories and courses
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,7 +35,6 @@ export default function ExamListing() {
     fetchData();
   }, []);
 
-  // ✅ Handle click navigation
   const handleItemClick = (id: number, type: "category" | "course") => {
     router.push(`/public/exams/${id}?type=${type}`);
   };
@@ -73,7 +71,6 @@ export default function ExamListing() {
 
       {hasData ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xxl:grid-cols-5 gap-5 sm:gap-6">
-          {/* ✅ Show course categories first */}
           {categories.map((cat) => (
             <div
               key={`category-${cat.category_id}`}
@@ -91,7 +88,6 @@ export default function ExamListing() {
             </div>
           ))}
 
-          {/* ✅ Then show courses */}
           {courses.map((course) => (
             <div
               key={`course-${course.course_id}`}

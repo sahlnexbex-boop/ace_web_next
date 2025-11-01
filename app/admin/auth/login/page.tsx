@@ -114,7 +114,7 @@ export default function AdminLoginPage() {
       className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
       style={{
         backgroundImage:
-          "url('https://png.pngtree.com/thumb_back/fh260/background/20230411/pngtree-nature-forest-sun-ecology-image_2256183.jpg')",
+          "url('https://content3.jdmagicbox.com/comp/malappuram/m4/9999px483.x483.181229205043.a6m4/catalogue/ace-academy-tirur-malappuram-tutorials-95ybkvfk44.jpg')",
       }}
     >
       {/* Overlay */}
@@ -142,7 +142,7 @@ export default function AdminLoginPage() {
               type="text"
               value={user_name}
               onChange={(e) => setUser_name(e.target.value)}
-              className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-4 text-white placeholder-gray-300"
+              className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-4 text-white placeholder-gray-100"
               placeholder="Your Username"
               required
             />
@@ -150,7 +150,7 @@ export default function AdminLoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-2 text-white placeholder-gray-300"
+              className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-2 text-white placeholder-gray-100"
               placeholder="Password"
               required
             />

@@ -39,7 +39,6 @@ export default function StudyServicePage() {
   const [filters, setFilters] = useState<{ status?: string; service_type?: string; category_id?: string }>({});
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories();
@@ -51,7 +50,6 @@ export default function StudyServicePage() {
     }
   };
 
-  // ✅ Load Services (with filters)
   const loadServices = async () => {
     try {
       const res = await getStudyServices(
@@ -87,7 +85,6 @@ export default function StudyServicePage() {
     value,
   }));
 
-  // ✅ View Modal
   const handleView = async (row: any) => {
     try {
       const res = await getStudyServiceById(row.service_id);
@@ -141,7 +138,6 @@ export default function StudyServicePage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     { name: "service_title", label: "Service Title", type: "text", required: true },
     { name: "service_description", label: "Description", type: "textarea", required: true },
@@ -164,12 +160,10 @@ export default function StudyServicePage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header & Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Study Services</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Reusable Filter Component */}
           <TableFilter
             fields={[
               {
@@ -197,7 +191,6 @@ export default function StudyServicePage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -210,7 +203,6 @@ export default function StudyServicePage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -264,7 +256,6 @@ export default function StudyServicePage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Study Service" : "Create Study Service"}
         isOpen={openForm}
@@ -278,7 +269,6 @@ export default function StudyServicePage() {
         onSuccess={loadServices}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -293,7 +283,6 @@ export default function StudyServicePage() {
         message={`Are you sure you want to delete "${selected?.service_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

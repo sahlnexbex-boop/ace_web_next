@@ -32,7 +32,6 @@ export default function CoursesPage() {
   const [filters, setFilters] = useState<{ status?: string; category_id?: string }>({});
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories(1, 100);
@@ -42,7 +41,6 @@ export default function CoursesPage() {
     }
   };
 
-  // ✅ Load Courses
   const loadCourses = async () => {
     try {
       const res = await getCourses(page, 10, debouncedSearch, filters);
@@ -68,7 +66,6 @@ export default function CoursesPage() {
       }))
     : [];
 
-  // ✅ View Logic
   const handleView = async (row: any) => {
     try {
       const res = await getCourseById(row.course_id);
@@ -150,7 +147,6 @@ export default function CoursesPage() {
     }
   };
 
-  // ✅ Extended Form Fields
   const fields = [
     { name: "course_name", label: "Course Name", type: "text", required: true },
     {
@@ -219,12 +215,10 @@ export default function CoursesPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header + Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Courses</h1>
 
         <div className="flex items-center gap-3">
-          {/* Filter Button */}
           <TableFilter
             fields={[
               {
@@ -247,7 +241,6 @@ export default function CoursesPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -260,7 +253,6 @@ export default function CoursesPage() {
         </div>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -323,7 +315,6 @@ export default function CoursesPage() {
         onRowClick={handleView}
       />
 
-      {/* Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Course" : "Create Course"}
         isOpen={openForm}
@@ -337,7 +328,6 @@ export default function CoursesPage() {
         onSuccess={loadCourses}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -352,7 +342,6 @@ export default function CoursesPage() {
         message={`Are you sure you want to delete "${selected?.course_name}"?`}
       />
 
-      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

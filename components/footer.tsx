@@ -138,8 +138,8 @@ export default function Footer() {
                 </a>
               </li>
               {/* <li>
-                <a href="#" className="hover:text-cyan-400 transition-colors">
-                  Contact us
+                <a href="/admin/auth/login" className="hover:text-cyan-400 transition-colors">
+                  Admin Panel
                 </a>
               </li> */}
             </ul>

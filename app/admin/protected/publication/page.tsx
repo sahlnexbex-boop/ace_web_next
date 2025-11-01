@@ -33,7 +33,6 @@ export default function PublicationPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // 🔹 Load course categories for filter & form
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories();
@@ -44,7 +43,6 @@ export default function PublicationPage() {
     }
   };
 
-  // 🔹 Load publications with filters, pagination, search
   const loadPublications = async () => {
     try {
       const status =
@@ -77,7 +75,6 @@ export default function PublicationPage() {
     loadPublications();
   }, [page, debouncedSearch, filters]);
 
-  // 🔹 Handle view modal
   const handleView = async (row: any) => {
     try {
       const res = await getPublicationById(row.book_id);
@@ -144,13 +141,11 @@ export default function PublicationPage() {
     }
   };
 
-  // 🔹 Category dropdown options for filter + modal
   const categoryOptions = categories.map((c: any) => ({
     label: c.category_name,
     value: String(c.category_id),
   }));
 
-  // 🔹 Fields for Create/Edit Modal
   const fields = [
     { name: "book_title", label: "Book Title", type: "text", required: true },
     {
@@ -185,12 +180,10 @@ export default function PublicationPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Publications</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Filter Button (Status + Category) */}
           <TableFilter
             fields={[
               {
@@ -215,7 +208,6 @@ export default function PublicationPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -228,7 +220,6 @@ export default function PublicationPage() {
         </div>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
           {
@@ -304,7 +295,6 @@ export default function PublicationPage() {
         onRowClick={handleView}
       />
 
-      {/* Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Publication" : "Create Publication"}
         isOpen={openForm}
@@ -318,7 +308,6 @@ export default function PublicationPage() {
         onSuccess={loadPublications}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -333,7 +322,6 @@ export default function PublicationPage() {
         message={`Are you sure you want to delete "${selected?.book_title}"?`}
       />
 
-      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

@@ -31,7 +31,6 @@ export default function NewsPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load News
   const loadNews = async () => {
     try {
       const res = await getNews(
@@ -51,7 +50,6 @@ export default function NewsPage() {
     loadNews();
   }, [page, debouncedSearch, filters]);
 
-  // ✅ View Logic
   const handleView = async (row: any) => {
     try {
       const res = await getNewsById(row.news_id);
@@ -106,7 +104,6 @@ export default function NewsPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     { name: "news_title", label: "News Title", type: "text", required: true },
     {
@@ -136,12 +133,10 @@ export default function NewsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header + Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">News</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Dynamic Filter */}
           <TableFilter
             fields={[
               {
@@ -159,7 +154,6 @@ export default function NewsPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -172,7 +166,6 @@ export default function NewsPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -249,7 +242,6 @@ export default function NewsPage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit News" : "Create News"}
         isOpen={openForm}
@@ -263,7 +255,6 @@ export default function NewsPage() {
         onSuccess={loadNews}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -278,7 +269,6 @@ export default function NewsPage() {
         message={`Are you sure you want to delete "${selected?.news_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

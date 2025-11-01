@@ -36,7 +36,10 @@ export default function CourseCategoryPage({
 
   const categoryId = params.categoryId;
 
-  // ✅ Fetch category details
+    useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
@@ -48,14 +51,13 @@ export default function CourseCategoryPage({
     })();
   }, [categoryId]);
 
-  // ✅ Fetch courses by category (active only)
   useEffect(() => {
     (async () => {
       try {
         const courseRes = await getCourses(
-          1, // page
-          20, // limit
-          "", // search
+          1, 
+          20, 
+          "", 
           {
             status: "1",
             category_id: String(categoryId),
@@ -124,7 +126,6 @@ export default function CourseCategoryPage({
         </span>
       </div>
 
-      {/* ✅ Category Header */}
       <h1 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-2">
         {category?.category_name || "Category Name"}
       </h1>
@@ -132,7 +133,6 @@ export default function CourseCategoryPage({
         {category?.courseType?.type_name || "Courses"}
       </p>
 
-      {/* ✅ Course Grid */}
       {courses.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {courses.map((course) => (

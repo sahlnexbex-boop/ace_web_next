@@ -74,7 +74,6 @@ const loadCategories = async () => {
     value: String(c.category_id),
   }));
 
-  // ✅ Handle View Modal (click row)
   const handleView = async (row: any) => {
     try {
       const res = await getVideoClassById(row.class_id);
@@ -136,7 +135,6 @@ const loadCategories = async () => {
     }
   };
 
-  // ✅ Fields for form
   const fields = [
     { name: "class_title", label: "Class Title", type: "text", required: true },
     { name: "date_time", label: "Date & Time", type: "datetime-local", required: true },
@@ -163,12 +161,10 @@ const loadCategories = async () => {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header + Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Video Classes</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Filter Component */}
           <TableFilter
             fields={[
               {
@@ -191,7 +187,6 @@ const loadCategories = async () => {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -204,7 +199,6 @@ const loadCategories = async () => {
         </div>
       </div>
 
-      {/* ✅ Table */}
       <DataTable
         columns={[
           {
@@ -274,7 +268,6 @@ const loadCategories = async () => {
         onRowClick={handleView}
       />
 
-      {/* ✅ Form Modal */}
       <DynamicFormModal
         title={selected ? "Edit Video Class" : "Create Video Class"}
         isOpen={openForm}
@@ -288,7 +281,6 @@ const loadCategories = async () => {
         onSuccess={loadVideoClasses}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -303,7 +295,6 @@ const loadCategories = async () => {
         message={`Are you sure you want to delete "${selected?.class_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

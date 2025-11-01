@@ -35,7 +35,6 @@ export default function RankHoldersPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // --- Load Courses & Categories ---
   const loadCourses = async () => {
     try {
       const res = await getCourses(1, 100, "");
@@ -60,7 +59,6 @@ export default function RankHoldersPage() {
     }
   };
 
-  // --- Load Rank Holders (with filters) ---
   const loadRankHolders = async () => {
     try {
       const { status, based_type, course_id, category_id, year, approval_status } = filters;
@@ -92,8 +90,6 @@ export default function RankHoldersPage() {
   useEffect(() => {
     loadRankHolders();
   }, [page, debouncedSearch, filters]);
-
-  // --- Dropdown Options ---
   const courseOptions = courses.map((c) => ({
     label: c.course_name,
     value: String(c.course_id),
@@ -104,7 +100,6 @@ export default function RankHoldersPage() {
     value: String(c.category_id),
   }));
 
-  // --- View Modal ---
   const handleRowClick = async (row: any) => {
     try {
       const res = await getRankHolderById(row.rank_holder_id);
@@ -154,7 +149,6 @@ export default function RankHoldersPage() {
     }
   };
 
-  // --- Form Fields ---
   const fields = [
     { name: "student_name", label: "Student Name", type: "text", required: true },
     { name: "student_rank", label: "Student Rank", type: "number", required: true },
@@ -217,12 +211,10 @@ export default function RankHoldersPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Rank Holders</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Filter Button */}
           <TableFilter
             fields={[
               {
@@ -261,7 +253,7 @@ export default function RankHoldersPage() {
               {
                 key: "year",
                 label: "Year",
-                type: "year", // 👈 Year-only picker
+                type: "year",
               },
               {
                 key: "status",
@@ -279,7 +271,6 @@ export default function RankHoldersPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -293,7 +284,6 @@ export default function RankHoldersPage() {
         </div>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
@@ -386,7 +376,6 @@ export default function RankHoldersPage() {
         onRowClick={handleRowClick}
       />
 
-      {/* Modals */}
       <DynamicFormModal
         title={selected ? "Edit Rank Holder" : "Create Rank Holder"}
         isOpen={openForm}

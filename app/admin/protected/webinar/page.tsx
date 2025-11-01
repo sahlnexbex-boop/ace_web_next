@@ -33,7 +33,6 @@ export default function WebinarsPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load categories
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories(1, 100);
@@ -43,7 +42,6 @@ export default function WebinarsPage() {
     }
   };
 
-  // ✅ Load webinars
   const loadWebinars = async () => {
     try {
       const res = await getWebinars(
@@ -75,7 +73,6 @@ export default function WebinarsPage() {
       }))
     : [];
 
-  // ✅ View logic
   const handleView = async (row: any) => {
     try {
       const res = await getWebinarById(row.webinar_id);
@@ -138,7 +135,6 @@ export default function WebinarsPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
     { name: "webinar_title", label: "Webinar Title", type: "text", required: true },
     { name: "date_time", label: "Date & Time", type: "datetime-local", required: true },
@@ -169,12 +165,10 @@ export default function WebinarsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header + Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Webinars</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Dynamic Filter */}
           <TableFilter
             fields={[
               {
@@ -197,7 +191,6 @@ export default function WebinarsPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -210,11 +203,12 @@ export default function WebinarsPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "webinar_title", label: "Title" },
+          { key: "speaker_name", label: "Speaker Name" },
+          { key: "speaker_position", label: "Speaker Position" },
           {
             key: "date_time",
             label: "Date & Time",
@@ -226,8 +220,6 @@ export default function WebinarsPage() {
                   })
                 : "—",
           },
-          { key: "speaker_name", label: "Speaker Name" },
-          { key: "speaker_position", label: "Speaker Position" },
           { key: "course_category_id", label: "Category", render: (r) => r.category?.category_name || "—" },
           {
             key: "webinar_image",
@@ -282,7 +274,6 @@ export default function WebinarsPage() {
         onRowClick={handleView}
       />
 
-      {/* ✅ Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Webinar" : "Create Webinar"}
         isOpen={openForm}
@@ -296,7 +287,6 @@ export default function WebinarsPage() {
         onSuccess={loadWebinars}
       />
 
-      {/* ✅ Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -311,7 +301,6 @@ export default function WebinarsPage() {
         message={`Are you sure you want to delete "${selected?.webinar_title}"?`}
       />
 
-      {/* ✅ View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => {

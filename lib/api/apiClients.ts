@@ -1,4 +1,3 @@
-// /lib/api/apiClients.ts
 import { getToken } from "@/lib/auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
@@ -12,12 +11,11 @@ export async function apiRequest(
 ) {
   const headers: Record<string, string> = {};
 
-  // ✅ Add JSON Content-Type only when not FormData
+  //  Add JSON Content-Type only when not FormData
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
-
-  // ✅ Attach token unless explicitly skipped
+  //  Attach token unless explicitly skipped
   if (!skipAuth) {
     const token = getToken?.();
     if (token) headers["Authorization"] = `Bearer ${token}`;

@@ -31,7 +31,6 @@ export default function SocialServicesPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // 🔹 Load social services
   const loadSocialServices = async () => {
     try {
       const status =
@@ -51,7 +50,6 @@ export default function SocialServicesPage() {
     loadSocialServices();
   }, [page, debouncedSearch, filters]);
 
-  // 🔹 Handle View
   const handleView = async (row: any) => {
     try {
       const res = await getSocialServiceById(row.service_id);
@@ -125,7 +123,6 @@ export default function SocialServicesPage() {
     }
   };
 
-  // 🔹 Fields for Create/Edit Modal
   const fields = [
     { name: "service_title", label: "Service Title", type: "text", required: true },
     { name: "service_description", label: "Description", type: "textarea", required: true },
@@ -147,12 +144,10 @@ export default function SocialServicesPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Social Services</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Filter Button (Status + Date) */}
           <TableFilter
             fields={[
               {
@@ -175,7 +170,6 @@ export default function SocialServicesPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -188,7 +182,6 @@ export default function SocialServicesPage() {
         </div>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
           {
@@ -258,7 +251,6 @@ export default function SocialServicesPage() {
         onRowClick={handleView}
       />
 
-      {/* Modals */}
       <DynamicFormModal
         title={selected ? "Edit Social Service" : "Create Social Service"}
         isOpen={openForm}

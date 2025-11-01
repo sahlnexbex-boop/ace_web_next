@@ -53,7 +53,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (checking) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 text-gray-500">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 text-gray-500 h-full overflow-y-auto">
        <Loader />
       </div>
     );

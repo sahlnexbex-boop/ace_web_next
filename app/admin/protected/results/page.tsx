@@ -35,7 +35,6 @@ export default function ResultsPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // 🔹 Load Courses and Categories
   const loadCourses = async () => {
     try {
       const res = await getCourses(1, 100, "");
@@ -59,7 +58,6 @@ export default function ResultsPage() {
     }
   };
 
-  // 🔹 Load Results with Filters
   const loadResults = async () => {
     try {
       const { status, based_type, result_type, course_id, category_id } =
@@ -92,7 +90,6 @@ export default function ResultsPage() {
     loadResults();
   }, [page, debouncedSearch, filters]);
 
-  // 🔹 Dropdown Options
   const courseOptions = courses.map((c) => ({
     label: c.course_name,
     value: String(c.course_id),
@@ -103,7 +100,6 @@ export default function ResultsPage() {
     value: String(c.category_id),
   }));
 
-  // 🔹 View Modal Data
   const handleRowClick = async (row: any) => {
     try {
       const res = await getResultById(row.result_id);
@@ -172,7 +168,6 @@ export default function ResultsPage() {
     }
   };
 
-  // 🔹 Fields for Modal
   const fields = [
     {
       name: "result_title",
@@ -244,12 +239,10 @@ export default function ResultsPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Results</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Dynamic Filter */}
           <TableFilter
             fields={[
               {
@@ -266,14 +259,14 @@ export default function ResultsPage() {
                 label: "Course",
                 type: "select",
                 options: courseOptions,
-                showIf: { field: "based_type", value: "1" }, // ✅ Only show if based_type = 1
+                showIf: { field: "based_type", value: "1" },
               },
               {
                 key: "category_id",
                 label: "Category",
                 type: "select",
                 options: categoryOptions,
-                showIf: { field: "based_type", value: "2" }, // ✅ Only show if based_type = 2
+                showIf: { field: "based_type", value: "2" }, 
               },
               {
                 key: "result_type",
@@ -300,7 +293,6 @@ export default function ResultsPage() {
             }}
           />
 
-          {/* Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -314,7 +306,6 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Data Table */}
       <DataTable
         columns={[
           {
@@ -406,7 +397,6 @@ export default function ResultsPage() {
         onRowClick={handleRowClick}
       />
 
-      {/* Create/Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Result" : "Create Result"}
         isOpen={openForm}
@@ -420,7 +410,6 @@ export default function ResultsPage() {
         onSuccess={loadResults}
       />
 
-      {/* Delete Modal */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}
@@ -435,7 +424,6 @@ export default function ResultsPage() {
         }}
       />
 
-      {/* View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}

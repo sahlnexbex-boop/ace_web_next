@@ -16,7 +16,6 @@ import {
 } from "@/lib/api/enquiry";
 import { IconPlus } from "@tabler/icons-react";
 
-// ✅ Label maps
 const ENQUIRY_TYPE: Record<number, string> = {
   1: "General",
   2: "Course",
@@ -45,7 +44,6 @@ export default function EnquiryPage() {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Load Enquiries (with filters)
   const loadEnquiries = async () => {
     try {
       const { status, enquiry_type, enquiry_status } = filters;
@@ -70,11 +68,11 @@ export default function EnquiryPage() {
     loadEnquiries();
   }, [page, debouncedSearch, filters]);
 
-  // ✅ Row click (View Modal)
   const handleRowClick = async (row: any) => {
     try {
       const res = await getEnquiryById(row.enquiry_id);
       if (!res?.data) return;
+
       const d = res.data;
 
       const formatted: Record<string, React.ReactNode> = {
@@ -87,13 +85,29 @@ export default function EnquiryPage() {
           </p>
         ),
         "Enquiry Type": ENQUIRY_TYPE[d.enquiry_type] || "—",
-        "Enquiry Status": ENQUIRY_STATUS[d.enquiry_status] || "—",
+
+        "Enquiry Status":
+          d.enquiry_status === 1 ? (
+            <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium">
+              Requested
+            </span>
+          ) : d.enquiry_status === 2 ? (
+            <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">
+              Ongoing
+            </span>
+          ) : (
+            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+              Completed
+            </span>
+          ),
+
         "Submitted On": d.submit_date
           ? new Date(d.submit_date).toLocaleString("en-IN", {
               dateStyle: "medium",
               timeStyle: "short",
             })
           : "—",
+
         Status:
           d.status === 1 || d.status === "1" ? (
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -104,6 +118,7 @@ export default function EnquiryPage() {
               Inactive
             </span>
           ),
+
         "Created At": d.created_at
           ? new Date(d.created_at).toLocaleString("en-IN")
           : "—",
@@ -119,11 +134,20 @@ export default function EnquiryPage() {
     }
   };
 
-  // ✅ Form Fields
   const fields = [
-    { name: "cstmr_name", label: "Customer Name", type: "text", required: true },
+    {
+      name: "cstmr_name",
+      label: "Customer Name",
+      type: "text",
+      required: true,
+    },
     { name: "cstmr_email", label: "Email", type: "email", required: true },
-    { name: "cstmr_phone", label: "Phone Number", type: "text", required: true },
+    {
+      name: "cstmr_phone",
+      label: "Phone Number",
+      type: "text",
+      required: true,
+    },
     {
       name: "cstmr_message",
       label: "Message",
@@ -164,12 +188,10 @@ export default function EnquiryPage() {
 
   return (
     <div className="p-4 sm:p-6">
-      {/* ✅ Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">Enquiries</h1>
 
         <div className="flex items-center gap-3">
-          {/* ✅ Filter */}
           <TableFilter
             fields={[
               {
@@ -206,7 +228,6 @@ export default function EnquiryPage() {
             }}
           />
 
-          {/* Create Enquiry */}
           <button
             onClick={() => {
               setSelected(null);
@@ -219,7 +240,6 @@ export default function EnquiryPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
       <DataTable
         columns={[
           {
@@ -237,7 +257,20 @@ export default function EnquiryPage() {
           {
             key: "enquiry_status",
             label: "Update Status",
-            render: (r) => ENQUIRY_STATUS[r.enquiry_status] || "—",
+            render: (r) =>
+              r.enquiry_status === 1 ? (
+                <div className="bg-orange-100 text-orange-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
+                  Requested
+                </div>
+              ) : r.enquiry_status === 2 ? (
+                <div className="bg-yellow-100 text-yellow-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
+                  Ongoing
+                </div>
+              ) : (
+                <div className="bg-green-100 text-green-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
+                  Completed
+                </div>
+              ),
           },
           {
             key: "submit_date",
@@ -272,7 +305,7 @@ export default function EnquiryPage() {
         setPage={setPage}
         setSearch={setSearch}
         onRowClick={handleRowClick}
-        onEdit={(row) => {
+        onEdit={(row: any) => {
           setSelected({
             ...row,
             status: String(row.status),
@@ -281,13 +314,12 @@ export default function EnquiryPage() {
           });
           setOpenForm(true);
         }}
-        onDelete={(row) => {
+        onDelete={(row: any) => {
           setSelected(row);
           setOpenDelete(true);
         }}
       />
 
-      {/* ✅ Modals */}
       <DynamicFormModal
         title={selected ? "Edit Enquiry" : "Create Enquiry"}
         isOpen={openForm}
