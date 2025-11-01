@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { apiRequest } from "@/lib/api/apiClients";
 import { useState } from "react";
+import { useToast } from "@/contexts/ToastContext";
 
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export default function ConfirmDeleteModal({
 }: ConfirmDeleteModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { showInfo, showError } = useToast();
 
   if (!isOpen) return null;
 
@@ -44,9 +46,11 @@ export default function ConfirmDeleteModal({
       }
 
       onSuccess?.();
+      showInfo("Deleted successfully");
       onClose();
     } catch (err: any) {
       setError(err.message || "Failed to delete");
+      showError(err.message || "Failed to delete");
     } finally {
       setLoading(false);
     }

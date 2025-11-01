@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { apiRequest } from "@/lib/api/apiClients";
+import { useToast } from "@/contexts/ToastContext";
 
 type FieldType =
   | "text"
@@ -53,6 +54,7 @@ export default function DynamicFormModal({
   const [formState, setFormState] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     const normalized: Record<string, any> = {};
@@ -133,11 +135,13 @@ export default function DynamicFormModal({
       if (onSubmit) await onSubmit(fd);
       else await defaultSubmit(fd);
       onSuccess?.();
+      showSuccess("Submit successfully");
       onClose();
     } catch (err: any) {
       const msg =
         err?.message || (typeof err === "string" ? err : "An error occurred");
       setError(msg);
+      showError(msg);
       console.error("Submit error:", err);
     } finally {
       setLoading(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useContext, useRef, useEffect, useState } from "react";
 import { Toast } from "primereact/toast";
 
 interface ToastContextType {
@@ -14,6 +14,14 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const toastRef = useRef<Toast>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const showSuccess = (message: string, summary = "Success") => {
     toastRef.current?.show({
@@ -52,16 +60,20 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <ToastContext.Provider
-      value={{ showSuccess, showError, showInfo, showWarn }}
-    >
-      <Toast ref={toastRef} position="bottom-right" className="z-[100] relative" />
+    <ToastContext.Provider value={{ showSuccess, showError, showInfo, showWarn }}>
+      <Toast
+        ref={toastRef}
+        position="bottom-right"
+        className={`z-[100] relative transition-all duration-300 
+          ${isMobile ? "scale-90 text-xs p-1 right-2 bottom-2" : "scale-100 text-sm p-3"}
+        `}
+      />
       {children}
     </ToastContext.Provider>
   );
 };
 
-// custom hook for easy access
+// Custom hook
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {

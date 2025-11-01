@@ -201,7 +201,7 @@ export default function PublicationsPage() {
         >
           {loading ? (
             <p className="text-gray-500 col-span-full text-center py-10">
-             <Loader />
+              <Loader />
             </p>
           ) : books.length > 0 ? (
             books.map((book) => (
@@ -223,7 +223,7 @@ export default function PublicationsPage() {
                   <h3 className="font-semibold text-gray-800 text-sm line-clamp-2">
                     {book.book_title}
                   </h3>
-                 <p className="text-gray-500 mt-1">{book.book_author}</p>
+                  <p className="text-gray-500 mt-1">{book.book_author}</p>
                   <p className="font-bold text-gray-900 mt-1">
                     ₹{book.book_price}
                   </p>
@@ -231,9 +231,9 @@ export default function PublicationsPage() {
               </div>
             ))
           ) : (
-            <p className="text-gray-500 col-span-full text-center py-10">
-              No books found.
-            </p>
+            <div className="flex justify-center items-center">
+              <img src="../no_data.png" alt="" className="w-52 md:w-72 opacity-40" />
+            </div>
           )}
         </div>
       </div>

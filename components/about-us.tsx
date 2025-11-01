@@ -65,7 +65,7 @@ export default function AboutUs() {
   tl.fromTo(".about-button", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4 }, "-=0.3");
   tl.fromTo(".about-tab", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 }, "-=0.4");
 
-  // ⏩ Notifications - Start Earlier (less delay)
+  //  Notifications - Start Earlier (less delay)
   tl.fromTo(
     ".notifications-panel",
     { opacity: 0, y: 30 },
@@ -258,7 +258,7 @@ export default function AboutUs() {
         </div>
 
         <div className="md:mt-16 mt-8">
-          <div className="flex justify-center gap-4 overflow-x-auto no-scrollbar px-2 py-2 sm:px-0 snap-x">
+          <div className="flex md:justify-center justify-start gap-4 overflow-x-auto no-scrollbar px-2 py-2 sm:px-0 snap-x">
             {tabs.map((tab) => (
               <button
                 key={tab.text}

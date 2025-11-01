@@ -221,7 +221,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold transition-all"
+              className="w-full bg-cyan-600 hover:bg-cyan-700 py-2 rounded font-semibold transition-all cursor-pointer"
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>
@@ -249,7 +249,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-semibold transition-all"
+              className="w-full bg-cyan-600 hover:bg-cyan-700 py-2 rounded font-semibold transition-all cursor-pointer"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>

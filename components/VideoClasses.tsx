@@ -25,7 +25,7 @@ export default function VideoClasses({ activeCategory }: { activeCategory: numbe
   }, [activeCategory]);
 
   if (loading) return <p>Loading...</p>;
-  if (!videos.length) return  <div className="flex justify-start items-center">
+  if (!videos.length) return  <div className="flex md:justify-start justify-center items-center">
     <img src="../no_data.png" alt="" className="w-52 opacity-40" />
   </div>;
 

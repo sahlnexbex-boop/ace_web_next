@@ -28,7 +28,7 @@ export default function StudyServiceList({
   }, [activeCategory, serviceType]);
 
   if (loading) return <p>Loading...</p>;
-  if (!services.length) return  <div className="flex justify-start items-center">
+  if (!services.length) return  <div className="flex md:justify-start justify-center items-center">
     <img src="../no_data.png" alt="" className="w-52 opacity-40" />
   </div>;
 

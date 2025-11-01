@@ -256,7 +256,7 @@ export default function CourseDetailsPage({
                 rel="noopener noreferrer"
                 className="flex items-center justify-between w-full bg-red-100 text-red-600 px-4 py-3 rounded-lg hover:bg-red-200 transition cursor-pointer"
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center text-sm md:text-md gap-2">
                   <FileText className="w-5 h-5" /> Download Syllabus (PDF)
                 </span>
               </a>
@@ -269,7 +269,7 @@ export default function CourseDetailsPage({
                 rel="noopener noreferrer"
                 className="flex items-center justify-between w-full bg-blue-100 text-blue-600 px-4 py-3 rounded-lg hover:bg-blue-200 transition cursor-pointer"
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2 text-sm md:text-md">
                   <Download className="w-5 h-5" /> Previous Year Question Papers
                 </span>
               </a>
