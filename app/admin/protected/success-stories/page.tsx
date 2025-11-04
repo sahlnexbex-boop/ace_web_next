@@ -186,7 +186,7 @@ export default function SuccessStoriesPage() {
     },
     {
       name: "thumbnail_image",
-      label: "Thumbnail Image",
+      label: "Thumbnail Image - (Ratio 3:2)",
       type: "file",
       required: false,
     },

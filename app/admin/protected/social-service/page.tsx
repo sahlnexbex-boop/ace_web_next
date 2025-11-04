@@ -138,8 +138,8 @@ export default function SocialServicesPage() {
       ],
       required: true,
     },
-    { name: "service_image", label: "Main Image", type: "file", required: false },
-    { name: "other_images", label: "Other Images", type: "file", multiple: true, required: false },
+    { name: "service_image", label: "Main Image - (Ratio 5:3)", type: "file", required: false },
+    { name: "other_images", label: "Other Images - (Ratio 5:3)", type: "file", multiple: true, required: false },
   ];
 
   return (

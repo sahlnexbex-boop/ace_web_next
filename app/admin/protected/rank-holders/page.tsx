@@ -206,7 +206,7 @@ export default function RankHoldersPage() {
       required: true,
     },
     { name: "year", label: "Year", type: "number", required: true },
-    { name: "student_photo", label: "Student Photo", type: "file", required: false },
+    { name: "student_photo", label: "Student Photo - (Ratio 1:1)", type: "file", required: false },
   ];
 
   return (

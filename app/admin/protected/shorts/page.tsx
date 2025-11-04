@@ -121,7 +121,7 @@ export default function ShortsPage() {
     },
     {
       name: "shorts_file",
-      label: "Shorts File",
+      label: "Shorts File - (Ratio 9:16)",
       type: "file",
       required: true,
     },

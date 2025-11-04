@@ -128,7 +128,7 @@ export default function NewsPage() {
       ],
       required: true,
     },
-    { name: "news_image", label: "News Image", type: "file", required: false },
+    { name: "news_image", label: "News Image - (Ratio 3:2)", type: "file", required: false },
   ];
 
   return (

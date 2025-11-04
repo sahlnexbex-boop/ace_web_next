@@ -155,7 +155,7 @@ export default function StudyServicePage() {
       ],
       required: true,
     },
-    { name: "service_file", label: "Service File", type: "file", required: false },
+    { name: "service_file", label: "Service File (PDF)", type: "file", required: false },
   ];
 
   return (

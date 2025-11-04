@@ -140,7 +140,7 @@ export default function EventsPage() {
       ],
       required: true,
     },
-    { name: "event_image", label: "Event Image", type: "file", required: false },
+    { name: "event_image", label: "Event Image - (Ratio 3:2)", type: "file", required: false },
   ];
 
   return (

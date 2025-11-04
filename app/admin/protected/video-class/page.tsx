@@ -156,7 +156,7 @@ const loadCategories = async () => {
       ],
       required: true,
     },
-    { name: "class_image", label: "Class Image", type: "file", required: false },
+    { name: "class_image", label: "Class Image - (Ratio 3:2)", type: "file", required: false },
   ];
 
   return (

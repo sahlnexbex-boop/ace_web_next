@@ -174,8 +174,8 @@ export default function PublicationPage() {
       ],
       required: true,
     },
-    { name: "book_image", label: "Book Image", type: "file", required: false },
-    { name: "book_file", label: "Book File", type: "file", required: false },
+    { name: "book_image", label: "Book Image - (Ratio 190x270)", type: "file", required: false },
+    { name: "book_file", label: "Book File (PDF)", type: "file", required: false },
   ];
 
   return (

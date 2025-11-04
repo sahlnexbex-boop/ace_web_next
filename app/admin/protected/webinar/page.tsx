@@ -160,7 +160,7 @@ export default function WebinarsPage() {
       ],
       required: true,
     },
-    { name: "webinar_image", label: "Webinar Image", type: "file", required: false },
+    { name: "webinar_image", label: "Webinar Image - (Ratio 3:2)", type: "file", required: false },
   ];
 
   return (

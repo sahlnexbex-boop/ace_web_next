@@ -298,7 +298,7 @@ export default function BlogsPage() {
             ],
             required: true,
           },
-          { name: "blog_image", label: "Blog Image", type: "file", required: false },
+          { name: "blog_image", label: "Blog Image - (Ratio: 3:2)", type: "file", required: false },
         ]}
         defaultValues={selected}
         onSubmit={async (fd) => {

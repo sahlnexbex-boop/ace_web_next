@@ -150,7 +150,7 @@ export default function CourseCategoryPage() {
     },
     {
       name: "category_image",
-      label: "Category Image",
+      label: "Category Image - (Ratio: 1:1)",
       type: "file",
       required: false,
     },

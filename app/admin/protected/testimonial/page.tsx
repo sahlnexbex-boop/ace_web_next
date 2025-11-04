@@ -107,7 +107,7 @@ export default function TestimonialsPage() {
     },
     {
       name: "image_of_candidate",
-      label: "Candidate Image",
+      label: "Candidate Image - (Ratio 1:1)",
       type: "file",
       required: false,
     },

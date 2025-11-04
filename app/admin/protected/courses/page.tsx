@@ -197,7 +197,7 @@ export default function CoursesPage() {
     },
     {
       name: "course_image",
-      label: "Course Image",
+      label: "Course Image - (Ratio: 3:2)",
       type: "file",
       required: false,
     },

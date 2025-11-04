@@ -143,13 +143,13 @@ export default function CarouselPage() {
     },
     {
       name: "carousel_file",
-      label: "Carousel File",
+      label: "Carousel File - (Ratio 16:9)",
       type: "file",
       required: true,
     },
     {
       name: "carousel_mobile_file",
-      label: "Mobile File",
+      label: "Mobile File - (Ratio 9:16)",
       type: "file",
       required: true,
     },

@@ -221,7 +221,7 @@ export default function ResultsPage() {
     },
     {
       name: "result_file",
-      label: "Result File",
+      label: "Result File - (PDF)",
       type: "file",
       required: false,
     },

@@ -168,7 +168,7 @@ export default function CurrentAffairPage() {
       ],
       required: true,
     },
-    { name: "affair_file", label: "File", type: "file", required: false },
+    { name: "affair_file", label: "File (PDF)", type: "file", required: false },
   ];
 
   return (

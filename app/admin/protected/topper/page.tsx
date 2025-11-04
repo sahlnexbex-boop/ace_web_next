@@ -196,7 +196,7 @@ export default function ToppersPage() {
         { label: "Inactive", value: "0" },
       ],
     },
-    { name: "topper_image", label: "Topper Image", type: "file" },
+    { name: "topper_image", label: "Topper Image - (Ratio 1:1)", type: "file" },
   ];
 
   return (
