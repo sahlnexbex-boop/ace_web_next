@@ -131,7 +131,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative flex items-center overflow-hidden z-10 md:min-h-[600px] min-h-[600px]">
+    <section className="relative flex items-center overflow-hidden z-10 md:min-h-[600px] min-h-[92vh]">
       {slides.map((slide, index) => {
         const displayFile = isMobile
           ? slide.carousel_mobile_file || slide.carousel_file
