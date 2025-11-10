@@ -10,7 +10,7 @@ export default function ExamHeader() {
         
       <div className="flex flex-col justify-center md:px-10 text-center md:text-left">
         {/* Breadcrumb */}
-        <div className="text-sm text-gray-900 mb-6 md:mb-20 flex justify-start items-center flex-wrap gap-1">
+        <div className="text-sm text-gray-900 mb-6 lg:mb-20 flex justify-start items-center flex-wrap gap-1">
           <span
             className="hover:text-blue-600 cursor-pointer"
             onClick={() => router.push("/public/home")}
@@ -42,7 +42,7 @@ export default function ExamHeader() {
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-semibold mb-4">
+        <h1 className="text-3xl lg:text-4xl font-semibold mb-4">
           Focused Learning,
           <br className="hidden sm:block" />
           Proven <span className="text-[#087fc2]">Success</span>

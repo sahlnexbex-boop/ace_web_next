@@ -166,8 +166,8 @@ export default function AboutHeader() {
               ref={statsRef}
               className="about-stats flex flex-wrap gap-4 bg-white py-5 rounded-3xl"
             >
-              <div className="about-stat rounded-lg md:p-4 flex-1 text-center">
-                <div className="md:text-5xl text-2xl font-bold text-cyan-700">
+              <div className="about-stat rounded-lg lg:p-4 flex-1 text-center flex flex-col justify-center">
+                <div className="lg:text-5xl text-2xl font-bold text-cyan-700">
                   <span ref={yearsRef}>0+</span>
                 </div>
                 <div className="text-xs md:text-sm text-gray-600">
@@ -176,7 +176,7 @@ export default function AboutHeader() {
               </div>
 
               <div className="about-stat rounded-lg md:p-4 flex-1 text-center">
-                <div className="md:text-5xl text-2xl font-bold text-cyan-700">
+                <div className="lg:text-5xl text-2xl font-bold text-cyan-700">
                   <span ref={studentsRef}>0+</span>
                 </div>
                 <div className="text-xs md:text-sm text-gray-600">
@@ -185,7 +185,7 @@ export default function AboutHeader() {
               </div>
 
               <div className="about-stat rounded-lg md:p-4 flex-1 text-center">
-                <div className="md:text-5xl text-2xl font-bold text-cyan-700">
+                <div className="lg:text-5xl text-2xl font-bold text-cyan-700">
                   <span ref={facultyRef}>0+</span>
                 </div>
                 <div className="text-xs md:text-sm text-gray-600">

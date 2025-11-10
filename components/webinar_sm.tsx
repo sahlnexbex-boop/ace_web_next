@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { getWebinars } from "@/lib/api/webinar";
+import DynamicVideoModal from "@/components/dynamicVideoModal";
 import Loader from "./loader";
 
 interface WebinarItem {
@@ -26,6 +27,8 @@ export default function Webinars() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(2);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [isModalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchWebinars = async () => {
@@ -73,7 +76,7 @@ export default function Webinars() {
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
-    startAutoSlide(); 
+    startAutoSlide();
   };
 
   const getSlides = () => {
@@ -93,6 +96,12 @@ export default function Webinars() {
     };
     return date.toLocaleDateString("en-US", options);
   };
+
+  const openVideo = (url: string) => {
+    setVideoUrl(url);
+    setModalOpen(true);
+  };
+  const closeVideo = () => setModalOpen(false);
 
   const formatTime = (isoDate: string) => {
     const date = new Date(isoDate);
@@ -132,6 +141,7 @@ export default function Webinars() {
                   {slide.map((web) => (
                     <div
                       key={web.webinar_id}
+                      onClick={() => openVideo(web.webinar_link)}
                       className="bg-white rounded-2xl shadow-md overflow-hidden border hover:shadow-md hover:shadow-blue-100 transition flex flex-col md:flex-row items-center p-4 md:p-6"
                     >
                       <div className="flex-shrink-0 w-full md:w-1/2">
@@ -243,6 +253,12 @@ export default function Webinars() {
           </div>
         )}
       </div>
+
+      <DynamicVideoModal
+        isOpen={isModalOpen}
+        onClose={closeVideo}
+        videoUrl={videoUrl}
+      />
     </section>
   );
 }

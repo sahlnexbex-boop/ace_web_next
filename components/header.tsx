@@ -18,34 +18,57 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { gsap } from "gsap";
+import { getCourseCategories } from "@/lib/api/courseCategory";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+  const [courseList, setCourseList] = useState<{ name: string; href: string }[]>([]);
+
   const menuRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
+
   const router = useRouter();
   const pathname = usePathname();
 
-  const courseList = [
-    { name: "All Courses", href: "/public/courses" },
-    { name: "UPSC", href: "/public/courses/upsc" },
-    { name: "Kerala PSC", href: "/public/courses/kerala-psc" },
-    { name: "HSA", href: "/public/courses/hsa" },
-    { name: "HSST", href: "/public/courses/hsst" },
-    { name: "KTET", href: "/public/courses/ktet" },
-  ];
+  /* ✅ FETCH COURSE CATEGORIES - first 5 */
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getCourseCategories(1, 5, "", { status: "1" });
 
+        if (response?.data) {
+          const formatted = response.data.map((cat: any) => ({
+            name: cat.category_name,
+            href: `/public/courses/${cat.category_id}`,
+          }));
+          setCourseList(formatted);
+        }
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  /* ✅ INSIGHTS LIST - unchanged */
   const insightList = [
     { name: "Blogs", href: "/public/blog" },
     { name: "Notifications", href: "/public/notification" },
     { name: "Publications", href: "/public/publication" },
   ];
 
+  /* ✅ MENU STRUCTURE */
   const menuLinks = [
     { label: "Home", href: "/public/home", icon: Home },
-    { label: "Courses", href: "/public/courses", icon: BookOpen, dropdown: courseList },
+    {
+      label: "Courses",
+      href: "/public/courses",
+      icon: BookOpen,
+      dropdown: courseList, // ✅ dynamic categories here
+    },
     { label: "Learners Portal", href: "/public/learners", icon: GraduationCap },
     { label: "Exam & Results", href: "/public/exams", icon: FileText },
     { label: "Highlights", href: "/public/highlights", icon: Star },
@@ -54,29 +77,18 @@ export default function Header() {
     { label: "Contact Us", href: "/public/contact", icon: Phone },
   ];
 
+  /* ✅ GSAP for mobile menu animation */
   useEffect(() => {
     if (isMenuOpen) {
-      gsap.to(overlayRef.current, {
-        opacity: 1,
-        duration: 0.3,
-        pointerEvents: "auto",
-      });
-      gsap.to(menuRef.current, {
-        x: 0,
-        duration: 0.4,
-        ease: "power3.out",
-      });
+      gsap.to(overlayRef.current, { opacity: 1, duration: 0.3, pointerEvents: "auto" });
+      gsap.to(menuRef.current, { x: 0, duration: 0.4, ease: "power3.out" });
       gsap.fromTo(
         ".mobile-link",
         { x: 30, opacity: 0 },
         { x: 0, opacity: 1, stagger: 0.1, delay: 0.2, duration: 0.4, ease: "power3.out" }
       );
     } else {
-      gsap.to(overlayRef.current, {
-        opacity: 0,
-        duration: 0.3,
-        pointerEvents: "none",
-      });
+      gsap.to(overlayRef.current, { opacity: 0, duration: 0.3, pointerEvents: "none" });
       gsap.to(menuRef.current, { x: "100%", duration: 0.4, ease: "power3.in" });
     }
   }, [isMenuOpen]);
@@ -86,35 +98,37 @@ export default function Header() {
     router.push(path);
   };
 
+  /* ✅ ACTIVE LINK DETECTION */
   const isActive = (href: string, label?: string) => {
-  const cleanPath = pathname.replace(/\/$/, ""); 
-  const cleanHref = href.replace(/\/$/, "");
-  if (
-    label === "Insights" &&
-    ["/public/blog", "/public/notification", "/public/publication"].some((path) =>
-      cleanPath.startsWith(path)
-    )
-  ) {
-    return true;
-  }
+    const cleanPath = pathname.replace(/\/$/, "");
+    const cleanHref = href.replace(/\/$/, "");
 
-  return cleanPath === cleanHref || cleanPath.startsWith(`${cleanHref}/`);
-};
+    if (
+      label === "Insights" &&
+      ["/public/blog", "/public/notification", "/public/publication"].some((path) =>
+        cleanPath.startsWith(path)
+      )
+    ) {
+      return true;
+    }
 
+    return cleanPath === cleanHref || cleanPath.startsWith(`${cleanHref}/`);
+  };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* ✅ LOGO */}
           <div
             className="flex items-center space-x-2 cursor-pointer"
             onClick={() => router.push("/public/home")}
           >
-            <img src="/logo_blue.png" alt="logo" className="h-10 sm:h-auto" />
+            <img src="/logo_blue.png" alt="logo" className="h-10 min-w-24 md:h-auto" />
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6 relative">
+          {/* ✅ DESKTOP MENU */}
+          <nav className="hidden lg:flex items-center space-x-6 relative">
             {menuLinks.map(({ label, href, icon: Icon, dropdown }) => (
               <div
                 key={label}
@@ -157,7 +171,8 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="md:hidden">
+          {/* ✅ MOBILE MENU BUTTON */}
+          <div className="lg:hidden">
             <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(true)}>
               <Menu className="h-6 w-6" />
             </Button>
@@ -165,13 +180,14 @@ export default function Header() {
         </div>
       </div>
 
+      {/* ✅ OVERLAY */}
       <div
         ref={overlayRef}
         onClick={() => setIsMenuOpen(false)}
         className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 opacity-0 pointer-events-none"
       ></div>
 
-      {/* Mobile Sidebar */}
+      {/* ✅ MOBILE SIDEBAR */}
       <div
         ref={menuRef}
         className="fixed top-0 right-0 h-full w-72 bg-white/90 backdrop-blur-md shadow-xl z-50 p-6 flex flex-col translate-x-full overflow-y-auto"
