@@ -12,19 +12,19 @@ export default function HybridLearning() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-3 gap-12 items-center">
-          <div className="md:col-span-2">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 text-center md:text-start">
+          <div className="lg:col-span-2">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 text-center lg:text-start">
               Hybrid Learning Programme
             </h2>
-            <p className="text-xl text-blue-600 mb-6 text-center md:text-start">
+            <p className="text-xl text-blue-600 mb-6 text-center lg:text-start">
               The Learning App For Online & Offline <br /> Students
             </p>
-            <p className="text-lg text-gray-600 mb-4 text-center md:text-start">
+            <p className="text-lg text-gray-600 mb-4 text-center lg:text-start">
               Download The App Now
             </p>
 
             {/* App Store Buttons */}
-            <div className="flex justify-center md:justify-start gap-8">
+            <div className="flex justify-center lg:justify-start gap-8">
               <a
                 href="https://play.google.com/store/apps/details?id=com.acelearning.app&pcampaignid=web_share"
                 target="_blank"
@@ -52,18 +52,18 @@ export default function HybridLearning() {
           </div>
 
           {/* Mobile App Mockup */}
-          <div className="relative flex justify-center md:block">
+          <div className="relative flex justify-center md:block overflow-hidden">
             <img
               src="/logo_full.png"
               alt="logo"
-              className="absolute bottom-0 md:-left-24 w-[500px]"
+              className="absolute bottom-0 left-16 lg:-left-24 w-[500px]"
             />
 
             <div className="relative z-10 max-w-sm mx-auto">
               <img
                 src="/mockup_device.png"
                 alt="Mobile app interface"
-                className="w-52 h-auto"
+                className="w-52 h-auto mx-auto lg:mx-0"
               />
             </div>
           </div>

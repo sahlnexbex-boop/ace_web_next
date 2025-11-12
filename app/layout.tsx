@@ -7,14 +7,22 @@ import { ToastProvider } from "@/contexts/ToastContext";
 
 export const metadata: Metadata = {
   title: "Ace Institution",
-  description: "Created by SahlCT",
-  generator: "Next.js",
+  description: "Created by NexBex Solutions",
   icons: {
-    icon: "./favicon.ico",
-    shortcut: "./logo_full.png",
-    apple: "./logo_full.png",
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+    other: [
+      {
+        rel: "icon",
+        url: "/favicon-32x32.png",
+        sizes: "32x32",
+      }
+    ],
   },
+  manifest: "/site.webmanifest",
 };
+
 
 export default function RootLayout({
   children,

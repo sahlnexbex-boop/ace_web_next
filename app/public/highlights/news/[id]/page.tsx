@@ -92,7 +92,13 @@ export default function NewsDetailsPage() {
 
         {/* Content */}
         <div className="text-gray-700 leading-relaxed space-y-4 text-[15px] md:text-base">
-          <p>{news.news_description || "No description available."}</p>
+          {news.news_description
+            ?.split(/\r?\n\r?\n/) 
+            .map((para: string, idx: number) => (
+              <p key={idx} className="whitespace-pre-line">
+                {para.trim()}
+              </p>
+            ))}
         </div>
       </div>
     </section>

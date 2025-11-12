@@ -17,7 +17,17 @@ export default function RankHolders() {
   useEffect(() => {
     const fetchRankHolders = async () => {
       try {
-        const res = await getRankHolders(1, 10, "", 1, undefined, undefined, undefined, undefined, 2);
+        const res = await getRankHolders(
+          1,
+          10,
+          "",
+          1,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          2
+        );
         const data = res?.data || [];
         setRankHolders(data);
       } catch (error) {
@@ -74,6 +84,7 @@ export default function RankHolders() {
   return (
     <section className="md:py-16 py-10 bg-white overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        {/* Title */}
         <div className="relative mb-12 flex justify-center">
           <h2
             className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer"
@@ -88,6 +99,7 @@ export default function RankHolders() {
           />
         </div>
 
+        {/* Navigation Arrows */}
         {!isMobile && rankHolders.length > 4 && (
           <>
             <button
@@ -105,6 +117,7 @@ export default function RankHolders() {
           </>
         )}
 
+        {/* Slider */}
         <div
           ref={(el) => {
             sliderRef.current = el;
@@ -121,11 +134,15 @@ export default function RankHolders() {
           {rankHolders.map((holder, idx) => (
             <div
               key={holder.rank_holder_id}
-              className={`rank-card snap-start flex-shrink-0 ${
-                isMobile ? "w-[80%]" : "w-[calc(25%-1rem)]"
-              } text-center shadow-xl border-t-2 rounded-2xl py-4 relative cursor-pointer opacity-0 bg-white ${
-                !isMobile && idx === 0 ? "ml-6" : ""
-              }`}
+              className={`rank-card snap-start flex-shrink-0
+                ${
+                  isMobile
+                    ? "w-[80%]" // ✅ Mobile: 1 card
+                    : "sm:w-[calc(35%-1rem)] lg:w-[calc(25%-1rem)]" // ✅ sm/md 2 cards, lg 4 cards
+                }
+                text-center shadow-xl border-t-2 rounded-2xl py-4 relative cursor-pointer opacity-0 bg-white ${
+                  !isMobile && idx === 0 ? "ml-6" : ""
+                }`}
             >
               <img
                 src="/logo_only.png"
@@ -142,10 +159,7 @@ export default function RankHolders() {
 
                   <div className="absolute inset-0">
                     <img
-                      src={
-                        holder.student_photo ||
-                        "/placeholder_student.png"
-                      }
+                      src={holder.student_photo || "/placeholder_student.png"}
                       alt={holder.student_name}
                       className="w-full h-full object-cover rounded-full"
                     />

@@ -213,7 +213,7 @@ export default function CarouselPage() {
           },
           {
             key: "carousel_file",
-            label: "File",
+            label: "PC File",
             render: (r) =>
               r.carousel_file ? (
                <a
@@ -230,7 +230,7 @@ export default function CarouselPage() {
           },
           {
             key: "carousel_mobile_file",
-            label: "File",
+            label: "Mobile File",
             render: (r) =>
               r.carousel_mobile_file ? (
                <a

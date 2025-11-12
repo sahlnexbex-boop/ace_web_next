@@ -185,7 +185,7 @@ export default function AboutInstitution() {
             Leadership & Team
           </h2>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-20">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 lg:gap-20">
             {team.map((member, index) => (
               <div
                 key={index}

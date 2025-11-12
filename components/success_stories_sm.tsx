@@ -86,7 +86,7 @@ export default function SuccessStories() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center md:ps-20 z-10">
+        <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center lg:ps-20 z-10">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">
               Success Stories Ace
