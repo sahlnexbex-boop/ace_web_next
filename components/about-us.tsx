@@ -17,11 +17,41 @@ export default function AboutUs() {
   const statsRef = useRef<HTMLDivElement | null>(null);
 
   const tabs = [
-    { text: "Exam & Results", textColor: "text-purple-600", bg: "bg-purple-300/10", hover: "hover:bg-purple-50", link: "/public/exams" },
-    { text: "Exam & Ans Keys", textColor: "text-blue-600", bg: "bg-blue-300/10", hover: "hover:bg-blue-50", link: "/public/learners?type=answer" },
-    { text: "Rank Holder List", textColor: "text-red-500", bg: "bg-red-300/10", hover: "hover:bg-red-50", link: "/public/exams" },
-    { text: "Publications", textColor: "text-gray-600", bg: "bg-gray-300/10", hover: "hover:bg-gray-50", link: "/public/publication" },
-    { text: "Blogs", textColor: "text-pink-600", bg: "bg-pink-300/10", hover: "hover:bg-pink-50", link: "/public/blog" },
+    {
+      text: "Exam & Results",
+      textColor: "text-purple-600",
+      bg: "bg-purple-300/10",
+      hover: "hover:bg-purple-50",
+      link: "/public/exams",
+    },
+    {
+      text: "Exam & Ans Keys",
+      textColor: "text-blue-600",
+      bg: "bg-blue-300/10",
+      hover: "hover:bg-blue-50",
+      link: "/public/learners?type=answer",
+    },
+    {
+      text: "Rank Holder List",
+      textColor: "text-red-500",
+      bg: "bg-red-300/10",
+      hover: "hover:bg-red-50",
+      link: "/public/exams",
+    },
+    {
+      text: "Publications",
+      textColor: "text-gray-600",
+      bg: "bg-gray-300/10",
+      hover: "hover:bg-gray-50",
+      link: "/public/publication",
+    },
+    {
+      text: "Blogs",
+      textColor: "text-pink-600",
+      bg: "bg-pink-300/10",
+      hover: "hover:bg-pink-50",
+      link: "/public/blog",
+    },
   ];
 
   const handleTabClick = (link: string) => {
@@ -31,7 +61,7 @@ export default function AboutUs() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await getResults(1, 10, "", "1", undefined, "1"); 
+        const res = await getResults(1, 10, "", "1", undefined, "1");
         const data = res?.data || [];
         const total = data.length;
 
@@ -54,71 +84,100 @@ export default function AboutUs() {
     fetchNotifications();
   }, []);
 
- useEffect(() => {
-  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+  useEffect(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-  // === Entrance Animations ===
-  tl.fromTo(".about-heading", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8 });
-  tl.fromTo(".about-subheading", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, "-=0.4");
-  tl.fromTo(".about-text", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, "-=0.3");
-  tl.fromTo(".about-stat", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.15 }, "-=0.3");
-  tl.fromTo(".about-button", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4 }, "-=0.3");
-  tl.fromTo(".about-tab", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 }, "-=0.4");
+    // === Entrance Animations ===
+    tl.fromTo(
+      ".about-heading",
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, duration: 0.8 }
+    );
+    tl.fromTo(
+      ".about-subheading",
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      "-=0.4"
+    );
+    tl.fromTo(
+      ".about-text",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      "-=0.3"
+    );
+    tl.fromTo(
+      ".about-stat",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, stagger: 0.15 },
+      "-=0.3"
+    );
+    tl.fromTo(
+      ".about-button",
+      { opacity: 0, scale: 0.9 },
+      { opacity: 1, scale: 1, duration: 0.4 },
+      "-=0.3"
+    );
+    tl.fromTo(
+      ".about-tab",
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
+      "-=0.4"
+    );
 
-  //  Notifications - Start Earlier (less delay)
-  tl.fromTo(
-    ".notifications-panel",
-    { opacity: 0, y: 30 },
-    { opacity: 1, y: 0, duration: 0.6 },
-    "-=0.4" // was -0.5, start earlier
-  );
-  tl.fromTo(
-    ".notification-item",
-    { opacity: 0, x: 25 },
-    { opacity: 1, x: 0, duration: 0.4, stagger: 0.12 },
-    "-=0.5"
-  );
+    //  Notifications - Start Earlier (less delay)
+    tl.fromTo(
+      ".notifications-panel",
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6 },
+      "-=0.4" // was -0.5, start earlier
+    );
+    tl.fromTo(
+      ".notification-item",
+      { opacity: 0, x: 25 },
+      { opacity: 1, x: 0, duration: 0.4, stagger: 0.12 },
+      "-=0.5"
+    );
 
-  // === Counter Animation (start & end simultaneously) ===
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting) {
-        const duration = 2.5; // ⏱ same duration for all counters
-        const targetValues = [
-          { ref: yearsRef, end: 20, suffix: "+" },
-          { ref: studentsRef, end: 5000, suffix: "+" },
-          { ref: facultyRef, end: 100, suffix: "+" },
-        ];
+    // === Counter Animation (start & end simultaneously) ===
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          const duration = 2.5; // ⏱ same duration for all counters
+          const targetValues = [
+            { ref: yearsRef, end: 20, suffix: "+" },
+            { ref: studentsRef, end: 25000, suffix: "+" },
+            { ref: facultyRef, end: 250, suffix: "+" },
+          ];
 
-        // Animate all counters together
-        targetValues.forEach(({ ref, end, suffix }) => {
-          if (ref.current) {
-            gsap.to(ref.current, {
-              innerText: end,
-              duration,
-              ease: "power3.out",
-              snap: { innerText: 1 },
-              onUpdate() {
-                if (ref.current)
-                  ref.current.innerText = Math.ceil(this.targets()[0].innerText) + suffix;
-              },
-            });
-          }
-        });
+          // Animate all counters together
+          targetValues.forEach(({ ref, end, suffix }) => {
+            if (ref.current) {
+              gsap.to(ref.current, {
+                innerText: end,
+                duration,
+                ease: "power3.out",
+                snap: { innerText: 1 },
+                onUpdate() {
+                  if (ref.current)
+                    ref.current.innerText =
+                      Math.ceil(this.targets()[0].innerText) + suffix;
+                },
+              });
+            }
+          });
 
-        observer.disconnect();
-      }
-    },
-    { threshold: 0.5 }
-  );
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
 
-  if (statsRef.current) observer.observe(statsRef.current);
-  return () => {
-    tl.kill();
-    if (statsRef.current) observer.unobserve(statsRef.current);
-  };
-}, []);
-
+    if (statsRef.current) observer.observe(statsRef.current);
+    return () => {
+      tl.kill();
+      if (statsRef.current) observer.unobserve(statsRef.current);
+    };
+  }, []);
 
   return (
     <section className="md:py-16 py-10 bg-gray-50">
@@ -165,7 +224,9 @@ export default function AboutUs() {
                     <div>
                       <p
                         className={`font-semibold text-sm ${
-                          item.placeholder ? "text-gray-400 italic" : "text-gray-900"
+                          item.placeholder
+                            ? "text-gray-400 italic"
+                            : "text-gray-900"
                         }`}
                       >
                         {item.result_title}
@@ -173,11 +234,14 @@ export default function AboutUs() {
                       {!item.placeholder && (
                         <p className="text-xs text-gray-500">
                           {item.result_date
-                            ? new Date(item.result_date).toLocaleString("en-IN", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              })
+                            ? new Date(item.result_date).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )
                             : ""}
                         </p>
                       )}
@@ -208,16 +272,27 @@ export default function AboutUs() {
           </div>
 
           <div className="w-full lg:w-1/2">
-            <h2 className="about-heading text-3xl md:text-4xl font-bold mb-2 text-gray-900">About Us</h2>
-            <h3 className="about-subheading text-2xl md:text-3xl font-bold mb-6 text-cyan-600">
-              Ace Institutions
+            <h2 className="about-heading text-md md:text-lg font-bold mb-1 text-gray-900">
+              About Us
+            </h2>
+            <h3 className="about-subheading text-2xl md:text-3xl font-bold mb-4 text-cyan-600">
+              Best PSC Coaching Centre in Kerala - Crafting careers since 2003
             </h3>
-            <p className="about-text text-lg text-gray-600 mb-8 leading-relaxed">
-              Academy for Competitive Examination was established in the year
-              2003 at Manjeri, Malappuram district of Kerala.
+            <p className="about-text text-md text-gray-600 mb-8 leading-relaxed">
+              As the best PSC coaching centre in Kerala, we’ve helped thousands
+              of students crack PSC examinations with ease and enter the
+              prestigious Kerala government workforce. For the past 22 years, we
+              have dedicated ourselves to helping students across Kerala build
+              their dream careers. Founded in 2003 at Manjeri, Malappuram
+              district of Kerala, our excellence in delivering quality education
+              has made us the frontrunner among competitive exam coaching
+              centres in Kerala.
             </p>
 
-            <div ref={statsRef} className="about-stats grid grid-cols-3 gap-8 mb-8">
+            <div
+              ref={statsRef}
+              className="about-stats grid grid-cols-3 gap-2 mb-8"
+            >
               <div className="about-stat text-center">
                 <div
                   ref={yearsRef}

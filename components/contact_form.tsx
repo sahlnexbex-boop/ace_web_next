@@ -61,38 +61,53 @@ export default function ContactSection() {
               Phone
             </h3>
             <p className="text-gray-700 mb-6 leading-relaxed">
-              0483-2769220 <br />
-              9995076789, 9072676783 <br />
-              9048058888, 7593002222
+              <a href="tel:0483-2769220">0483-2769220</a>
+              <br />
+              <a href="tel:9995076789">9995076789</a>,{" "}
+              <a href="tel:9072676783">9072676783</a> <br />
+              <a href="tel:9048058888">9048058888</a>,{" "}
+              <a href="tel:7593002222">7593002222</a>
             </p>
 
             <h3 className="text-xl font-semibold mb-1 md:mb-2 text-gray-900">
               Email
             </h3>
-            <p className="text-gray-700 mb-6">info@aceinstitute.com</p>
+            <a href="mailto:info@aceinstitutions.com" className="text-gray-700">
+              info@aceinstitute.com
+            </a>
 
-            <h3 className="text-xl font-semibold mb-3 text-gray-900">Follow</h3>
+            <h3 className="text-xl font-semibold mb-3 mt-6 text-gray-900">
+              Follow
+            </h3>
             <div className="flex gap-3">
               <a
-                href="#"
+                href="https://www.facebook.com/aceinstitutions/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-blue-400 text-white p-2 rounded-md hover:bg-blue-500 transition"
               >
                 <IconBrandFacebook />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/aceinstitutions/?hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-pink-400 text-white p-2 rounded-md hover:bg-pink-500 transition"
               >
                 <IconBrandInstagram />
               </a>
               <a
-                href="#"
+                href="https://x.com/ace_institute/status/641468102346051584"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-sky-400 text-white p-2 rounded-md hover:bg-sky-500 transition"
               >
                 <IconBrandTwitter />
               </a>
               <a
-                href="#"
+                href="https://www.youtube.com/@aceinstitutions_"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-red-400 text-white p-2 rounded-md hover:bg-red-500 transition"
               >
                 <IconBrandYoutube />

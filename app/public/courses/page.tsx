@@ -12,8 +12,8 @@ export default function ListCourses() {
   const data = {
     header: "Our Courses",
     content_01:
-      "Expert coaching with quality study materials, regular tests, and ",
-    content_02: "guidance for complete exam preparation.",
+      "From foundation courses to advanced training we offer a wide range of courses specially curated keeping students in mind.",
+    // content_02: "guidance for complete exam preparation.",
   };
   
   return (

@@ -2,21 +2,82 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { Description } from "@radix-ui/react-toast";
 
 export default function Branches() {
-  const [selectedBranch, setSelectedBranch] = useState("Calicut");
+  const [selectedBranch, setSelectedBranch] = useState({
+    name: "Calicut",
+    Description:
+      "Our Calicut branch is located in the centre of the city, has easy accessibility, friendly staff, and a comfortable learning atmosphere.",
+    Phone: "04954850321",
+    email: "acepsccalicut@gmail.com",
+  });
 
   const branches = [
-    "Calicut",
-    "Balussery",
-    "Malappuram",
-    "Nilambur",
-    "Perinthalmanna",
-    "Edappal",
-    "Tirur",
-    "Palakkad",
-    "Pattambi",
+    {
+      name: "Calicut",
+      Description:
+        "Our Calicut branch is located in the centre of the city, has easy accessibility, friendly staff, and a comfortable learning atmosphere.",
+      Phone: "04954850321",
+      email: "acepsccalicut@gmail.com",
+    },
+    {
+      name: "Balussery",
+      Description:
+        "The Balussery branch is a peaceful and quiet area for students to receive direct help and constant academic support.",
+      Phone: "04962640404",
+      email: "acepscbalussery@gmail.com",
+    },
+    {
+      name: "Malappuram",
+      Description:
+        "Malappuram branch has a lively atmosphere and committed teachers who help the students to keep their motivation up until the end of the exam preparation",
+      Phone: "04832733455",
+      email: "acemalapuram@gmail.com",
+    },
+    {
+      name: "Nilambur",
+      Description:
+        "ilambur branch has a junior-friendly environment where the skilled teachers will make the hard-to-understand topics seem simple.",
+      Phone: "04931220221",
+      email: "acenilambur@gmail.com",
+    },
+    {
+      name: "Perinthalmanna",
+      Description:
+        "Perinthalmanna branch has a combination of excellent teaching and a friendly atmosphere that keeps students' morale up and gets them ready for their exams.",
+      Phone: "8943058888",
+      email: "aceperinthalmanna@gmail.com",
+    },
+    {
+      name: "Edappal",
+      Description:
+        "Our Edappal branch is a learning centre where students with the commitment of the instructors embrace education and build a strong foundation necessary to crack examinations.",
+      Phone: "04942685555",
+      email: "aceedappal@gmail.com",
+    },
+    {
+      name: "Tirur",
+      Description:
+        "The Tirur branch is a place where learning is encouraged and the students will not only get the attention but also the clarity they need to pass the competitive exams.",
+      Phone: "04942420005",
+      email: "acethirur@gmail.com",
+    },
+    {
+      name: "Palakkad",
+      Description:
+        "Palakkad branch has skilled faculty and a calm academic environment which together help the students to stay focused on their goals.",
+      Phone: "9072330044",
+      email: "acepalakkad@gmail.com",
+    },
+    {
+      name: "Pattambi",
+      Description:
+        "Our Pattambi branch is characterized by a very nice and inspiring atmosphere where the students not only receive dependable guidance but also enjoy constant progress in their studies.",
+      Phone: "04662214111",
+      email: "acepscpattambi@gmail.com",
+    },
   ];
 
   const branchImages = [
@@ -155,23 +216,27 @@ export default function Branches() {
           {/* Branch List */}
           <div className="lg:col-span-1 mb-6 lg:mb-0">
             <div className="space-y-2">
-              {branches.map((branch) => (
+              {branches.map((item) => (
                 <Button
-                  key={branch}
-                  variant={selectedBranch === branch ? "default" : "outline"}
-                  className={`w-full justify-start font-semibold py-4 sm:py-6 ${
-                    selectedBranch === branch
+                  key={item.name}
+                  variant={
+                    selectedBranch.name === item.name ? "default" : "outline"
+                  }
+                  className={`w-full justify-start font-semibold py-4 cursor-pointer sm:py-6 ${
+                    selectedBranch.name === item.name
                       ? "bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:bg-blue-700 text-white"
                       : "text-gray-700 hover:text-blue-600"
                   }`}
-                  onClick={() => setSelectedBranch(branch)}
+                  onClick={() => setSelectedBranch(item)}
                 >
                   <MapPin
                     className={`w-5 h-5 sm:w-6 sm:h-6 mr-2 ${
-                      selectedBranch === branch ? "text-white" : "text-blue-500"
+                      selectedBranch.name === item.name
+                        ? "text-white"
+                        : "text-blue-500"
                     }`}
                   />
-                  {branch}
+                  {item.name}
                 </Button>
               ))}
             </div>
@@ -181,22 +246,31 @@ export default function Branches() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
               <h3 className="text-xl sm:text-2xl font-bold mb-3 text-gray-900">
-                {selectedBranch}
+                {selectedBranch.name}
               </h3>
 
               <p className="text-gray-600 mb-3 sm:mb-5 leading-relaxed text-sm sm:text-base">
-                {branchInfo[selectedBranch]?.description}
+                {selectedBranch?.Description}
               </p>
 
-              <div className="flex items-center mb-3 text-sm sm:text-base">
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                <span className="text-gray-700">{branchInfo[selectedBranch]?.phone}</span>
+              <div className="flex gap-5 items-center mb-3 text-sm sm:text-base">
+                <div className="flex items-center">
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                  <span className="text-gray-700">{selectedBranch?.Phone}</span>
+                </div>
+                <div className="flex items-center">
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                  <span className="text-gray-700">{selectedBranch?.email}</span>
+                </div>
               </div>
 
               {/* Branch Images */}
               <div className="flex gap-3 overflow-x-auto mb-3 h-14">
-                {branchInfo[selectedBranch]?.images.map((image, index) => (
-                  <div key={index} className="flex-shrink-0 w-20 sm:w-24 h-full rounded-lg overflow-hidden">
+                {branchInfo[selectedBranch.name]?.images.map((image, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 w-20 sm:w-24 h-full rounded-lg overflow-hidden"
+                  >
                     <img
                       src={image}
                       alt={`${selectedBranch} branch ${index + 1}`}
@@ -208,7 +282,7 @@ export default function Branches() {
 
               {/* Map */}
               <iframe
-                src={branchInfo[selectedBranch]?.map}
+                src={branchInfo[selectedBranch.name]?.map}
                 loading="lazy"
                 className="w-full rounded-xl h-48 sm:h-60"
               ></iframe>

@@ -154,7 +154,7 @@ export default function Testimonials() {
                           alt="quote"
                           className="h-16 w-20 mb-3"
                         />
-                        <p className="text-gray-700 mb-6 mt-3 text-sm sm:text-base leading-relaxed line-clamp-3">
+                        <p className="text-gray-700 mb-6 mt-3 text-sm sm:text-base leading-relaxed line-clamp-4">
                           {t.content || "No testimonial content available."}
                         </p>
                         <div className="flex items-center gap-3">

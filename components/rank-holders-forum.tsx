@@ -51,10 +51,16 @@ export default function RankHoldersForum() {
               Rank Holders Forum
             </h2>
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              A special platform to recognize and celebrate the achievements of
-              our outstanding rank holders. This forum provides an opportunity
-              to connect, share experiences, and inspire upcoming students
-              towards excellence.
+              Our students are our pride and inspiration. By consistently
+              securing top ranks, they stand as a testament to the quality of
+              our education, dedicated faculty guidance and unwavering support
+              we offer to each student. We at ACE strongly believe dreams
+              shouldn't be hindered by distance. Our PSC coaching app ensures
+              that you get to prepare at the comfort of your home. With
+              carefully curated syllabus and training methods we have emerged as
+              the best online psc coaching centre in Kerala. Our student success
+              stories from all over Kerala proves that distance is no barrier
+              when education is done right.
             </p>
             <Button
               size="lg"
@@ -295,7 +301,9 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
             {basedType === "2" && (
               <div className="col-span-1 md:col-span-2">
                 <select
-                  {...register("category_id", { required: "Select a category" })}
+                  {...register("category_id", {
+                    required: "Select a category",
+                  })}
                   className="border p-2 rounded w-full"
                 >
                   <option value="">Select Category</option>
@@ -318,7 +326,9 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
               <input
                 type="text"
                 placeholder="Exam Name"
-                {...register("exam_name", { required: "Exam name is required" })}
+                {...register("exam_name", {
+                  required: "Exam name is required",
+                })}
                 className="border p-2 rounded w-full"
               />
               {errors.exam_name && (
@@ -452,4 +462,3 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
-

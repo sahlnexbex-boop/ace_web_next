@@ -29,8 +29,8 @@ export default function AboutInstitution() {
           <path d="M4 16l8 4l8 -4" />
         </svg>
       ),
-      title: "Project-based learning",
-      desc: "Students work on real projects that simulate workplace challenges — from ideation to deployment.",
+      title: "Practical-based learning",
+      desc: "Our PSC coaching centre in Kerala specializes in offering affordable PSC coaching in Kerala without compromising on training quality, faculty experience, or student support. Students learn through practical, exam-focused tasks that mirror real question patterns and problem-solving scenarios, helping them build accuracy, speed, and confidence.",
     },
     {
       icon: (
@@ -54,7 +54,7 @@ export default function AboutInstitution() {
         </svg>
       ),
       title: "Mentorship & career support",
-      desc: "One-on-one mentorship, resume reviews, mock interviews and placement assistance for every graduating cohort.",
+      desc: "Your choice of Kerala PSC coaching campus can have a huge impact on how you view KeralaPSC and other competitive examinations. At ACE, we offer one-on-one mentoring, doubt clearance sessions, exam strategy tips and more to ensure that you are on your top game. Our team stays with you every step of the way so that you can achieve your dream job with ease.",
     },
     {
       icon: (
@@ -78,15 +78,15 @@ export default function AboutInstitution() {
           <path d="M21 6l0 13" />
         </svg>
       ),
-      title: "Industry-aligned curriculum",
-      desc: "Curriculum designed with industry partners to ensure students learn tools and workflows used by employers today.",
+      title: "Exam-aligned curriculum",
+      desc: "From well-organized study materials to modern classrooms and digital resources, every part of our PSC coaching centre in Kerala is created to support long hours of focused preparation and training. Our Kerala PSC coaching curriculum is developed in accordance with the latest trends in PSC, SSC, and central/state recruitment so that every aspirant can make the most of their coaching.",
     },
   ];
 
   const team = [
-    { name: "Thomas Joe", role: "Founder & Director", image: "/lead_01.png" },
-    { name: "Riya Kumar", role: "Head of Curriculum", image: "/lead_02.png" },
-    { name: "Thomas Paul", role: "Placement Lead", image: "/lead_03.png" },
+    { name: "Najmunneesa", role: "Director", image: "/profile-3.webp" },
+    { name: "Umaira", role: "Managing Director", image: "/profile-4.webp" },
+    { name: "Aboobacker Siddeeque", role: "Principal", image: "/profile-6.webp" },
   ];
 
   useLayoutEffect(() => {
@@ -144,11 +144,10 @@ export default function AboutInstitution() {
             <h3 className="font-semibold text-lg text-gray-900 mb-2">
               Our Mission
             </h3>
-            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-              To provide high-quality education and nurturing support that
-              empowers students to excel academically, develop critical
-              thinking, and achieve their full potential for a successful
-              future.
+            <p className="text-gray-500 text-sm md:text-base leading-relaxed">
+              To empower students through comprehensive training that helps them
+              ace competitive examinations, develop critical thinking abilities,
+              and realize their full potential.
             </p>
           </div>
 
@@ -156,10 +155,10 @@ export default function AboutInstitution() {
             <h3 className="font-semibold text-lg text-gray-900 mb-2">
               Our Vision
             </h3>
-            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-              To be a leading institution recognized for excellence in
-              education, fostering innovation, social responsibility, and
-              lifelong learning among students.
+            <p className="text-gray-500 text-sm md:text-base leading-relaxed">
+              To be India’s best coaching centre for competitive examinations
+              that sets benchmarks in quality education by leveraging technology
+              and fostering innovation and academic rigor.
             </p>
           </div>
         </div>
@@ -172,7 +171,7 @@ export default function AboutInstitution() {
             >
               <div className="mb-3">{f.icon}</div>
               <h4 className="font-semibold text-gray-900 mb-2">{f.title}</h4>
-              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+              <p className="text-gray-500 text-sm md:text-base leading-relaxed">
                 {f.desc}
               </p>
             </div>

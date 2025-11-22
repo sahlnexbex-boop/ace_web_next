@@ -13,6 +13,8 @@ export default function RankHolders() {
   const [isMobile, setIsMobile] = useState(false);
   const [rankHolders, setRankHolders] = useState<any[]>([]);
   const router = useRouter();
+  const visibleCards = 4;
+  const maxIndex = Math.max(0, rankHolders.length - visibleCards);
 
   useEffect(() => {
     const fetchRankHolders = async () => {
@@ -102,18 +104,25 @@ export default function RankHolders() {
         {/* Navigation Arrows */}
         {!isMobile && rankHolders.length > 4 && (
           <>
-            <button
-              onClick={prevSlide}
-              className="absolute cursor-pointer left-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-3 hover:bg-cyan-50 transition z-10"
-            >
-              <ChevronLeft className="text-cyan-700 w-6 h-6" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute cursor-pointer right-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-3 hover:bg-cyan-50 transition z-10"
-            >
-              <ChevronRight className="text-cyan-700 w-6 h-6" />
-            </button>
+            {/* LEFT ARROW (show only when not at start) */}
+            {currentIndex > 0 && (
+              <button
+                onClick={prevSlide}
+                className="absolute cursor-pointer left-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-3 hover:bg-cyan-50 transition z-10"
+              >
+                <ChevronLeft className="text-cyan-700 w-6 h-6" />
+              </button>
+            )}
+
+            {/* RIGHT ARROW (show only when not at end) */}
+            {currentIndex < maxIndex && (
+              <button
+                onClick={nextSlide}
+                className="absolute cursor-pointer right-0 top-1/2 -translate-y-1/2 bg-white shadow-md rounded-full p-3 hover:bg-cyan-50 transition z-10"
+              >
+                <ChevronRight className="text-cyan-700 w-6 h-6" />
+              </button>
+            )}
           </>
         )}
 
@@ -123,7 +132,7 @@ export default function RankHolders() {
             sliderRef.current = el;
             gridRef.current = el;
           }}
-          className={`flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory ${
+          className={`flex md:gap-8 gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory ${
             isMobile ? "pb-10" : "overflow-hidden pb-10"
           } pl-0 pr-6`}
           style={{
@@ -138,53 +147,17 @@ export default function RankHolders() {
                 ${
                   isMobile
                     ? "w-[80%]" // ✅ Mobile: 1 card
-                    : "sm:w-[calc(35%-1rem)] lg:w-[calc(25%-1rem)]" // ✅ sm/md 2 cards, lg 4 cards
+                    : "sm:w-[calc(35%-1rem)] lg:w-[calc(24.5%-1rem)]" // ✅ sm/md 2 cards, lg 4 cards
                 }
-                text-center shadow-xl border-t-2 rounded-2xl py-4 relative cursor-pointer opacity-0 bg-white ${
+                text-center shadow-xl border-t-2 rounded-2xl overflow-hidden relative cursor-pointer opacity-0 bg-white ${
                   !isMobile && idx === 0 ? "ml-6" : ""
                 }`}
             >
               <img
-                src="/logo_only.png"
-                alt=""
-                className="absolute -top-8 h-[290px] opacity-40 pointer-events-none"
+                src={holder.student_photo || "/placeholder_student.png"}
+                alt={holder.student_name}
+                className="w-full h-full object-cover"
               />
-
-              <div className="relative mb-6">
-                <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto relative">
-                  <div className="absolute inset-0 opacity-30">
-                    <div className="absolute top-4 right-4 w-12 h-12 sm:w-16 sm:h-16 bg-white/20 transform rotate-45"></div>
-                    <div className="absolute bottom-8 left-8 w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full"></div>
-                  </div>
-
-                  <div className="absolute inset-0">
-                    <img
-                      src={holder.student_photo || "/placeholder_student.png"}
-                      alt={holder.student_name}
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  </div>
-
-                  <div className="absolute bottom-0 px-2 left-4 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg flex flex-col justify-center items-center">
-                    <span className="text-md sm:text-xl text-gray-900 md:font-bold font-semibold">
-                      {holder.student_rank}
-                    </span>
-                    <span className="text-[8px] sm:text-[10px] text-gray-900">
-                      Rank
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <h3 className="text-base sm:text-lg font-bold text-gray-900">
-                {holder.student_name}
-              </h3>
-              <p className="text-sm text-cyan-600">
-                {holder.exam_name || "—"}
-              </p>
-              <p className="text-xs text-gray-500">
-                {holder.name_of_office || ""}
-              </p>
             </div>
           ))}
 

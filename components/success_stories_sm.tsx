@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import VideoModal from "@/components/videoModal"; 
+import VideoModal from "@/components/videoModal";
 
 export default function SuccessStories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,12 +13,12 @@ export default function SuccessStories() {
   const statsRef = useRef(null);
 
   const YEARS_TARGET = 20;
-  const STUDENTS_TARGET = 5000;
-  const FACULTY_TARGET = 100;
+  const STUDENTS_TARGET = 25000;
+  const FACULTY_TARGET = 250;
 
   const YEARS_STEP = 1;
-  const STUDENTS_STEP = 100;
-  const FACULTY_STEP = 1;
+  const STUDENTS_STEP = 1000;
+  const FACULTY_STEP = 10;
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -37,7 +37,10 @@ export default function SuccessStories() {
           onUpdate: () => {
             if (yearsRef.current) {
               const stepped = Math.ceil(yearsObj.v / YEARS_STEP) * YEARS_STEP;
-              yearsRef.current.innerText = `${Math.min(stepped, YEARS_TARGET)}+`;
+              yearsRef.current.innerText = `${Math.min(
+                stepped,
+                YEARS_TARGET
+              )}+`;
             }
           },
         });
@@ -48,8 +51,12 @@ export default function SuccessStories() {
           ease: "power3.out",
           onUpdate: () => {
             if (studentsRef.current) {
-              const stepped = Math.ceil(studentsObj.v / STUDENTS_STEP) * STUDENTS_STEP;
-              studentsRef.current.innerText = `${Math.min(stepped, STUDENTS_TARGET)}+`;
+              const stepped =
+                Math.ceil(studentsObj.v / STUDENTS_STEP) * STUDENTS_STEP;
+              studentsRef.current.innerText = `${Math.min(
+                stepped,
+                STUDENTS_TARGET
+              )}+`;
             }
           },
         });
@@ -60,8 +67,12 @@ export default function SuccessStories() {
           ease: "power3.out",
           onUpdate: () => {
             if (facultyRef.current) {
-              const stepped = Math.ceil(facultyObj.v / FACULTY_STEP) * FACULTY_STEP;
-              facultyRef.current.innerText = `${Math.min(stepped, FACULTY_TARGET)}+`;
+              const stepped =
+                Math.ceil(facultyObj.v / FACULTY_STEP) * FACULTY_STEP;
+              facultyRef.current.innerText = `${Math.min(
+                stepped,
+                FACULTY_TARGET
+              )}+`;
             }
           },
         });
@@ -86,13 +97,18 @@ export default function SuccessStories() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center lg:ps-20 z-10">
+        <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center z-10">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">
               Success Stories Ace
             </h2>
-            <p className="text-gray-200 mb-6">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+            <p className="text-gray-100 mb-6">
+              Every achievement at ACE is a story of relentless efforts in the
+              right direction. With one-on-one PSC training, specially curated
+              study materials and sample question papers for competitive exam
+              preparation, we have developed a PSC training model that works
+              wonders.Discover real stories of our dear students and the efforts
+              that helped them achieve their goals.
             </p>
 
             <div

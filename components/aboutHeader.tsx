@@ -15,12 +15,12 @@ export default function AboutHeader() {
   const statsRef = useRef<HTMLDivElement | null>(null);
 
   const YEARS_TARGET = 20;
-  const STUDENTS_TARGET = 5000;
-  const FACULTY_TARGET = 100;
+  const STUDENTS_TARGET = 25000;
+  const FACULTY_TARGET = 250;
 
-  const STUDENTS_STEP = 100;
+  const STUDENTS_STEP = 1000;
   const YEARS_STEP = 1;
-  const FACULTY_STEP = 1;
+  const FACULTY_STEP = 10;
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -154,12 +154,18 @@ export default function AboutHeader() {
 
           <div className="order-2 md:order-1">
             <h2 className="about-heading text-2xl md:text-3xl font-bold mb-4 text-gray-900">
-              Success Stories Ace
+              Best PSC Coaching Centre in Kerala - Crafting careers since 2003
             </h2>
 
             <p className="about-text text-gray-700 mb-6">
-              Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry's standard dummy text.
+              As the best PSC coaching centre in Kerala, we’ve helped thousands
+              of students crack PSC examinations with ease and enter the
+              prestigious Kerala government workforce. For the past 22 years, we
+              have dedicated ourselves to helping students across Kerala build
+              their dream careers. Founded in 2003 at Manjeri, Malappuram
+              district of Kerala, our excellence in delivering quality education
+              has made us the frontrunner among competitive exam coaching
+              centres in Kerala.
             </p>
 
             <div
@@ -194,12 +200,12 @@ export default function AboutHeader() {
               </div>
             </div>
 
-           <button
-                onClick={() => setShowEnquiryModal(true)}
-                className="bg-gradient-to-r from-[#1F67A5] to-[#087fc2] hover:from-[#087fc2] hover:to-[#1F67A5] text-white font-semibold px-6 py-2.5 rounded-lg transition cursor-pointer"
-              >
-                Enquire Now
-              </button>
+            <button
+              onClick={() => setShowEnquiryModal(true)}
+              className="bg-gradient-to-r from-[#1F67A5] to-[#087fc2] hover:from-[#087fc2] hover:to-[#1F67A5] text-white font-semibold px-6 py-2.5 rounded-lg transition cursor-pointer"
+            >
+              Enquire Now
+            </button>
           </div>
         </div>
       </section>
@@ -211,10 +217,10 @@ export default function AboutHeader() {
       />
 
       <EnquiryModal
-              isOpen={showEnquiryModal}
-              onClose={() => setShowEnquiryModal(false)}
-              enquiryType={1}
-            />
+        isOpen={showEnquiryModal}
+        onClose={() => setShowEnquiryModal(false)}
+        enquiryType={1}
+      />
     </>
   );
 }

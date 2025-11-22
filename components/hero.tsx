@@ -178,7 +178,7 @@ export default function Hero() {
 
             <div className="relative max-w-7xl h-full flex justify-center md:justify-start items-center mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-28 text-center md:text-left">
               <div className="text-white max-w-2xl">
-                <h1 className="hero-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-2">
+                <h1 className="hero-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-2 md:me-10">
                   {slide.carousel_title}
                 </h1>
                 <p className="hero-subheading text-base sm:text-lg md:text-xl mb-4 text-cyan-100 font-light">
@@ -191,7 +191,7 @@ export default function Hero() {
                 {slide.carousel_title && (
                   <a
                     href="/public/contact"
-                    className="hero-button inline-block bg-white rounded-xl text-gray-700 cursor-pointer hover:bg-gray-100 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
+                    className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white cursor-pointer hover:bg-gray-100 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
                   >
                     Explore Now
                   </a>

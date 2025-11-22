@@ -4,6 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { Nunito_Sans } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Ace Institution",
@@ -23,13 +24,34 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
 };
 
+const nunito = Nunito_Sans({
+  subsets: ["latin"],
+  variable: "--font-nunito",
+  weight: [
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+    "900",
+  ],
+});
+
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en"
+    className={`
+        ${nunito.variable}
+        ${GeistSans.variable}
+        ${GeistMono.variable}
+      `}
+    >
+      <body className="font-nunito">
         <ToastProvider>{children}</ToastProvider>
         <Analytics />
       </body>
