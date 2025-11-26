@@ -86,7 +86,7 @@ export default function CourseCategoryPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 md:py-12 py-8 md:pb-32 pb-16">
-      {/* ✅ Breadcrumb */}
+      {/*  Breadcrumb */}
       <div className="flex items-center gap-1 text-sm text-gray-500 mb-6">
         <button
           onClick={() => router.push("/public/home")}

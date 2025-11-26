@@ -5,8 +5,6 @@ export const getToppers = async (
   limit = 10,
   search = "",
   status?: number,
-  based_type?: number,
-  course_id?: number,
   category_id?: number,
   year?: number
 ) => {
@@ -17,8 +15,6 @@ export const getToppers = async (
 
   if (search) params.append("search", search);
   if (status !== undefined) params.append("status", String(status));
-  if (based_type) params.append("based_type", String(based_type));
-  if (course_id) params.append("course_id", String(course_id));
   if (category_id) params.append("category_id", String(category_id));
   if (year) params.append("year", String(year));
 

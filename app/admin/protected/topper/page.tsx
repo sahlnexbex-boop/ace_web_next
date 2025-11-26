@@ -7,6 +7,7 @@ import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
 import TableFilter from "@/components/filter_button";
 import { useDebounce } from "@/hooks/debounce";
+
 import {
   getToppers,
   getTopperById,
@@ -14,7 +15,7 @@ import {
   updateTopper,
   deleteTopper,
 } from "@/lib/api/topper";
-import { getCourses } from "@/lib/api/course";
+
 import { getCourseCategories } from "@/lib/api/courseCategory";
 import { IconPlus } from "@tabler/icons-react";
 
@@ -29,21 +30,11 @@ export default function ToppersPage() {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState<Record<string, string>>({});
-  const [courses, setCourses] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [basedType, setBasedType] = useState<string>("");
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const loadCourses = async () => {
-    try {
-      const res = await getCourses(1, 100, "");
-      setCourses(res?.data || []);
-    } catch (err) {
-      console.error("Error loading courses:", err);
-    }
-  };
-
+  // Load categories only
   const loadCategories = async () => {
     try {
       const res = await getCourseCategories();
@@ -60,40 +51,32 @@ export default function ToppersPage() {
   };
 
   const loadToppers = async () => {
-    try {
-      const { status, based_type, course_id, category_id, year } = filters;
+  try {
+    const { status, category_id, year } = filters;
 
-      const res = await getToppers(
-        page,
-        10,
-        debouncedSearch,
-        status ? Number(status) : undefined,
-        based_type ? Number(based_type) : undefined,
-        based_type === "1" ? Number(course_id) : undefined,
-        based_type === "2" ? Number(category_id) : undefined,
-        year ? Number(year) : undefined
-      );
+    const res = await getToppers(
+      page,                                  // page
+      10,                                    // limit
+      debouncedSearch,                       // search
+      status ? Number(status) : undefined,   // status
+      category_id ? Number(category_id) : undefined, // ✔ category_id
+      year ? Number(year) : undefined        // ✔ year
+    );
 
-      setData(res?.data || []);
-      setTotalPages(res?.totalPages || 1);
-    } catch (err) {
-      console.error("Error loading toppers:", err);
-    }
-  };
+    setData(res?.data || []);
+    setTotalPages(res?.totalPages || 1);
+  } catch (err) {
+    console.error("Error loading toppers:", err);
+  }
+};
 
   useEffect(() => {
-    loadCourses();
     loadCategories();
   }, []);
 
   useEffect(() => {
     loadToppers();
   }, [page, debouncedSearch, filters]);
-
-  const courseOptions = courses.map((c) => ({
-    label: c.course_name,
-    value: String(c.course_id),
-  }));
 
   const categoryOptions = categories.map((c) => ({
     label: c.category_name,
@@ -105,21 +88,13 @@ export default function ToppersPage() {
       const res = await getTopperById(row.topper_id);
       if (res?.data) {
         const t = res.data;
+
         const formatted: Record<string, React.ReactNode> = {
           "Topper Name": t.topper_name || "—",
           "Exam Name": t.exam_name || "—",
           Rank: t.topper_rank || "—",
           Year: t.year || "—",
-          "Based Type":
-            t.based_type === 1
-              ? "Course"
-              : t.based_type === 2
-              ? "Course Category"
-              : "—",
-          "Course / Category":
-            t.based_type === 1
-              ? t.course?.course_name || "—"
-              : t.category?.category_name || "—",
+          Category: t.category?.category_name || "—",
           Status:
             t.status === 1 ? (
               <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -148,6 +123,7 @@ export default function ToppersPage() {
             ? new Date(t.updated_at).toLocaleString("en-IN")
             : "—",
         };
+
         setViewData(formatted);
         setOpenView(true);
       }
@@ -156,36 +132,21 @@ export default function ToppersPage() {
     }
   };
 
+  // Fields for form (NO BASED TYPE, NO COURSE)
   const fields = [
     { name: "topper_name", label: "Topper Name", type: "text", required: true },
     { name: "topper_rank", label: "Rank", type: "number", required: true },
     { name: "year", label: "Year", type: "number", required: true },
     { name: "exam_name", label: "Exam Name", type: "text", required: true },
-    {
-      name: "based_type",
-      label: "Based Type",
-      type: "select",
-      required: true,
-      options: [
-        { label: "Course", value: "1" },
-        { label: "Course Category", value: "2" },
-      ],
-      onChange: (val: string) => setBasedType(val),
-    },
-    {
-      name: "course_id",
-      label: "Select Course",
-      type: "select",
-      options: courseOptions,
-      disabled: basedType !== "1",
-    },
+
     {
       name: "category_id",
       label: "Select Category",
       type: "select",
+      required: true,
       options: categoryOptions,
-      disabled: basedType !== "2",
     },
+
     {
       name: "status",
       label: "Status",
@@ -196,6 +157,7 @@ export default function ToppersPage() {
         { label: "Inactive", value: "0" },
       ],
     },
+
     { name: "topper_image", label: "Topper Image - (Ratio 1:1)", type: "file" },
   ];
 
@@ -208,27 +170,10 @@ export default function ToppersPage() {
           <TableFilter
             fields={[
               {
-                key: "based_type",
-                label: "Based Type",
-                type: "select",
-                options: [
-                  { label: "Course", value: "1" },
-                  { label: "Course Category", value: "2" },
-                ],
-              },
-              {
-                key: "course_id",
-                label: "Course",
-                type: "select",
-                options: courseOptions,
-                showIf: { field: "based_type", value: "1" },
-              },
-              {
                 key: "category_id",
                 label: "Category",
                 type: "select",
                 options: categoryOptions,
-                showIf: { field: "based_type", value: "2" },
               },
               {
                 key: "year",
@@ -251,14 +196,12 @@ export default function ToppersPage() {
             }}
           />
 
-          
           <button
             onClick={() => {
               setSelected(null);
-              setBasedType("");
               setOpenForm(true);
             }}
-            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800"
+            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800 cursor-pointer"
           >
             Create Topper <IconPlus size={20} />
           </button>
@@ -267,21 +210,15 @@ export default function ToppersPage() {
 
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "topper_name", label: "Topper Name" },
           { key: "exam_name", label: "Exam Name" },
           { key: "topper_rank", label: "Rank" },
           { key: "year", label: "Year" },
-          {
-            key: "based_type",
-            label: "Based On",
-            render: (r) =>
-              r.based_type === 1
-                ? "Course"
-                : r.based_type === 2
-                ? "Course Category"
-                : "—",
-          },
           {
             key: "topper_image",
             label: "Image",
@@ -320,13 +257,10 @@ export default function ToppersPage() {
         onEdit={(row) => {
           setSelected({
             ...row,
-            based_type: String(row.based_type),
-            course_id: row.course_id ? String(row.course_id) : "",
             category_id: row.category_id ? String(row.category_id) : "",
             status: String(row.status),
             year: String(row.year),
           });
-          setBasedType(String(row.based_type));
           setOpenForm(true);
         }}
         onDelete={(row) => {

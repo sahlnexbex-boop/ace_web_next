@@ -13,7 +13,7 @@ export const getCourseCategories = async (
 
   if (search) params.append("search", search);
 
-  // ✅ Backend expects `type_id` and `status`
+  //  Backend expects `type_id` and `status`
   if (filters.type_id) params.append("type_id", filters.type_id);
   if (filters.status) params.append("status", filters.status);
 

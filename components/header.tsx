@@ -32,7 +32,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
 
-  /* ✅ FETCH COURSE CATEGORIES - first 5 */
+  /*  FETCH COURSE CATEGORIES - first 5 */
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -53,21 +53,21 @@ export default function Header() {
     fetchCategories();
   }, []);
 
-  /* ✅ INSIGHTS LIST - unchanged */
+  /*  INSIGHTS LIST - unchanged */
   const insightList = [
     { name: "Blogs", href: "/public/blog" },
     { name: "Notifications", href: "/public/notification" },
     { name: "Publications", href: "/public/publication" },
   ];
 
-  /* ✅ MENU STRUCTURE */
+  /*  MENU STRUCTURE */
   const menuLinks = [
     { label: "Home", href: "/public/home", icon: Home },
     {
       label: "Courses",
       href: "/public/courses",
       icon: BookOpen,
-      dropdown: courseList, // ✅ dynamic categories here
+      dropdown: courseList, //  dynamic categories here
     },
     { label: "Learners Portal", href: "/public/learners", icon: GraduationCap },
     { label: "Exam & Results", href: "/public/exams", icon: FileText },
@@ -77,7 +77,7 @@ export default function Header() {
     { label: "Contact Us", href: "/public/contact", icon: Phone },
   ];
 
-  /* ✅ GSAP for mobile menu animation */
+  /*  GSAP for mobile menu animation */
   useEffect(() => {
     if (isMenuOpen) {
       gsap.to(overlayRef.current, { opacity: 1, duration: 0.3, pointerEvents: "auto" });
@@ -98,7 +98,7 @@ export default function Header() {
     router.push(path);
   };
 
-  /* ✅ ACTIVE LINK DETECTION */
+  /*  ACTIVE LINK DETECTION */
   const isActive = (href: string, label?: string) => {
     const cleanPath = pathname.replace(/\/$/, "");
     const cleanHref = href.replace(/\/$/, "");
@@ -119,7 +119,7 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* ✅ LOGO */}
+          {/*  LOGO */}
           <div
             className="flex items-center space-x-2 cursor-pointer"
             onClick={() => router.push("/public/home")}
@@ -127,7 +127,7 @@ export default function Header() {
             <img src="/logo_blue.png" alt="logo" className="h-10 min-w-24 md:h-auto" />
           </div>
 
-          {/* ✅ DESKTOP MENU */}
+          {/*  DESKTOP MENU */}
           <nav className="hidden lg:flex items-center space-x-6 relative">
             {menuLinks.map(({ label, href, icon: Icon, dropdown }) => (
               <div
@@ -171,7 +171,7 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* ✅ MOBILE MENU BUTTON */}
+          {/*  MOBILE MENU BUTTON */}
           <div className="lg:hidden">
             <Button variant="ghost" size="sm" onClick={() => setIsMenuOpen(true)}>
               <Menu className="h-6 w-6" />
@@ -180,14 +180,14 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ✅ OVERLAY */}
+      {/*  OVERLAY */}
       <div
         ref={overlayRef}
         onClick={() => setIsMenuOpen(false)}
         className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 opacity-0 pointer-events-none"
       ></div>
 
-      {/* ✅ MOBILE SIDEBAR */}
+      {/*  MOBILE SIDEBAR */}
       <div
         ref={menuRef}
         className="fixed top-0 right-0 h-full w-72 bg-white/90 backdrop-blur-md shadow-xl z-50 p-6 flex flex-col translate-x-full overflow-y-auto"
@@ -204,11 +204,11 @@ export default function Header() {
             <div key={label} className="mobile-link">
               <button
                 onClick={() => {
-                  if (dropdown) {
-                    setOpenAccordion((prev) => (prev === label ? null : label));
-                  } else {
+                  // if (dropdown) {
+                  //   setOpenAccordion((prev) => (prev === label ? null : label));
+                  // } else {
                     handleNavigate(href);
-                  }
+                  // }
                 }}
                 className={`flex justify-between items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium shadow-sm w-full ${
                   isActive(href, label)
@@ -222,6 +222,10 @@ export default function Header() {
                 </span>
                 {dropdown && (
                   <ChevronDown
+                    onClick={(e)=>{
+                      e.stopPropagation();
+                      setOpenAccordion((prev) => (prev === label ? null : label));
+                    }}
                     className={`w-4 h-4 transition-transform ${
                       openAccordion === label ? "rotate-180" : ""
                     }`}

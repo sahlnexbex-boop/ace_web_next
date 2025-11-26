@@ -190,6 +190,9 @@ export default function ShortsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
                   Open
                 </a>
@@ -199,7 +202,7 @@ export default function ShortsPage() {
           },
           {
             key: "shorts_file",
-            label: "File",
+            label: "Thumbnail",
             render: (r) =>
               r.shorts_file ? (
                 <a
@@ -207,8 +210,11 @@ export default function ShortsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
-                  View
+                  <img src={r.shorts_file} className="w-10 h-16 object-cover" />
                 </a>
               ) : (
                 "—"

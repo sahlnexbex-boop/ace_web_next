@@ -142,7 +142,7 @@ export default function PublicationsPage() {
       </p>
 
       <div className="md:hidden mb-6">
-        <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x">
+        <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x no-scrollbar">
           {categories.map((cat) => (
             <button
               key={cat}

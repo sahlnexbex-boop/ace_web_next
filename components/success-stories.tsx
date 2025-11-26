@@ -53,7 +53,7 @@ export default function SuccessStories() {
   const shorts2 = getItem(shorts, 1);
   const testi1 = getItem(testimonials, 0);
   const testi2 = getItem(testimonials, 1);
-  const testi3 = getItem(testimonials, 2);
+  // const testi3 = getItem(testimonials, 2);
   const story1 = getItem(successStories, 0);
   const story2 = getItem(successStories, 1);
 
@@ -113,7 +113,7 @@ export default function SuccessStories() {
                   <h3 className="font-bold text-lg text-white mb-2">
                     {testi1.name_of_candidate}
                   </h3>
-                  <p className="text-sm mb-3 leading-relaxed text-gray-300">
+                  <p className="text-sm mb-3 leading-relaxed text-gray-300 line-clamp-12">
                     {testi1.content}
                   </p>
                   <div className="flex items-center">
@@ -148,7 +148,7 @@ export default function SuccessStories() {
                   <h3 className="font-bold text-lg mb-2 text-gray-800">
                     {testi2.name_of_candidate}
                   </h3>
-                  <p className="text-sm mb-10 leading-relaxed text-gray-700">
+                  <p className="text-sm mb-10 leading-relaxed text-gray-700 line-clamp-12">
                     {testi2.content}
                   </p>
                   <div className="flex items-center">
@@ -169,7 +169,7 @@ export default function SuccessStories() {
             {story1 && (
               <Card
                 onClick={() => openVideo(story1.youtube_video_link)}
-                className="cursor-pointer overflow-hidden rounded-3xl hover:shadow-lg transition-shadow bg-[#ffeef7]"
+                className="cursor-pointer overflow-hidden rounded-3xl hover:shadow-lg transition-shadow bg-blue-50"
               >
                 <CardContent className="p-0">
                   <img
@@ -178,8 +178,8 @@ export default function SuccessStories() {
                     className="w-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                   <div className="p-4">
-                    <h3 className="font-bold text-xl">{story1.stories_title}</h3>
-                    <p>{story1.description}</p>
+                    <h3 className="font-bold text-xl line-clamp-2 text-gray-700">{story1.stories_title}</h3>
+                    <p className="line-clamp-4 text-gray-500">{story1.description}</p>
                     <div className="text-xs text-gray-100 bg-blue-500 w-fit px-3 py-1 mt-3 rounded-md">
                       {story1.year}
                     </div>
@@ -188,7 +188,7 @@ export default function SuccessStories() {
               </Card>
             )}
 
-            {testi3 && (
+            {/* {testi3 && (
               <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-3xl bg-[#d3f9ff]">
                 <CardContent className="p-6">
                   <img src="/quates_blue.png" alt="" className="mb-10" />
@@ -211,7 +211,7 @@ export default function SuccessStories() {
                   </div>
                 </CardContent>
               </Card>
-            )}
+            )} */}
           </div>
 
           {/* ============================
@@ -222,7 +222,7 @@ export default function SuccessStories() {
             {story2 && (
               <Card
                 onClick={() => openVideo(story2.youtube_video_link)}
-                className="overflow-hidden rounded-3xl hover:shadow-lg transition-shadow bg-[#ffeef7]"
+                className="overflow-hidden rounded-3xl hover:shadow-lg transition-shadow bg-purple-50"
               >
                 <CardContent className="p-0">
                   <img
@@ -231,10 +231,10 @@ export default function SuccessStories() {
                     className="w-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                   <div className="p-4">
-                    <h3 className="font-bold text-lg leading-[18px] text-gray-700">
-                      {story2.name_of_candidate}
+                    <h3 className="font-bold text-lg text-gray-700 line-clamp-2">
+                      {story2.stories_title}
                     </h3>
-                    <p className="text-sm my-3 text-gray-500">{story2.description}</p>
+                    <p className="text-sm my-2 text-gray-500 line-clamp-4">{story2.description}</p>
                     <div className="text-xs text-gray-100 bg-blue-500 w-fit px-3 py-1 mt-3 rounded-md">
                       {story2.year}
                     </div>

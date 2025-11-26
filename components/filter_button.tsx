@@ -29,7 +29,7 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const filterRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Close dropdown when clicking outside
+  //  Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
@@ -40,19 +40,19 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Trigger change when filters update
+  //  Trigger change when filters update
   useEffect(() => {
     onChange(filters);
   }, [filters]);
 
-  // ✅ Conditional visibility
+  //  Conditional visibility
   const shouldShowField = (field: FilterField) => {
     if (!field.showIf) return true;
     const targetValue = filters[field.showIf.field];
     return targetValue === String(field.showIf.value);
   };
 
-  // ✅ Extract only the year from "YYYY-MM" value
+  //  Extract only the year from "YYYY-MM" value
   const extractYear = (monthValue: string) => monthValue?.split("-")[0] || "";
 
   return (
@@ -78,7 +78,7 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
                     {field.label}
                   </label>
 
-                  {/* ✅ Normal Date Picker */}
+                  {/*  Normal Date Picker */}
                   {field.type === "date" && (
                     <input
                       type="date"
@@ -93,7 +93,7 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
                     />
                   )}
 
-                  {/* ✅ Year-Only Picker */}
+                  {/*  Year-Only Picker */}
                   {field.type === "year" && (
                     <input
                       type="month"
@@ -114,7 +114,7 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
                     />
                   )}
 
-                  {/* ✅ Select Dropdown */}
+                  {/*  Select Dropdown */}
                   {(!field.type || field.type === "select") && (
                     <select
                       value={filters[field.key] ?? ""}

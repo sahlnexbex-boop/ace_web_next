@@ -178,10 +178,10 @@ export default function CurrentAffairPage() {
           Current Affairs
         </h1>
         <div className="flex items-center gap-3 relative">
-          {/* ✅ Search Field from DataTable */}
+          {/*  Search Field from DataTable */}
           {/* handled inside DataTable — so skip here */}
 
-          {/* ✅ Filter Button */}
+          {/*  Filter Button */}
           <div className="relative" ref={filterRef}>
             <button
               onClick={() => setFiltersOpen(!filtersOpen)}
@@ -240,7 +240,7 @@ export default function CurrentAffairPage() {
             )}
           </div>
 
-          {/* ✅ Create Button */}
+          {/*  Create Button */}
           <button
             onClick={() => {
               setSelected(null);
@@ -253,7 +253,7 @@ export default function CurrentAffairPage() {
         </div>
       </div>
 
-      {/* ✅ Data Table */}
+      {/*  Data Table */}
       <DataTable
         columns={[
           {
@@ -282,6 +282,7 @@ export default function CurrentAffairPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cyan-700 underline"
+                onClick={(e) => e.stopPropagation()}
               >
                 View
               </a>
@@ -322,7 +323,7 @@ export default function CurrentAffairPage() {
         }}
       />
 
-      {/* ✅ Create / Edit Modal */}
+      {/*  Create / Edit Modal */}
       <DynamicFormModal
         title={selected ? "Edit Affair" : "Create Affair"}
         isOpen={openForm}
@@ -336,7 +337,7 @@ export default function CurrentAffairPage() {
         onSuccess={loadAffairs}
       />
 
-      {/* ✅ View Modal */}
+      {/*  View Modal */}
       <DynamicViewModal
         isOpen={openView}
         onClose={() => setOpenView(false)}
@@ -344,7 +345,7 @@ export default function CurrentAffairPage() {
         data={viewData}
       />
 
-      {/* ✅ Delete Confirmation */}
+      {/*  Delete Confirmation */}
       <ConfirmDeleteModal
         isOpen={openDelete}
         onClose={() => setOpenDelete(false)}

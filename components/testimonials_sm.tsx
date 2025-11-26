@@ -20,12 +20,12 @@ export default function Testimonials() {
   const [itemsPerSlide, setItemsPerSlide] = useState(3);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ✅ Modal states
+  //  Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState<TestimonialItem | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
-  // ✅ Fetch testimonials list
+  //  Fetch testimonials list
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
@@ -44,7 +44,7 @@ export default function Testimonials() {
     fetchTestimonials();
   }, []);
 
-  // ✅ Responsive cards per slide
+  //  Responsive cards per slide
   useEffect(() => {
     const handleResize = () => {
       setItemsPerSlide(window.innerWidth < 768 ? 1 : 3);
@@ -84,7 +84,7 @@ export default function Testimonials() {
     return slides;
   };
 
-  // ✅ Open modal and fetch full data
+  //  Open modal and fetch full data
   const openModal = async (id: number) => {
     setModalLoading(true);
     setIsModalOpen(true);
@@ -104,7 +104,7 @@ export default function Testimonials() {
     <>
       <section className="bg-blue-50 md:py-16 py-8 px-4 sm:px-6 md:px-10 overflow-hidden">
         <div className="max-w-7xl mx-auto text-center">
-          {/* ✅ Section Title */}
+          {/*  Section Title */}
           <div className="relative md:mb-12 mb-6 text-left">
             <h2 className="text-2xl md:text-4xl font-bold text-gray-900 inline-block">
               Student Testimonials
@@ -118,7 +118,7 @@ export default function Testimonials() {
             </div>
           </div>
 
-          {/* ✅ Loader, Empty State, or Testimonials */}
+          {/*  Loader, Empty State, or Testimonials */}
           {loading ? (
             <Loader />
           ) : testimonials.length === 0 ? (
@@ -131,7 +131,7 @@ export default function Testimonials() {
             </div>
           ) : (
             <div className="relative w-full overflow-hidden">
-              {/* ✅ Slides */}
+              {/*  Slides */}
               <div
                 className="flex transition-transform duration-700 ease-in-out"
                 style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -178,7 +178,7 @@ export default function Testimonials() {
                 ))}
               </div>
 
-              {/* ✅ Slider Dots */}
+              {/*  Slider Dots */}
               <div className="flex justify-center gap-2 mt-8">
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <button
@@ -197,7 +197,7 @@ export default function Testimonials() {
         </div>
       </section>
 
-      {/* ✅ FULL DATA MODAL */}
+      {/*  FULL DATA MODAL */}
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center px-4"

@@ -21,8 +21,8 @@
 //   required?: boolean;
 //   placeholder?: string;
 //   multiple?: boolean;
-//   disabled?: boolean; // ✅ new
-//   onChange?: (val: string) => void; // ✅ new
+//   disabled?: boolean; //  new
+//   onChange?: (val: string) => void; //  new
 // }
 
 // interface DynamicFormModalProps {

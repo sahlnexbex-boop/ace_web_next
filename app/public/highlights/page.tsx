@@ -101,7 +101,7 @@ export default function Highlights() {
       {/* Sticky Tabs */}
       <div className="sticky top-16 z-40 bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-nowrap md:flex-wrap gap-6 py-3 text-sm font-medium overflow-x-auto scrollbar-hide">
+          <div className="flex flex-nowrap md:flex-wrap gap-6 py-3 text-sm font-medium overflow-x-auto scrollbar-hide no-scrollbar">
             <button
               onClick={() => scrollToSection(successRef, "success")}
               className={tabClass("success")}

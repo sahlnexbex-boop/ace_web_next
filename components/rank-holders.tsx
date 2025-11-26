@@ -146,8 +146,8 @@ export default function RankHolders() {
               className={`rank-card snap-start flex-shrink-0
                 ${
                   isMobile
-                    ? "w-[80%]" // ✅ Mobile: 1 card
-                    : "sm:w-[calc(35%-1rem)] lg:w-[calc(24.5%-1rem)]" // ✅ sm/md 2 cards, lg 4 cards
+                    ? "w-[80%]" //  Mobile: 1 card
+                    : "sm:w-[calc(35%-1rem)] lg:w-[calc(24.5%-1rem)]" //  sm/md 2 cards, lg 4 cards
                 }
                 text-center shadow-xl border-t-2 rounded-2xl overflow-hidden relative cursor-pointer opacity-0 bg-white ${
                   !isMobile && idx === 0 ? "ml-6" : ""

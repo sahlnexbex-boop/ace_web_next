@@ -65,7 +65,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         ref={toastRef}
         position="bottom-right"
         className={`z-[100] relative transition-all duration-300 
-          ${isMobile ? "scale-90 text-xs p-1 right-2 bottom-2" : "scale-100 text-sm p-3"}
+          ${isMobile ? "scale-90 text-xs md:p-1 right-2 bottom-2" : "scale-100 text-sm p-3"}
         `}
       />
       {children}

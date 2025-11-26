@@ -78,21 +78,21 @@ export default function CarouselPage() {
             href={c.carousel_file}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-cyan-700 underline"
+            className="text-cyan-700 underline flex justify-end"
           >
-            {c.carousel_file}
+            <img src={c.carousel_file} className="w-32 h-16 object-cover" />
           </a>
         ) : (
           "—"
         ),
-         "Carousel Mobile File": c.carousel_mobile_file ? (
+        "Carousel Mobile File": c.carousel_mobile_file ? (
           <a
             href={c.carousel_mobile_file}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-cyan-700 underline"
+            className="text-cyan-700 underline flex justify-end"
           >
-            {c.carousel_mobile_file}
+            <img src={c.carousel_mobile_file} className="w-12 h-20 object-cover" />
           </a>
         ) : (
           "—"
@@ -197,8 +197,24 @@ export default function CarouselPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "carousel_title", label: "Title", render: (r) => r.carousel_title|| "—" },
-          { key: "carousel_sec_title", label: "Sub Title", render: (r) => r.carousel_sec_title|| "—" },
+          {
+            key: "carousel_title",
+            label: "Title",
+            render: (r) => (
+              <div className="truncate max-w-[100px]" title={r.carousel_title}>
+                {r.carousel_title || "—"}
+              </div>
+            ),
+          },
+          {
+            key: "carousel_sec_title",
+            label: "Sub Title",
+            render: (r) => (
+              <div className="truncate max-w-[200px]" title={r.carousel_sec_title}>
+                {r.carousel_sec_title || "—"}
+              </div>
+            ),
+          },
           {
             key: "carousel_description",
             label: "Description",
@@ -216,13 +232,20 @@ export default function CarouselPage() {
             label: "PC File",
             render: (r) =>
               r.carousel_file ? (
-               <a
+                <a
                   href={r.carousel_file}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
+                  onClick={(e)=>{
+                    e.stopPropagation();
+                  }}
                 >
-                  View
+                  <img
+                    src={r.carousel_file}
+                    className="max-w-32 h-10 object-cover rounded-sm"
+                    alt="file"
+                  />
                 </a>
               ) : (
                 "—"
@@ -233,13 +256,20 @@ export default function CarouselPage() {
             label: "Mobile File",
             render: (r) =>
               r.carousel_mobile_file ? (
-               <a
+                <a
                   href={r.carousel_mobile_file}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
+                   onClick={(e)=>{
+                    e.stopPropagation();
+                  }}
                 >
-                  View
+                  <img 
+                    src={r.carousel_mobile_file}
+                    className="max-w-20 h-12 object-cover rounded-sm"
+                    alt="file"
+                  />
                 </a>
               ) : (
                 "—"

@@ -82,19 +82,19 @@ export default function LearnersPortal() {
         </span>
       </div>
 
-      <h1 className="md:text-3xl text-2xl font-bold text-gray-900 mb-8">
+      <h1 className="md:text-3xl text-2xl font-bold text-gray-900 md:mb-8 mb-5">
         Learners Portal
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 md:gap-8 gap-4">
         {/* Sidebar Menu */}
-        <div className="md:bg-white md:p-4 p-0 md:rounded-xl md:shadow h-fit overflow-x-auto lg:overflow-visible">
+        <div className="md:bg-white md:p-4 p-0 md:rounded-xl md:shadow h-fit overflow-x-auto lg:overflow-visible no-scrollbar">
           <ul className="flex lg:flex-col gap-3 lg:gap-2 w-max lg:w-full">
             {menuItems.map(({ id, label, icon: Icon }) => (
               <li key={id}>
                 <button
                   onClick={() => handleMenuClick(id)}
-                  className={`flex w-full items-center gap-3 px-4 py-2 rounded-lg text-left transition cursor-pointer whitespace-nowrap ${
+                  className={`flex w-full items-center md:gap-3 gap-2 md:px-4 md:py-2 px-2 py-1 md:rounded-lg rounded-md text-left transition cursor-pointer whitespace-nowrap ${
                     activeTab === id
                       ? "bg-gradient-to-r from-[#1F67A5] to-[#087fc2] text-white"
                       : "text-gray-700 hover:bg-blue-200"

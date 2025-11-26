@@ -97,7 +97,7 @@ export default function Courses() {
        
 
         {/* Tabs */}
-        <div className="flex overflow-x-auto scrollbar-hide justify-start sm:justify-center gap-3 sm:gap-4 md:mb-12 mb-6 pb-2">
+        <div className="flex overflow-x-auto scrollbar-hide justify-start sm:justify-center gap-3 sm:gap-4 md:mb-12 mb-6 pb-2 no-scrollbar">
           {types.map((type) => (
             <button
               key={type.type_id}

@@ -5,7 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
-import TableFilter from "@/components/filter_button"; 
+import TableFilter from "@/components/filter_button";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getResults,
@@ -266,7 +266,7 @@ export default function ResultsPage() {
                 label: "Category",
                 type: "select",
                 options: categoryOptions,
-                showIf: { field: "based_type", value: "2" }, 
+                showIf: { field: "based_type", value: "2" },
               },
               {
                 key: "result_type",
@@ -347,6 +347,9 @@ export default function ResultsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
                   View
                 </a>

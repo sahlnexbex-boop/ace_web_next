@@ -5,7 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
-import TableFilter from "@/components/filter_button"; 
+import TableFilter from "@/components/filter_button";
 import { useDebounce } from "@/hooks/debounce";
 import {
   getSuccessStories,
@@ -264,6 +264,9 @@ export default function SuccessStoriesPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-cyan-700 underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
                   Watch
                 </a>

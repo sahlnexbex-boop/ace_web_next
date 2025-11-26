@@ -4,7 +4,7 @@ import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { getBlogs } from "@/lib/api/blogs"; 
+import { getBlogs } from "@/lib/api/blogs";
 import Loader from "@/components/loader";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,11 +15,10 @@ export default function BlogPage() {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await getBlogs(1, 10, "", 1); 
+        const res = await getBlogs(1, 10, "", 1);
         if (res?.data) {
           setBlogs(res.data);
         }
@@ -33,7 +32,6 @@ export default function BlogPage() {
     fetchBlogs();
   }, []);
 
- 
   useLayoutEffect(() => {
     if (loading || blogs.length === 0) return;
 
@@ -64,7 +62,10 @@ export default function BlogPage() {
   }, [blogs, loading]);
 
   return (
-    <div ref={sectionRef} className="max-w-7xl mx-auto px-6 md:px-12 md:py-14 py-8">
+    <div
+      ref={sectionRef}
+      className="max-w-7xl mx-auto px-6 md:px-12 md:py-14 py-8"
+    >
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-gray-600 text-sm mb-6">
         <svg
@@ -99,15 +100,23 @@ export default function BlogPage() {
               onClick={() => router.push(`/public/blog/${blog.blog_id}`)}
               className="blog-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer overflow-hidden group"
             >
-              <div className="overflow-hidden">
+              <div className="overflow-hidden relative">
                 <img
                   src={blog.blog_image}
                   alt={blog.blog_title}
                   className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                 />
+                 {/* ⭐ Course Name */}
+                {blog.course?.course_name && (
+                  <p className="text-[10px] absolute top-2 right-2 text-white bg-cyan-600 inline-block px-2 py-1 rounded-sm mb-2">
+                    {blog.course.course_name}
+                  </p>
+                )}
+
               </div>
 
               <div className="p-5">
+                {/* Date */}
                 <p className="text-cyan-700 text-sm font-semibold mb-1">
                   {new Date(blog.publishing_date).toLocaleDateString("en-US", {
                     year: "numeric",
@@ -115,10 +124,16 @@ export default function BlogPage() {
                     day: "numeric",
                   })}
                 </p>
-                <h3 className="text-gray-900 text-lg font-semibold mb-2">
+
+               
+                {/* Title */}
+                <h3 className="text-gray-900 text-xl font-semibold mb-2">
                   {blog.blog_title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-snug line-clamp-2">
+                
+
+                {/* Description */}
+                <p className="text-gray-600 text-sm leading-snug line-clamp-3">
                   {blog.blog_content}
                 </p>
               </div>

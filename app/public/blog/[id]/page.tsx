@@ -16,13 +16,16 @@ export default function BlogDetails() {
   const [recentBlogs, setRecentBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Load Blog + Recent Blogs
   useEffect(() => {
     const fetchBlogData = async () => {
       try {
         const blogRes = await getBlogById(Number(id));
+
         if (blogRes?.data) {
           setBlog(blogRes.data);
         }
+
         const recentRes = await getBlogs(1, 4, "", 1);
         if (recentRes?.data) {
           const filtered = recentRes.data.filter(
@@ -40,6 +43,7 @@ export default function BlogDetails() {
     if (id) fetchBlogData();
   }, [id]);
 
+  // GSAP Animations
   useLayoutEffect(() => {
     if (loading) return;
 
@@ -141,32 +145,57 @@ export default function BlogDetails() {
       </div>
 
       <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
+        {/* ================= Main Blog ================= */}
         <div className="blog-main">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            {blog.blog_title}
-          </h1>
-          <p className="text-cyan-700 text-sm font-semibold mb-6">
-            {new Date(blog.publishing_date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            • {blog.blog_author}
-          </p>
+          <div className="flex justify-between items-center flex-wrap">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                {blog.blog_title}
+              </h1>
+
+              <p className="text-cyan-700 text-sm font-semibold md:mb-6 mb-2">
+                {new Date(blog.publishing_date).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}{" "}
+                • {blog.blog_author}
+              </p>
+            </div>
+            <div>
+              {/* ⭐ Course Badge (Navigate to /public/courses/:category_id/:course_id) */}
+              {blog.course && (
+                <div
+                  className="inline-block bg-cyan-600 text-white text-xs px-3 py-1 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
+                  onClick={() =>
+                    router.push(
+                      `/public/courses/${blog.course.category_id}/${blog.course.course_id}`
+                    )
+                  }
+                >
+                  {blog.course.course_name}
+                </div>
+              )}
+            </div>
+          </div>
+
           <img
             src={blog.blog_image}
             alt={blog.blog_title}
             className="rounded-lg w-full h-auto mb-6 border border-gray-200"
           />
+
           <div className="blog-text text-gray-700 leading-relaxed whitespace-pre-line">
             {blog.blog_content}
           </div>
         </div>
 
+        {/* ================= Recent Blogs ================= */}
         <div>
           <h3 className="font-semibold text-lg mb-4 text-gray-900">
             Recent Blogs
           </h3>
+
           {recentBlogs.length === 0 ? (
             <p className="text-sm text-gray-500">No recent blogs found.</p>
           ) : (
@@ -182,7 +211,9 @@ export default function BlogDetails() {
                     alt={b.blog_title}
                     className="w-20 h-16 object-cover rounded-md"
                   />
+
                   <div>
+                    {/* ⭐ Date */}
                     <p className="text-cyan-700 text-xs font-semibold mb-1">
                       {new Date(b.publishing_date).toLocaleDateString("en-US", {
                         year: "numeric",
@@ -190,6 +221,23 @@ export default function BlogDetails() {
                         day: "numeric",
                       })}
                     </p>
+
+                    {/* ⭐ Course badge */}
+                    {b.course && (
+                      <p
+                        className="text-[10px] bg-cyan-600 text-white inline-block px-2 py-1 rounded-md mb-1 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(
+                            `/public/courses/${b.course.category_id}/${b.course.course_id}`
+                          );
+                        }}
+                      >
+                        {b.course.course_name}
+                      </p>
+                    )}
+
+                    {/* Blog Title */}
                     <h4 className="text-sm text-gray-800 font-medium leading-tight">
                       {b.blog_title}
                     </h4>

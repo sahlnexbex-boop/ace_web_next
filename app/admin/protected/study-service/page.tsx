@@ -5,7 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
-import TableFilter from "@/components/filter_button"; // ✅ new reusable filter
+import TableFilter from "@/components/filter_button"; //  new reusable filter
 import { useDebounce } from "@/hooks/debounce";
 import {
   getStudyServices,
@@ -36,7 +36,11 @@ export default function StudyServicePage() {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<any[]>([]);
-  const [filters, setFilters] = useState<{ status?: string; service_type?: string; category_id?: string }>({});
+  const [filters, setFilters] = useState<{
+    status?: string;
+    service_type?: string;
+    category_id?: string;
+  }>({});
   const debouncedSearch = useDebounce(search, 500);
 
   const loadCategories = async () => {
@@ -80,10 +84,12 @@ export default function StudyServicePage() {
     value: String(c.category_id),
   }));
 
-  const serviceTypeOptions = Object.entries(study_service_type).map(([value, label]) => ({
-    label,
-    value,
-  }));
+  const serviceTypeOptions = Object.entries(study_service_type).map(
+    ([value, label]) => ({
+      label,
+      value,
+    })
+  );
 
   const handleView = async (row: any) => {
     try {
@@ -94,7 +100,9 @@ export default function StudyServicePage() {
         const formatted: Record<string, React.ReactNode> = {
           "Service Title": s.service_title || "—",
           Description: (
-            <p className="text-gray-700 whitespace-pre-line">{s.service_description || "—"}</p>
+            <p className="text-gray-700 whitespace-pre-line">
+              {s.service_description || "—"}
+            </p>
           ),
           Category: s.category?.category_name || "—",
           "Service Type": study_service_type[s.service_type] || "—",
@@ -139,11 +147,38 @@ export default function StudyServicePage() {
   };
 
   const fields = [
-    { name: "service_title", label: "Service Title", type: "text", required: true },
-    { name: "service_description", label: "Description", type: "textarea", required: true },
-    { name: "category_id", label: "Category", type: "select", options: categoryOptions, required: true },
-    { name: "service_type", label: "Service Type", type: "select", options: serviceTypeOptions, required: true },
-    { name: "subject_name", label: "Subject Name", type: "text", required: true },
+    {
+      name: "service_title",
+      label: "Service Title",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "service_description",
+      label: "Description",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "category_id",
+      label: "Category",
+      type: "select",
+      options: categoryOptions,
+      required: true,
+    },
+    {
+      name: "service_type",
+      label: "Service Type",
+      type: "select",
+      options: serviceTypeOptions,
+      required: true,
+    },
+    {
+      name: "subject_name",
+      label: "Subject Name",
+      type: "text",
+      required: true,
+    },
     { name: "exam_name", label: "Exam Name", type: "text", required: true },
     {
       name: "status",
@@ -155,7 +190,12 @@ export default function StudyServicePage() {
       ],
       required: true,
     },
-    { name: "service_file", label: "Service File (PDF)", type: "file", required: false },
+    {
+      name: "service_file",
+      label: "Service File (PDF)",
+      type: "file",
+      required: false,
+    },
   ];
 
   return (
@@ -205,10 +245,22 @@ export default function StudyServicePage() {
 
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "service_title", label: "Title" },
-          { key: "category_id", label: "Category", render: (r) => r.category?.category_name || "—" },
-          { key: "service_type", label: "Type", render: (r) => study_service_type[r.service_type] || "—" },
+          {
+            key: "category_id",
+            label: "Category",
+            render: (r) => r.category?.category_name || "—",
+          },
+          {
+            key: "service_type",
+            label: "Type",
+            render: (r) => study_service_type[r.service_type] || "—",
+          },
           { key: "subject_name", label: "Subject" },
           { key: "exam_name", label: "Exam" },
           {
@@ -216,7 +268,15 @@ export default function StudyServicePage() {
             label: "File",
             render: (r) =>
               r.service_file ? (
-                <a href={r.service_file} target="_blank" rel="noopener noreferrer" className="text-cyan-700 underline">
+                <a
+                  href={r.service_file}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-700 underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
                   View File
                 </a>
               ) : (
@@ -228,9 +288,13 @@ export default function StudyServicePage() {
             label: "Status",
             render: (r) =>
               r.status == 1 || r.status == "1" ? (
-                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">Active</div>
+                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+                  Active
+                </div>
               ) : (
-                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">Inactive</div>
+                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                  Inactive
+                </div>
               ),
           },
         ]}
