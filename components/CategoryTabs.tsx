@@ -76,7 +76,7 @@ export default function CategoryTabs({
       className="
         flex gap-3 mb-6 overflow-x-auto pb-2 
         flex-nowrap scroll-smooth 
-        no-scrollbar cursor-grab select-none
+        no-scrollbar cursor-grab select-none 
       "
     >
       <button

@@ -29,6 +29,8 @@ export default function CarouselPage() {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
 
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const debouncedSearch = useDebounce(search, 500);
 
   const loadCarousels = async () => {
@@ -63,6 +65,12 @@ export default function CarouselPage() {
             {c.carousel_description || "—"}
           </p>
         ),
+        button_type:
+          c.button_type === 1
+            ? "Online Registration"
+            : c.button_type === 2
+            ? "Explore Now"
+            : "—",
         Status:
           c.status == 1 || c.status === "1" ? (
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -75,24 +83,27 @@ export default function CarouselPage() {
           ),
         "Carousel File": c.carousel_file ? (
           <a
-            href={c.carousel_file}
+            href={server_url + c.carousel_file}
             target="_blank"
             rel="noopener noreferrer"
             className="text-cyan-700 underline flex justify-end"
           >
-            <img src={c.carousel_file} className="w-32 h-16 object-cover" />
+            <img src={server_url +c.carousel_file} className="w-32 h-16 object-cover" />
           </a>
         ) : (
           "—"
         ),
         "Carousel Mobile File": c.carousel_mobile_file ? (
           <a
-            href={c.carousel_mobile_file}
+            href={server_url +c.carousel_mobile_file}
             target="_blank"
             rel="noopener noreferrer"
             className="text-cyan-700 underline flex justify-end"
           >
-            <img src={c.carousel_mobile_file} className="w-12 h-20 object-cover" />
+            <img
+              src={server_url + c.carousel_mobile_file}
+              className="w-12 h-20 object-cover"
+            />
           </a>
         ) : (
           "—"
@@ -130,6 +141,16 @@ export default function CarouselPage() {
       label: "Description",
       type: "textarea",
       required: false,
+    },
+    {
+      name: "button_type",
+      label: "Button Type",
+      type: "select",
+      options: [
+        { label: "Online Registration", value: "1" },
+        { label: "Explore Now", value: "2" },
+      ],
+      required: true,
     },
     {
       name: "status",
@@ -210,39 +231,52 @@ export default function CarouselPage() {
             key: "carousel_sec_title",
             label: "Sub Title",
             render: (r) => (
-              <div className="truncate max-w-[200px]" title={r.carousel_sec_title}>
+              <div
+                className="truncate max-w-[200px]"
+                title={r.carousel_sec_title}
+              >
                 {r.carousel_sec_title || "—"}
               </div>
             ),
           },
           {
-            key: "carousel_description",
-            label: "Description",
-            render: (r) => (
-              <div
-                className="truncate max-w-[250px]"
-                title={r.carousel_description}
-              >
-                {r.carousel_description || "—"}
-              </div>
-            ),
+            key: "button_type",
+            label: "Button Type",
+            render: (r) =>
+              r.button_type === 1
+                ? "Online Registration"
+                : r.button_type === 2
+                ? "Explore Now"
+                : "—",
           },
+          // {
+          //   key: "carousel_description",
+          //   label: "Description",
+          //   render: (r) => (
+          //     <div
+          //       className="truncate max-w-[250px]"
+          //       title={r.carousel_description}
+          //     >
+          //       {r.carousel_description || "—"}
+          //     </div>
+          //   ),
+          // },
           {
             key: "carousel_file",
             label: "PC File",
             render: (r) =>
               r.carousel_file ? (
                 <a
-                  href={r.carousel_file}
+                  href={server_url + r.carousel_file}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
-                  onClick={(e)=>{
+                  onClick={(e) => {
                     e.stopPropagation();
                   }}
                 >
                   <img
-                    src={r.carousel_file}
+                    src={ server_url + r.carousel_file}
                     className="max-w-32 h-10 object-cover rounded-sm"
                     alt="file"
                   />
@@ -257,16 +291,16 @@ export default function CarouselPage() {
             render: (r) =>
               r.carousel_mobile_file ? (
                 <a
-                  href={r.carousel_mobile_file}
+                  href={server_url + r.carousel_mobile_file}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
-                   onClick={(e)=>{
+                  onClick={(e) => {
                     e.stopPropagation();
                   }}
                 >
-                  <img 
-                    src={r.carousel_mobile_file}
+                  <img
+                    src={server_url + r.carousel_mobile_file}
                     className="max-w-20 h-12 object-cover rounded-sm"
                     alt="file"
                   />

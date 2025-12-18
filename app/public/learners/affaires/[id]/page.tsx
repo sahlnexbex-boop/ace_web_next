@@ -29,6 +29,7 @@ export default function AffairDetail() {
   const publishedRef = useRef<HTMLParagraphElement>(null);
   const contentRef = useRef<HTMLParagraphElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchAffair = async () => {
@@ -149,8 +150,6 @@ export default function AffairDetail() {
           >
             {affairData.affair_description}
           </p>
-
-          
         </div>
 
         {/* Sidebar */}
@@ -164,12 +163,12 @@ export default function AffairDetail() {
           {affairData.affair_file && (
             <div className="mt-6">
               <a
-                href={affairData.affair_file}
+                href={server_url +affairData.affair_file}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium py-2 px-4 rounded-md transition"
               >
-                 View Attached File
+                View Attached File
               </a>
             </div>
           )}

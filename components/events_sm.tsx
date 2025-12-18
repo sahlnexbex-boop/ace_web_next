@@ -8,12 +8,13 @@ export default function Events() {
   const router = useRouter();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await getEvents(1, 4, "", 1); 
+        const response = await getEvents(1, 4, "", 1);
         if (response?.data) {
           setEvents(response.data);
         } else {
@@ -37,9 +38,7 @@ export default function Events() {
           ACE Events
         </h2>
 
-        {loading && (
-          <Loader />
-        )}
+        {loading && <Loader />}
 
         {!loading && events.length === 0 && (
           <div className="flex justify-center items-center min-h-[70vh] md:min-h-auto">
@@ -53,12 +52,14 @@ export default function Events() {
             {events.map((ev) => (
               <div
                 key={ev.event_id}
-                onClick={() => router.push(`/public/highlights/events/${ev.event_id}`)}
+                onClick={() =>
+                  router.push(`/public/highlights/events/${ev.event_id}`)
+                }
                 className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-lg"
               >
                 <div className="overflow-hidden">
                   <img
-                    src={ev.event_image}
+                    src={server_url + ev.event_image}
                     alt={ev.event_title}
                     className="w-full h-48 object-cover transform transition-transform duration-500 ease-in-out group-hover:scale-110"
                   />
@@ -74,7 +75,9 @@ export default function Events() {
                       day: "numeric",
                     })}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">{ev.event_location}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {ev.event_location}
+                  </p>
                 </div>
               </div>
             ))}

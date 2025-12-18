@@ -23,6 +23,7 @@ export default function PublicationsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const pageRef = useRef(null);
   const cardsRef = useRef<HTMLDivElement>(null);
@@ -214,7 +215,7 @@ export default function PublicationsPage() {
               >
                 <div className="flex-1 flex items-center justify-center">
                   <img
-                    src={book.book_image || "/placeholder.svg"}
+                    src={server_url + book.book_image || "/placeholder.svg"}
                     alt={book.book_title}
                     className="w-full h-64 object-contain transform transition-transform duration-500 hover:scale-105"
                   />
@@ -232,7 +233,11 @@ export default function PublicationsPage() {
             ))
           ) : (
             <div className="flex justify-center items-center">
-              <img src="../no_data.png" alt="" className="w-52 md:w-72 opacity-40" />
+              <img
+                src="../no_data.png"
+                alt=""
+                className="w-52 md:w-72 opacity-40"
+              />
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { gsap } from "gsap";
 import { getCarousels } from "@/lib/api/carousel";
+import ApplyOnlineModal from "@/components/applyOnlineModal";
 
 export default function Hero() {
   const [slides, setSlides] = useState<any[]>([]);
@@ -11,6 +12,9 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const [openApply, setOpenApply] = useState(false);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -155,7 +159,7 @@ export default function Hero() {
                   ref={(el: HTMLVideoElement | null) => {
                     videoRefs.current[index] = el;
                   }}
-                  src={displayFile}
+                  src={server_url + displayFile}
                   autoPlay
                   loop
                   muted
@@ -168,7 +172,7 @@ export default function Hero() {
                 />
               ) : (
                 <img
-                  src={displayFile}
+                  src={server_url +displayFile}
                   alt={slide.carousel_title}
                   className="w-full h-full object-cover"
                 />
@@ -176,25 +180,36 @@ export default function Hero() {
               <div className="absolute inset-0 bg-black/20" />
             </div>
 
-            <div className="relative max-w-7xl h-full flex justify-center md:justify-start items-center mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-28 text-center md:text-left">
+            <div className="relative max-w-7xl h-full flex justify-start md:items-center items-start mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 md:py-28 text-center md:text-left">
               <div className="text-white max-w-2xl">
-                <h1 className="hero-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-2 md:me-10">
+                <h1 className="hero-heading text-start text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-2 md:me-10">
                   {slide.carousel_title}
                 </h1>
-                <p className="hero-subheading text-base sm:text-lg md:text-xl mb-4 text-cyan-100 font-light">
+                <p className="hero-subheading text-start text-base sm:text-lg md:text-xl mb-4 text-cyan-100 font-light">
                   {slide.carousel_sec_title}
                 </p>
-                <p className="hero-text text-sm sm:text-base md:text-lg leading-relaxed mb-6 md:me-20">
+                <p className="hero-text text-sm text-start sm:text-base md:text-lg leading-relaxed md:mb-6 mb-4 md:me-20">
                   {slide.carousel_description}
                 </p>
 
                 {slide.carousel_title && (
-                  <a
-                    href="/public/contact"
-                    className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white cursor-pointer hover:bg-gray-100 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
-                  >
-                    Explore Now
-                  </a>
+                  <div className="flex justify-start">
+                    {slide.button_type === 1 ? (
+                      <button
+                        onClick={() => setOpenApply(true)}
+                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
+                      >
+                        Online Registration
+                      </button>
+                    ) : (
+                      <a
+                        href="/public/contact"
+                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
+                      >
+                        Explore Now
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -216,6 +231,8 @@ export default function Hero() {
           />
         ))}
       </div>
+
+      <ApplyOnlineModal open={openApply} onClose={() => setOpenApply(false)} />
     </section>
   );
 }

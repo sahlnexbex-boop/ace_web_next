@@ -30,6 +30,8 @@ export default function VideoClassPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<any[]>([]);
   const [filters, setFilters] = useState<{ status?: string; category_id?: string }>({});
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -101,7 +103,7 @@ const loadCategories = async () => {
           "Class Image": s.class_image ? (
             <div className="flex justify-end">
               <img
-                src={s.class_image}
+                src={server_url +s.class_image}
                 alt="Class"
                 className="w-16 h-16 object-cover rounded-lg shadow"
               />
@@ -224,7 +226,7 @@ const loadCategories = async () => {
             render: (r) =>
               r.class_image ? (
                 <img
-                  src={r.class_image}
+                  src={server_url +r.class_image}
                   className="w-10 h-10 object-cover rounded-full"
                   alt="Class"
                 />

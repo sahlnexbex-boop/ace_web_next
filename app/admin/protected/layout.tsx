@@ -94,7 +94,12 @@ const menuItems = [
       { name: "Toppers", icon: GraduationCap, path: "/admin/protected/topper" },
     ],
   },
-  { name: "Enquiry's", icon: HelpCircle, path: "/admin/protected/enquiry" },
+  { name: "Enquiry's", icon: HelpCircle, 
+    children: [
+      { name: "Connect Enquiry", icon: Trophy, path: "/admin/protected/enquiry" },
+      { name: "Online Registartion", icon: GraduationCap, path: "/admin/protected/online-registration" },
+    ],
+   },
 ];
 
 //  Sidebar Component

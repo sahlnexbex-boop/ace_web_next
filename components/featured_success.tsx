@@ -11,6 +11,7 @@ export default function FeaturedSuccess() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(3);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -40,7 +41,9 @@ export default function FeaturedSuccess() {
     if (stories.length === 0) return;
     if (intervalId) clearInterval(intervalId);
     const newInterval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % Math.ceil(stories.length / itemsPerSlide));
+      setCurrentSlide(
+        (prev) => (prev + 1) % Math.ceil(stories.length / itemsPerSlide)
+      );
     }, 8000);
     setIntervalId(newInterval);
     return () => clearInterval(newInterval);
@@ -97,7 +100,11 @@ export default function FeaturedSuccess() {
             Featured Success Stories
           </h2>
           <div className="relative w-32 md:w-40 h-3 mt-1">
-            <img src="/line_03.png" alt="underline" className="absolute left-0 bottom-0 w-full" />
+            <img
+              src="/line_03.png"
+              alt="underline"
+              className="absolute left-0 bottom-0 w-full"
+            />
           </div>
         </div>
 
@@ -109,7 +116,7 @@ export default function FeaturedSuccess() {
             {getSlides().map((slide, slideIndex) => (
               <div
                 key={slideIndex}
-                className={`flex-shrink-0 w-full grid gap-8 ${
+                className={`flex-shrink-0 w-full grid gap-8 lg:gap-12 md:py-3 md:px-3 ${
                   itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
                 }`}
               >
@@ -120,9 +127,9 @@ export default function FeaturedSuccess() {
                     className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
                   >
                     <img
-                      src={s.thumbnail_image}
+                      src={server_url + s.thumbnail_image}
                       alt={s.stories_title}
-                      className="w-full h-48 object-cover"
+                      className="w-full lg:h-60 object-cover"
                     />
                     <div className="p-4 text-left">
                       <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base line-clamp-2">
@@ -147,7 +154,9 @@ export default function FeaturedSuccess() {
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`w-3 h-3 cursor-pointer rounded-full transition-all ${
-                  currentSlide === index ? "bg-cyan-600 w-6" : "bg-gray-300 hover:bg-cyan-400"
+                  currentSlide === index
+                    ? "bg-cyan-600 w-6"
+                    : "bg-gray-300 hover:bg-cyan-400"
                 }`}
               ></button>
             ))}
@@ -155,7 +164,11 @@ export default function FeaturedSuccess() {
         </div>
       </div>
 
-      <DynamicVideoModal isOpen={isModalOpen} onClose={closeVideo} videoUrl={videoUrl} />
+      <DynamicVideoModal
+        isOpen={isModalOpen}
+        onClose={closeVideo}
+        videoUrl={videoUrl}
+      />
     </section>
   );
 }

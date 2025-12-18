@@ -35,6 +35,8 @@ export default function CourseDetailsPage({
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   useEffect(() => {
     (async () => {
@@ -94,7 +96,7 @@ export default function CourseDetailsPage({
         className="relative text-white md:py-16 py-8 px-6 md:px-12 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: course.course_image
-            ? `url(${course.course_image})`
+            ? `url(${server_url +course.course_image})`
             : "url('/course_details_background.png')",
         }}
       >
@@ -251,7 +253,7 @@ export default function CourseDetailsPage({
           <div className="space-y-3">
             {course.course_syllabus_file && (
               <a
-                href={course.course_syllabus_file}
+                href={server_url + course.course_syllabus_file}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between w-full bg-red-100 text-red-600 px-4 py-3 rounded-lg hover:bg-red-200 transition cursor-pointer"
@@ -264,7 +266,7 @@ export default function CourseDetailsPage({
 
             {course.course_questions_file && (
               <a
-                href={course.course_questions_file}
+                href={ server_url + course.course_questions_file}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between w-full bg-blue-100 text-blue-600 px-4 py-3 rounded-lg hover:bg-blue-200 transition cursor-pointer"

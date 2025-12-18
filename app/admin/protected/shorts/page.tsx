@@ -28,6 +28,8 @@ export default function ShortsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -71,7 +73,7 @@ export default function ShortsPage() {
         ),
         "Shorts File": s.shorts_file ? (
           <a
-            href={s.shorts_file}
+            href={server_url + s.shorts_file}
             target="_blank"
             rel="noopener noreferrer"
             className="text-cyan-700 underline"
@@ -206,7 +208,7 @@ export default function ShortsPage() {
             render: (r) =>
               r.shorts_file ? (
                 <a
-                  href={r.shorts_file}
+                  href={server_url + r.shorts_file}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"
@@ -214,7 +216,7 @@ export default function ShortsPage() {
                     e.stopPropagation();
                   }}
                 >
-                  <img src={r.shorts_file} className="w-10 h-16 object-cover" />
+                  <img src={server_url + r.shorts_file} className="w-10 h-16 object-cover" />
                 </a>
               ) : (
                 "—"

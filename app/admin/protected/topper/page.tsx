@@ -31,7 +31,7 @@ export default function ToppersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [categories, setCategories] = useState<any[]>([]);
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   // Load categories only
@@ -108,7 +108,7 @@ export default function ToppersPage() {
           "Topper Image": t.topper_image ? (
             <div className="flex justify-end">
               <img
-                src={t.topper_image}
+                src={server_url +t.topper_image}
                 alt="Topper"
                 className="w-16 h-16 rounded object-cover"
               />
@@ -225,7 +225,7 @@ export default function ToppersPage() {
             render: (r) =>
               r.topper_image ? (
                 <img
-                  src={r.topper_image}
+                  src={server_url + r.topper_image}
                   alt="Topper"
                   className="w-10 h-10 object-cover rounded-md"
                 />

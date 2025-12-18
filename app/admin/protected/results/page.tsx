@@ -32,7 +32,7 @@ export default function ResultsPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [basedType, setBasedType] = useState<string>("");
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   const loadCourses = async () => {
@@ -133,12 +133,12 @@ export default function ResultsPage() {
           (r.based_type === 2 ? "No linked category" : "—"),
         "Result File": r.result_file ? (
           <a
-            href={r.result_file}
+            href={server_url +r.result_file}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 underline"
           >
-            {r.result_file}
+            {server_url + r.result_file}
           </a>
         ) : (
           "—"
@@ -343,7 +343,7 @@ export default function ResultsPage() {
             render: (r) =>
               r.result_file ? (
                 <a
-                  href={r.result_file}
+                  href={server_url + r.result_file}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"

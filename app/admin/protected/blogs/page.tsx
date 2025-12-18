@@ -31,7 +31,7 @@ export default function BlogsPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [viewData, setViewData] = useState<any>(null);
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   // Load courses
@@ -156,7 +156,7 @@ export default function BlogsPage() {
             render: (r) =>
               r.blog_image ? (
                 <img
-                  src={r.blog_image}
+                  src={server_url + r.blog_image}
                   alt={r.blog_title}
                   className="w-10 h-10 object-cover rounded-full"
                 />
@@ -278,7 +278,7 @@ export default function BlogsPage() {
               ),
             Image: b.blog_image ? (
               <img
-                src={b.blog_image}
+                src={ server_url + b.blog_image}
                 className="w-14 h-14 rounded object-cover"
               />
             ) : (

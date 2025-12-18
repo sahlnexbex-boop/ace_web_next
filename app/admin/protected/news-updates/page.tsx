@@ -28,7 +28,7 @@ export default function NewsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   const loadNews = async () => {
@@ -81,7 +81,7 @@ export default function NewsPage() {
         "News Image": n.news_image ? (
           <div className="flex justify-end">
             <img
-              src={n.news_image}
+              src={server_url + n.news_image}
               alt="News"
               className="w-20 h-20 object-cover rounded-lg"
             />
@@ -196,7 +196,7 @@ export default function NewsPage() {
             render: (r) =>
               r.news_image ? (
                 <img
-                  src={r.news_image}
+                  src={server_url + r.news_image}
                   className="w-10 h-10 object-cover rounded-full"
                   alt="News"
                 />

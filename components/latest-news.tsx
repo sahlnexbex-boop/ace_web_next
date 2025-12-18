@@ -10,6 +10,8 @@ import Loader from "./loader";
 export default function LatestNews() {
   const router = useRouter();
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,9 +94,9 @@ export default function LatestNews() {
                 key={item.news_id}
                 className="news-card opacity-0 overflow-hidden hover:shadow-lg transition-shadow rounded-xl cursor-pointer"
               >
-                <div className="aspect-video overflow-hidden">
+                <div className="w-full h-60 overflow-hidden">
                   <img
-                    src={item.news_image || "/placeholder.svg"}
+                    src={server_url + item.news_image || "/placeholder.svg"}
                     alt={item.news_title}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />

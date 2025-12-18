@@ -18,6 +18,7 @@ export default function SuccessStories() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [successStories, setSuccessStories] = useState<any[]>([]);
   const [videoUrl, setVideoUrl] = useState<string>("");
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const openVideo = (url: string) => {
     setVideoUrl(url);
@@ -92,15 +93,19 @@ export default function SuccessStories() {
                 <CardContent className="p-0 h-full">
                   <div className="relative h-full">
                     <img
-                      src={shorts1.shorts_file}
+                      src={server_url + shorts1.shorts_file}
                       alt={shorts1.shorts_title}
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
-                    <div className="absolute bottom-14 bg-white rounded-xl left-0 right-0 px-6 py-3 mx-4">
-                      <h3 className="text-gray-800 font-bold text-xl mb-1">
-                        {shorts1.shorts_title}
-                      </h3>
-                    </div>
+                    {
+                      shorts1.shorts_title && (
+                        <div className="absolute bottom-14 bg-white rounded-xl left-0 right-0 px-6 py-3 mx-4">
+                          <h3 className="text-gray-800 font-bold text-xl mb-1">
+                            {shorts1.shorts_title}
+                          </h3>
+                        </div>
+                      )
+                    }
                   </div>
                 </CardContent>
               </Card>
@@ -118,7 +123,7 @@ export default function SuccessStories() {
                   </p>
                   <div className="flex items-center">
                     <img
-                      src={testi1.image_of_candidate}
+                      src={server_url + testi1.image_of_candidate}
                       alt={testi1.name_of_candidate}
                       className="w-10 h-10 rounded-full mr-3"
                     />
@@ -153,7 +158,7 @@ export default function SuccessStories() {
                   </p>
                   <div className="flex items-center">
                     <img
-                      src={testi2.image_of_candidate}
+                      src={server_url + testi2.image_of_candidate}
                       alt={testi2.name_of_candidate}
                       className="w-10 h-10 rounded-full mr-3"
                     />
@@ -173,7 +178,7 @@ export default function SuccessStories() {
               >
                 <CardContent className="p-0">
                   <img
-                    src={story1.thumbnail_image}
+                    src={server_url + story1.thumbnail_image}
                     alt={story1.name_of_candidate}
                     className="w-full object-cover transition-transform duration-500 hover:scale-105"
                   />
@@ -226,7 +231,7 @@ export default function SuccessStories() {
               >
                 <CardContent className="p-0">
                   <img
-                    src={story2.thumbnail_image}
+                    src={server_url + story2.thumbnail_image}
                     alt={story2.stories_title}
                     className="w-full object-cover transition-transform duration-500 hover:scale-105"
                   />
@@ -250,17 +255,19 @@ export default function SuccessStories() {
               >
                 <CardContent className="p-0">
                   <img
-                    src={shorts2.shorts_file}
+                    src={server_url + shorts2.shorts_file}
                     alt={shorts2.shorts_title}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
-                  <div className="absolute flex items-end bottom-10 bg-blue-400 me-10 rounded-e-full">
-                    <div className="px-6 py-3 md:py-5">
-                      <p className="text-white font-bold sm:text-sm text-xs leading-relaxed">
-                        {shorts2.shorts_title}
-                      </p>
+                  { shorts2.shorts_title && (
+                    <div className="absolute flex items-end bottom-10 bg-blue-400 me-10 rounded-e-full">
+                      <div className="px-6 py-3 md:py-5">
+                        <p className="text-white font-bold sm:text-sm text-xs leading-relaxed">
+                          {shorts2.shorts_title}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             )}

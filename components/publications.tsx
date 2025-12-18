@@ -19,6 +19,8 @@ export default function Publications() {
   const router = useRouter();
   const gridRef = useRef<HTMLDivElement | null>(null);
   const [publications, setPublications] = useState<Publication[]>([]);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +101,7 @@ export default function Publications() {
                 <div className="mb-4 sm:mb-6">
                   <div className="w-28 h-36 sm:w-32 sm:h-40 rounded-lg mx-auto flex items-center justify-center shadow-md">
                     <img
-                      src={book.book_image || "/placeholder.svg"}
+                      src={server_url + book.book_image || "/placeholder.svg"}
                       alt={book.book_title}
                       className="w-full h-full object-cover rounded-sm"
                     />

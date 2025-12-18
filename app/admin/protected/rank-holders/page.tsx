@@ -32,7 +32,7 @@ export default function RankHoldersPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [basedType, setBasedType] = useState<string>("");
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   const loadCourses = async () => {
@@ -110,7 +110,7 @@ export default function RankHoldersPage() {
         "Student Photo": d.student_photo ? (
           <div className="flex justify-end">
             <img
-              src={d.student_photo}
+              src={server_url + d.student_photo}
               alt="Student"
               className="w-14 h-14 object-cover rounded"
             />
@@ -306,7 +306,7 @@ export default function RankHoldersPage() {
             render: (r) =>
               r.student_photo ? (
                 <img
-                  src={r.student_photo}
+                  src={server_url + r.student_photo}
                   alt="Student"
                   className="w-10 h-10 object-cover rounded-md"
                 />

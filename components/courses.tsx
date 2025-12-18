@@ -16,6 +16,8 @@ export default function Courses() {
   const router = useRouter();
   const pathname = usePathname();
   const lastPathRef = useRef(pathname);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   useEffect(() => {
     (async () => {
@@ -130,7 +132,7 @@ export default function Courses() {
                 <div className="w-full flex justify-between items-start">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mb-2 sm:mb-4">
                     <img
-                      src={cat.category_image || "/placeholder.png"}
+                      src={server_url + cat.category_image || "/placeholder.png"}
                       alt={cat.category_name}
                       className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-full"
                     />

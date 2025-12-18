@@ -15,6 +15,7 @@ export default function BlogDetails() {
   const [blog, setBlog] = useState<any>(null);
   const [recentBlogs, setRecentBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // Load Blog + Recent Blogs
   useEffect(() => {
@@ -163,10 +164,10 @@ export default function BlogDetails() {
               </p>
             </div>
             <div>
-              {/* ⭐ Course Badge (Navigate to /public/courses/:category_id/:course_id) */}
+              {/*  Course Badge (Navigate to /public/courses/:category_id/:course_id) */}
               {blog.course && (
                 <div
-                  className="inline-block bg-cyan-600 text-white text-xs px-3 py-1 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
+                  className="inline-block bg-sky-500 text-white text-xs px-3 py-1 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
                   onClick={() =>
                     router.push(
                       `/public/courses/${blog.course.category_id}/${blog.course.course_id}`
@@ -180,7 +181,7 @@ export default function BlogDetails() {
           </div>
 
           <img
-            src={blog.blog_image}
+            src={server_url + blog.blog_image}
             alt={blog.blog_title}
             className="rounded-lg w-full h-auto mb-6 border border-gray-200"
           />
@@ -207,13 +208,13 @@ export default function BlogDetails() {
                   onClick={() => router.push(`/public/blog/${b.blog_id}`)}
                 >
                   <img
-                    src={b.blog_image}
+                    src={ server_url + b.blog_image}
                     alt={b.blog_title}
                     className="w-20 h-16 object-cover rounded-md"
                   />
 
                   <div>
-                    {/* ⭐ Date */}
+                    {/*  Date */}
                     <p className="text-cyan-700 text-xs font-semibold mb-1">
                       {new Date(b.publishing_date).toLocaleDateString("en-US", {
                         year: "numeric",
@@ -222,7 +223,7 @@ export default function BlogDetails() {
                       })}
                     </p>
 
-                    {/* ⭐ Course badge */}
+                    {/*  Course badge */}
                     {b.course && (
                       <p
                         className="text-[10px] bg-cyan-600 text-white inline-block px-2 py-1 rounded-md mb-1 cursor-pointer"

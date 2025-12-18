@@ -53,8 +53,8 @@ export default function ContactSection() {
             <h3 className="text-xl font-semibold mb-1 md:mb-2 text-gray-900">
               Address
             </h3>
-            <p className="text-gray-700 md:mb-6 mb-4">
-              Aysha Near GCHSS, Manjeri Malappuram Dt. Kerala
+            <p className="text-gray-700 md:mb-6 mb-4 lg:me-50">
+              Aysha Tower, Industrial Estate Rd, near GGHSS, Karuvambram, Manjeri, Kerala - 676121
             </p>
 
             <h3 className="text-xl font-semibold mb-1 md:mb-2 text-gray-900">
@@ -238,10 +238,10 @@ export default function ContactSection() {
               Find us on the map
             </h3>
             <p className="text-gray-700 mb-3">
-              Aysha Near GCHSS, Manjeri Malappuram Dt. Kerala
+              Aysha Tower, Industrial Estate Rd, near GGHSS, Karuvambram, Manjeri, Kerala - 676121
             </p>
             <a
-              href="https://www.google.com/maps"
+              href="https://maps.app.goo.gl/2QwwVTRQZtYhZdQt9"
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-600 font-semibold hover:underline"

@@ -28,7 +28,7 @@ export default function EventsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   const loadEvents = async () => {
@@ -82,7 +82,7 @@ export default function EventsPage() {
         "Event Image": e.event_image ? (
           <div className="flex justify-end">
             <img
-              src={e.event_image}
+              src={server_url +e.event_image}
               alt="Event"
               className="w-20 h-20 object-cover rounded-lg"
             />
@@ -218,7 +218,7 @@ export default function EventsPage() {
             render: (r) =>
               r.event_image ? (
                 <img
-                  src={r.event_image}
+                  src={server_url + r.event_image}
                   className="w-10 h-10 object-cover rounded-full"
                   alt="Event"
                 />

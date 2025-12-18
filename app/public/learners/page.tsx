@@ -15,7 +15,7 @@ export default function LearnersPortal() {
 
   const menuItems = [
     { id: "current", label: "Current Affairs", icon: Home },
-    { id: "syllabus", label: "Syllabus", icon: FileText },
+    // { id: "syllabus", label: "Syllabus", icon: FileText },
     { id: "study", label: "Study Material", icon: File },
     { id: "videos", label: "Video Classes", icon: Video },
     { id: "previous", label: "Previous Papers", icon: File },
@@ -43,7 +43,7 @@ export default function LearnersPortal() {
 
   //  Map service_type based on tab
   const serviceTypeMap: Record<string, number> = {
-    syllabus: 1,
+    // syllabus: 1,
     study: 2,
     previous: 3,
     model: 4,
@@ -67,54 +67,58 @@ export default function LearnersPortal() {
   };
 
   return (
-    <div className="bg-blue-50 min-h-screen py-10 px-6 md:px-12">
-      {/* Breadcrumb */}
-      <div className="text-sm text-gray-600 mb-3">
-        <span
-          className="hover:text-blue-600 cursor-pointer"
-          onClick={() => router.push("/public/home")}
-        >
-          Home
-        </span>{" "}
-        / Learners Portal /{" "}
-        <span className="font-medium capitalize">
-          {menuItems.find((m) => m.id === activeTab)?.label}
-        </span>
-      </div>
-
-      <h1 className="md:text-3xl text-2xl font-bold text-gray-900 md:mb-8 mb-5">
-        Learners Portal
-      </h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 md:gap-8 gap-4">
-        {/* Sidebar Menu */}
-        <div className="md:bg-white md:p-4 p-0 md:rounded-xl md:shadow h-fit overflow-x-auto lg:overflow-visible no-scrollbar">
-          <ul className="flex lg:flex-col gap-3 lg:gap-2 w-max lg:w-full">
-            {menuItems.map(({ id, label, icon: Icon }) => (
-              <li key={id}>
-                <button
-                  onClick={() => handleMenuClick(id)}
-                  className={`flex w-full items-center md:gap-3 gap-2 md:px-4 md:py-2 px-2 py-1 md:rounded-lg rounded-md text-left transition cursor-pointer whitespace-nowrap ${
-                    activeTab === id
-                      ? "bg-gradient-to-r from-[#1F67A5] to-[#087fc2] text-white"
-                      : "text-gray-700 hover:bg-blue-200"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </button>
-              </li>
-            ))}
-          </ul>
+    <div className="bg-blue-50 min-h-screen">
+      <div className="py-10 px-6 md:px-12">
+        {/* Breadcrumb */}
+        <div className="text-sm text-gray-600 mb-3">
+          <span
+            className="hover:text-blue-600 cursor-pointer"
+            onClick={() => router.push("/public/home")}
+          >
+            Home
+          </span>{" "}
+          / Learners Portal /{" "}
+          <span className="font-medium capitalize">
+            {menuItems.find((m) => m.id === activeTab)?.label}
+          </span>
         </div>
 
-        {/* Content Area */}
-        <div className="lg:col-span-3 transition-all duration-300">
-          <CategoryTabs
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
-          />
-          {renderContent()}
+        <h1 className="md:text-3xl text-2xl font-bold text-gray-900 md:mb-8 mb-5">
+          Learners Portal
+        </h1>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 md:gap-8 gap-4">
+          {/* Sidebar Menu - Fixed on Desktop */}
+          <div className="lg:col-span-1">
+            <div className="md:bg-white md:p-4 p-0 md:rounded-xl md:shadow overflow-x-auto lg:overflow-visible no-scrollbar lg:sticky lg:top-24">
+              <ul className="flex lg:flex-col gap-3 lg:gap-4 w-max lg:w-full">
+                {menuItems.map(({ id, label, icon: Icon }) => (
+                  <li key={id}>
+                    <button
+                      onClick={() => handleMenuClick(id)}
+                      className={`flex w-full items-center md:gap-4 gap-2 md:px-4 md:py-3 px-2 py-1 md:rounded-lg rounded-md text-left transition cursor-pointer whitespace-nowrap ${
+                        activeTab === id
+                          ? "bg-gradient-to-r from-[#1F67A5] to-[#087fc2] text-white"
+                          : "text-gray-700 hover:bg-blue-200"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Content Area - Scrollable */}
+          <div className="lg:col-span-3 transition-all duration-300">
+            <CategoryTabs
+              activeCategory={activeCategory}
+              onCategoryChange={setActiveCategory}
+            />
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>

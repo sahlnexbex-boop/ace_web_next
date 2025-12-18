@@ -19,6 +19,7 @@ export default function Testimonials() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(3);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   //  Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -159,7 +160,7 @@ export default function Testimonials() {
                         </p>
                         <div className="flex items-center gap-3">
                           <img
-                            src={t.image_of_candidate || "/default-avatar.png"}
+                            src={server_url + t.image_of_candidate || "/default-avatar.png"}
                             alt={t.name_of_candidate}
                             className="w-12 h-12 rounded-full object-cover"
                           />

@@ -35,6 +35,7 @@ export default function CourseCategoryPage() {
   );
 
   const debouncedSearch = useDebounce(search, 500);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const loadCourseTypes = async () => {
     try {
@@ -85,7 +86,7 @@ export default function CourseCategoryPage() {
         "Category Image": c.category_image ? (
           <div className="flex justify-end">
             <img
-              src={c.category_image}
+              src={server_url + c.category_image}
               alt="Category"
               className="w-16 h-16 rounded object-cover"
             />
@@ -175,7 +176,7 @@ export default function CourseCategoryPage() {
                 ],
               },
               {
-                key: "type_id", 
+                key: "type_id",
                 label: "Course Type",
                 options: typeOptions,
               },
@@ -206,7 +207,15 @@ export default function CourseCategoryPage() {
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
           { key: "category_name", label: "Name" },
-          { key: "category_description", label: "Description", render: (r) => <p className="text-gray-700 whitespace-pre-line max-w-72 line-clamp-2">{r.category_description}</p> },
+          {
+            key: "category_description",
+            label: "Description",
+            render: (r) => (
+              <p className="text-gray-700 whitespace-pre-line max-w-72 line-clamp-2">
+                {r.category_description}
+              </p>
+            ),
+          },
           {
             key: "courseType.type_name",
             label: "Course Type",
@@ -218,7 +227,7 @@ export default function CourseCategoryPage() {
             render: (r) =>
               r.category_image ? (
                 <img
-                  src={r.category_image}
+                  src={server_url + r.category_image}
                   className="w-10 h-10 object-cover rounded-full"
                 />
               ) : (

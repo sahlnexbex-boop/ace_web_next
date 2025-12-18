@@ -33,6 +33,7 @@ export default function NotificationsPage() {
   const [results, setResults] = useState<ResultItem[]>([]);
   const [loading, setLoading] = useState(true);
   const listRef = useRef<HTMLDivElement>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -148,13 +149,16 @@ export default function NotificationsPage() {
                     month: "short",
                     year: "numeric",
                   })}{" "}
-                  | {item.course?.course_name || item.category?.category_name || "N/A"}
+                  |{" "}
+                  {item.course?.course_name ||
+                    item.category?.category_name ||
+                    "N/A"}
                 </p>
               </div>
 
               {activeTab === "notifications" ? (
                 <a
-                  href={`${item.result_file}`}
+                  href={`${server_url + item.result_file}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer flex items-center gap-1 mt-3 sm:mt-0 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all"
@@ -163,7 +167,7 @@ export default function NotificationsPage() {
                 </a>
               ) : (
                 <a
-                  href={item.result_file || "#"}
+                  href={server_url + item.result_file || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer flex items-center gap-2 mt-3 sm:mt-0 bg-red-50 text-red-600 hover:bg-red-100 font-medium text-sm px-4 py-1.5 rounded-full transition-all"

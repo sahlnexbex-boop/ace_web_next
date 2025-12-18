@@ -17,6 +17,8 @@ export default function AceShorts() {
   const [shorts, setShorts] = useState<ShortItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   useEffect(() => {
     const fetchShorts = async () => {
@@ -64,15 +66,15 @@ export default function AceShorts() {
                 className="relative group cursor-pointer"
                 onClick={() => setSelectedVideo(short.shorts_link)}
               >
-                <div className="rounded-lg aspect-[3/4] overflow-hidden shadow-lg transform transition-transform group-hover:scale-105">
+                <div className="rounded-lg  overflow-hidden shadow-lg transform transition-transform group-hover:scale-105">
                   <img
-                    src={short.shorts_file || "/placeholder.svg"}
+                    src={server_url + short.shorts_file || "/placeholder.svg"}
                     alt={short.shorts_title}
                     className="w-full h-full object-cover"
                   />
 
                   {/* Play button overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 md:top-52 flex items-center justify-center">
                     <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
                       <Play
                         className="w-6 h-6 text-cyan-600 ml-1"
@@ -82,12 +84,12 @@ export default function AceShorts() {
                   </div>
 
                   {/* Ace logo */}
-                  <div className="absolute top-4 right-4">
+                  {/* <div className="absolute top-4 right-4">
                     <div className="flex items-center space-x-1 text-white text-xs">
                       <div className="w-4 h-4 bg-cyan-400 rounded transform rotate-45"></div>
                       <span className="font-bold">ace</span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* <p className="text-center mt-2 text-sm font-medium text-gray-800">

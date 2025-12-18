@@ -28,8 +28,8 @@ export default function SocialServicesPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [viewData, setViewData] = useState<Record<string, any> | null>(null);
-
   const debouncedSearch = useDebounce(search, 500);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const loadSocialServices = async () => {
     try {
@@ -38,7 +38,13 @@ export default function SocialServicesPage() {
       const date =
         filters.date && filters.date !== "" ? filters.date : undefined;
 
-      const res = await getSocialServices(page, 10, debouncedSearch, status, date);
+      const res = await getSocialServices(
+        page,
+        10,
+        debouncedSearch,
+        status,
+        date
+      );
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
     } catch (err) {
@@ -86,7 +92,7 @@ export default function SocialServicesPage() {
         "Main Image": s.service_image ? (
           <div className="flex justify-end">
             <img
-              src={s.service_image}
+              src={server_url + s.service_image}
               alt="Main Service"
               className="w-16 h-16 object-cover rounded-md"
             />
@@ -99,7 +105,7 @@ export default function SocialServicesPage() {
             {otherImgs.map((img, i) => (
               <img
                 key={i}
-                src={img}
+                src={server_url + img}
                 alt={`Other ${i + 1}`}
                 className="w-14 h-14 object-cover rounded"
               />
@@ -124,10 +130,30 @@ export default function SocialServicesPage() {
   };
 
   const fields = [
-    { name: "service_title", label: "Service Title", type: "text", required: true },
-    { name: "service_description", label: "Description", type: "textarea", required: true },
-    { name: "service_date", label: "Service Date", type: "date", required: true },
-    { name: "service_location", label: "Location", type: "text", required: true },
+    {
+      name: "service_title",
+      label: "Service Title",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "service_description",
+      label: "Description",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "service_date",
+      label: "Service Date",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "service_location",
+      label: "Location",
+      type: "text",
+      required: true,
+    },
     {
       name: "status",
       label: "Status",
@@ -138,14 +164,27 @@ export default function SocialServicesPage() {
       ],
       required: true,
     },
-    { name: "service_image", label: "Main Image - (Ratio 5:3)", type: "file", required: false },
-    { name: "other_images", label: "Other Images - (Ratio 5:3)", type: "file", multiple: true, required: false },
+    {
+      name: "service_image",
+      label: "Main Image - (Ratio 5:3)",
+      type: "file",
+      required: false,
+    },
+    {
+      name: "other_images",
+      label: "Other Images - (Ratio 5:3)",
+      type: "file",
+      multiple: true,
+      required: false,
+    },
   ];
 
   return (
     <div className="p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-        <h1 className="text-2xl font-semibold text-cyan-700">Social Services</h1>
+        <h1 className="text-2xl font-semibold text-cyan-700">
+          Social Services
+        </h1>
 
         <div className="flex items-center gap-3">
           <TableFilter
@@ -205,7 +244,7 @@ export default function SocialServicesPage() {
             render: (r) =>
               r.service_image ? (
                 <img
-                  src={r.service_image}
+                  src={server_url + r.service_image}
                   className="w-10 h-10 object-cover rounded-full"
                   alt="Service"
                 />

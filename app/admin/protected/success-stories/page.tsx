@@ -34,6 +34,8 @@ export default function SuccessStoriesPage() {
     category_id?: string;
   }>({});
   const debouncedSearch = useDebounce(search, 500);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   const loadCategories = async () => {
     try {
@@ -117,7 +119,7 @@ export default function SuccessStoriesPage() {
           "Thumbnail Image": s.thumbnail_image ? (
             <div className="flex justify-end">
               <img
-                src={s.thumbnail_image}
+                src={server_url + s.thumbnail_image}
                 alt="Thumbnail"
                 className="w-16 h-16 object-cover rounded"
               />
@@ -280,7 +282,7 @@ export default function SuccessStoriesPage() {
             render: (r) =>
               r.thumbnail_image ? (
                 <img
-                  src={r.thumbnail_image}
+                  src={server_url + r.thumbnail_image}
                   className="w-10 h-10 object-cover rounded-full"
                   alt="Thumbnail"
                 />

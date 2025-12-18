@@ -6,7 +6,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
-import TableFilter from "@/components/filter_button"; 
+import TableFilter from "@/components/filter_button";
 import { useDebounce } from "@/hooks/debounce";
 
 import {
@@ -30,7 +30,7 @@ export default function PublicationPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [viewData, setViewData] = useState<Record<string, any> | null>(null);
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   const loadCategories = async () => {
@@ -46,7 +46,9 @@ export default function PublicationPage() {
   const loadPublications = async () => {
     try {
       const status =
-        filters.status && filters.status !== "" ? Number(filters.status) : undefined;
+        filters.status && filters.status !== ""
+          ? Number(filters.status)
+          : undefined;
       const category_id =
         filters.category_id && filters.category_id !== ""
           ? Number(filters.category_id)
@@ -82,7 +84,7 @@ export default function PublicationPage() {
 
       const formatted: Record<string, any> = {
         "Book Title": p.book_title,
-        "Description": (
+        Description: (
           <p className="text-gray-700 whitespace-pre-line">
             {p.book_description || "—"}
           </p>
@@ -91,12 +93,12 @@ export default function PublicationPage() {
         Author: p.book_author || "—",
         Language: p.book_language || "—",
         Category:
-          categories.find((c) => c.category_id === p.category_id)?.category_name ||
-          "—",
+          categories.find((c) => c.category_id === p.category_id)
+            ?.category_name || "—",
         "Book Image": p.book_image ? (
           <div className="flex justify-end">
             <img
-              src={p.book_image}
+              src={server_url + p.book_image}
               alt="Book"
               className="w-16 h-16 object-cover rounded-md"
             />
@@ -106,12 +108,12 @@ export default function PublicationPage() {
         ),
         "Book File": p.book_file ? (
           <a
-            href={p.book_file}
+            href={server_url + p.book_file}
             target="_blank"
             rel="noopener noreferrer"
             className="text-cyan-700 underline"
           >
-            {p.book_file}
+            {server_url + p.book_file}
           </a>
         ) : (
           "—"
@@ -174,8 +176,18 @@ export default function PublicationPage() {
       ],
       required: true,
     },
-    { name: "book_image", label: "Book Image - (Ratio 190x270)", type: "file", required: false },
-    { name: "book_file", label: "Book File (PDF)", type: "file", required: false },
+    {
+      name: "book_image",
+      label: "Book Image - (Ratio 190x270)",
+      type: "file",
+      required: false,
+    },
+    {
+      name: "book_file",
+      label: "Book File (PDF)",
+      type: "file",
+      required: false,
+    },
   ];
 
   return (
@@ -197,9 +209,7 @@ export default function PublicationPage() {
               {
                 key: "category_id",
                 label: "Category",
-                options: [
-                  ...categoryOptions,
-                ],
+                options: [...categoryOptions],
               },
             ]}
             onChange={(f) => {
@@ -242,22 +252,22 @@ export default function PublicationPage() {
               categories.find((c) => c.category_id === r.category_id)
                 ?.category_name || "—",
           },
-          { 
-             key: "book_image",
-             label: "Image",
-             render: (r) => (
-               <div className="flex gap-1">
-                 {r.book_image ? (
-                   <img
-                     src={r.book_image}
-                     className="w-8 h-8 rounded object-cover"
-                     alt="Book"
-                   />
-                 ) : (
-                   "—"
-                 )}
-               </div>
-             )
+          {
+            key: "book_image",
+            label: "Image",
+            render: (r) => (
+              <div className="flex gap-1">
+                {r.book_image ? (
+                  <img
+                    src={server_url + r.book_image}
+                    className="w-8 h-8 rounded object-cover"
+                    alt="Book"
+                  />
+                ) : (
+                  "—"
+                )}
+              </div>
+            ),
           },
           {
             key: "status",

@@ -15,6 +15,7 @@ export default function AboutUs() {
   const studentsRef = useRef<HTMLDivElement | null>(null);
   const facultyRef = useRef<HTMLDivElement | null>(null);
   const statsRef = useRef<HTMLDivElement | null>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const tabs = [
     {
@@ -250,7 +251,7 @@ export default function AboutUs() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(item.result_file, "_blank")}
+                        onClick={() => window.open(server_url + item.result_file, "_blank")}
                         className="text-xs px-3 py-1 text-cyan-600 bg-[#098B9F33] hover:text-cyan-800 cursor-pointer hover:bg-[#098B9F55]"
                       >
                         View

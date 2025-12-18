@@ -17,6 +17,7 @@ export default function PublicationDetails() {
 
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -88,15 +89,33 @@ export default function PublicationDetails() {
     return () => ctx.revert();
   }, [book]);
 
-  if (loading) return <div className="p-10 text-center text-gray-600">Loading publication...</div>;
-  if (!book) return <div className="p-10 text-center text-red-500">Book not found.</div>;
+  if (loading)
+    return (
+      <div className="p-10 text-center text-gray-600">
+        Loading publication...
+      </div>
+    );
+  if (!book)
+    return <div className="p-10 text-center text-red-500">Book not found.</div>;
 
   return (
-    <div ref={containerRef} className="max-w-7xl mx-auto px-6 md:px-10 md:py-16 py-8">
+    <div
+      ref={containerRef}
+      className="max-w-7xl mx-auto px-6 md:px-10 md:py-16 py-8"
+    >
       {/* Breadcrumb */}
       <div className="flex items-start gap-2 text-gray-600 text-sm mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeWidth={2}
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"
+          />
         </svg>
         <span>/</span>
         <span>Publications</span>
@@ -107,31 +126,41 @@ export default function PublicationDetails() {
       {/* Book Section */}
       <div className="flex flex-col md:flex-row md:gap-32 gap-6 md:mt-12">
         <img
-          src={book.book_image}
+          src={server_url + book.book_image}
           alt={book.book_title}
           className="book-image w-full md:w-1/4 object-contain rounded-lg shadow-sm"
         />
 
         <div className="book-info flex-1 flex flex-col justify-center items-start">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{book.book_title}</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+            {book.book_title}
+          </h1>
           <p className="text-gray-700 mb-4 text-justify leading-relaxed">
             {book.book_description}
           </p>
           <p className="text-lg text-gray-700 mb-2">
             Author: <span className="font-semibold">{book.book_author}</span>
           </p>
-          <p className="md:text-3xl text-xl font-bold text-cyan-700 mb-6">₹{book.book_price}</p>
+          <p className="md:text-3xl text-xl font-bold text-cyan-700 mb-6">
+            ₹{book.book_price}
+          </p>
 
           <div className="text-sm text-gray-700 space-y-3 mb-8">
-            <p><strong>Category:</strong> {book.category?.category_name || "—"}</p>
-            <p><strong>Language:</strong> {book.book_language}</p>
-            <p><strong>Paper:</strong> PAPER BACK</p>
+            <p>
+              <strong>Category:</strong> {book.category?.category_name || "—"}
+            </p>
+            <p>
+              <strong>Language:</strong> {book.book_language}
+            </p>
+            <p>
+              <strong>Paper:</strong> PAPER BACK
+            </p>
           </div>
 
           {/* Download / Wishlist buttons */}
           <div className="flex flex-wrap gap-4">
             <a
-              href={book.book_file}
+              href={server_url + book.book_file}
               target="_blank"
               rel="noopener noreferrer"
               className="cursor-pointer bg-cyan-600 text-white border border-cyan-600 rounded-lg px-5 py-2 flex items-center gap-2 hover:bg-cyan-700 transition-all duration-300"

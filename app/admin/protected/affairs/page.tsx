@@ -32,6 +32,7 @@ export default function CurrentAffairPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const debouncedSearch = useDebounce(search, 500);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -111,12 +112,12 @@ export default function CurrentAffairPage() {
           ),
         File: s.affair_file ? (
           <a
-            href={s.affair_file}
+            href={server_url +s.affair_file}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline"
           >
-           {s.affair_file}
+           {server_url + s.affair_file}
           </a>
         ) : (
           "—"
@@ -278,7 +279,7 @@ export default function CurrentAffairPage() {
             label: "File",
             render: (r) => (
               <a
-                href={r.affair_file}
+                href={server_url + r.affair_file}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cyan-700 underline"

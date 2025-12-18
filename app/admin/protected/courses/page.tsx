@@ -31,6 +31,8 @@ export default function CoursesPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [filters, setFilters] = useState<{ status?: string; category_id?: string }>({});
   const debouncedSearch = useDebounce(search, 500);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   const loadCategories = async () => {
     try {
@@ -88,24 +90,24 @@ export default function CoursesPage() {
           "Study Material": c.course_study_material || "—",
           "Syllabus File": c.course_syllabus_file ? (
             <a
-              href={c.course_syllabus_file}
+              href={server_url + c.course_syllabus_file}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-700 underline"
             >
-             {c.course_syllabus_file}
+             {server_url + c.course_syllabus_file}
             </a>
           ) : (
             "—"
           ),
           "Questions File": c.course_questions_file ? (
             <a
-              href={c.course_questions_file}
+              href={server_url + c.course_questions_file}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-700 underline"
             >
-              {c.course_questions_file}
+              {server_url +c.course_questions_file}
             </a>
           ) : (
             "—"
@@ -113,7 +115,7 @@ export default function CoursesPage() {
           "Course Image": c.course_image ? (
             <div className="flex justify-end">
               <img
-                src={c.course_image}
+                src={server_url + c.course_image}
                 alt="Course"
                 className="w-16 h-16 object-cover rounded"
               />
@@ -164,7 +166,7 @@ export default function CoursesPage() {
     },
     { name: "course_rating", label: "Rating", type: "text", required: false },
     { name: "course_duration", label: "Duration (Hours)", type: "text", required: false },
-    { name: "course_fee", label: "Fee", type: "text", required: false },
+    { name: "course_fee", label: "Fee", type: "number", required: false },
     {
       name: "course_overview",
       label: "Course Overview",
@@ -271,7 +273,7 @@ export default function CoursesPage() {
             render: (r) =>
               r.course_image ? (
                 <img
-                  src={r.course_image}
+                  src={server_url + r.course_image}
                   className="w-10 h-10 object-cover rounded-full"
                   alt="Class"
                 />

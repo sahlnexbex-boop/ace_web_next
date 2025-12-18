@@ -11,6 +11,7 @@ export default function NewsUpdates() {
   const [newsList, setNewsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -43,7 +44,7 @@ export default function NewsUpdates() {
     if (totalSlides > 1) {
       timerRef.current = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % totalSlides);
-      }, 8000); 
+      }, 8000);
     }
   };
 
@@ -115,13 +116,15 @@ export default function NewsUpdates() {
                 {slide.map((n) => (
                   <div
                     key={n.news_id}
-                    onClick={() => router.push(`/public/highlights/news/${n.news_id}`)}
+                    onClick={() =>
+                      router.push(`/public/highlights/news/${n.news_id}`)
+                    }
                     className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-500 cursor-pointer hover:-translate-y-1"
                   >
                     <img
-                      src={n.news_image}
+                      src={server_url + n.news_image}
                       alt={n.news_title}
-                      className="w-full h-52 object-cover"
+                      className="w-full md:h-60 object-cover"
                     />
                     <div className="p-4 text-left">
                       <p className="text-sm text-gray-500 mb-2">

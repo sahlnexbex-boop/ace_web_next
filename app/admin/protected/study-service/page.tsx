@@ -5,7 +5,7 @@ import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
-import TableFilter from "@/components/filter_button"; //  new reusable filter
+import TableFilter from "@/components/filter_button"; 
 import { useDebounce } from "@/hooks/debounce";
 import {
   getStudyServices,
@@ -18,7 +18,7 @@ import { getCourseCategories } from "@/lib/api/courseCategory";
 import { IconPlus } from "@tabler/icons-react";
 
 const study_service_type: Record<number, string> = {
-  1: "Syllabus",
+  // 1: "Syllabus",
   2: "Study Materials",
   3: "Previous Papers",
   4: "Model Papers",
@@ -42,6 +42,8 @@ export default function StudyServicePage() {
     category_id?: string;
   }>({});
   const debouncedSearch = useDebounce(search, 500);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   const loadCategories = async () => {
     try {
@@ -110,12 +112,12 @@ export default function StudyServicePage() {
           "Exam Name": s.exam_name || "—",
           "Service File": s.service_file ? (
             <a
-              href={s.service_file}
+              href={server_url + s.service_file}
               target="_blank"
               rel="noopener noreferrer"
               className="text-cyan-700 underline"
             >
-              {s.service_file}
+              {server_url + s.service_file}
             </a>
           ) : (
             "—"
@@ -269,7 +271,7 @@ export default function StudyServicePage() {
             render: (r) =>
               r.service_file ? (
                 <a
-                  href={r.service_file}
+                  href={server_url + r.service_file}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-cyan-700 underline"

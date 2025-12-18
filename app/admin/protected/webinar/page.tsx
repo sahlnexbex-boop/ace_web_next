@@ -21,7 +21,10 @@ import { getCourseCategories } from "@/lib/api/courseCategory";
 export default function WebinarsPage() {
   const [data, setData] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [filters, setFilters] = useState<{ status?: string; course_category_id?: string }>({});
+  const [filters, setFilters] = useState<{
+    status?: string;
+    course_category_id?: string;
+  }>({});
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
@@ -30,7 +33,7 @@ export default function WebinarsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
   const debouncedSearch = useDebounce(search, 500);
 
   const loadCategories = async () => {
@@ -49,7 +52,9 @@ export default function WebinarsPage() {
         10,
         debouncedSearch,
         filters.status ? Number(filters.status) : undefined,
-        filters.course_category_id ? Number(filters.course_category_id) : undefined
+        filters.course_category_id
+          ? Number(filters.course_category_id)
+          : undefined
       );
       setData(res?.data || []);
       setTotalPages(res?.totalPages || 1);
@@ -101,7 +106,9 @@ export default function WebinarsPage() {
           </a>
         ),
         Description: (
-          <p className="text-gray-700 whitespace-pre-line">{w.webinar_description || "—"}</p>
+          <p className="text-gray-700 whitespace-pre-line">
+            {w.webinar_description || "—"}
+          </p>
         ),
         Status:
           w.status === 1 || w.status === "1" ? (
@@ -115,7 +122,11 @@ export default function WebinarsPage() {
           ),
         "Webinar Image": w.webinar_image ? (
           <div className="flex justify-end">
-            <img src={w.webinar_image} alt="Webinar" className="w-20 h-20 object-cover rounded-lg" />
+            <img
+              src={server_url + w.webinar_image}
+              alt="Webinar"
+              className="w-20 h-20 object-cover rounded-lg"
+            />
           </div>
         ) : (
           "—"
@@ -136,9 +147,24 @@ export default function WebinarsPage() {
   };
 
   const fields = [
-    { name: "webinar_title", label: "Webinar Title", type: "text", required: true },
-    { name: "date_time", label: "Date & Time", type: "datetime-local", required: true },
-    { name: "webinar_duration", label: "Duration", type: "text", required: true },
+    {
+      name: "webinar_title",
+      label: "Webinar Title",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "date_time",
+      label: "Date & Time",
+      type: "datetime-local",
+      required: true,
+    },
+    {
+      name: "webinar_duration",
+      label: "Duration",
+      type: "text",
+      required: true,
+    },
     {
       name: "course_category_id",
       label: "Course Category",
@@ -146,10 +172,30 @@ export default function WebinarsPage() {
       options: categoryOptions,
       required: true,
     },
-    { name: "speaker_name", label: "Speaker Name", type: "text", required: true },
-    { name: "speaker_position", label: "Speaker Position", type: "text", required: true },
-    { name: "webinar_description", label: "Description", type: "textarea", required: true },
-    { name: "webinar_link", label: "Webinar Link", type: "text", required: true },
+    {
+      name: "speaker_name",
+      label: "Speaker Name",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "speaker_position",
+      label: "Speaker Position",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "webinar_description",
+      label: "Description",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "webinar_link",
+      label: "Webinar Link",
+      type: "text",
+      required: true,
+    },
     {
       name: "status",
       label: "Status",
@@ -160,7 +206,12 @@ export default function WebinarsPage() {
       ],
       required: true,
     },
-    { name: "webinar_image", label: "Webinar Image - (Ratio 3:2)", type: "file", required: false },
+    {
+      name: "webinar_image",
+      label: "Webinar Image - (Ratio 3:2)",
+      type: "file",
+      required: false,
+    },
   ];
 
   return (
@@ -205,7 +256,11 @@ export default function WebinarsPage() {
 
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
+          {
+            key: "sno",
+            label: "S.No",
+            render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
           { key: "webinar_title", label: "Title" },
           { key: "speaker_name", label: "Speaker Name" },
           { key: "speaker_position", label: "Speaker Position" },
@@ -220,14 +275,18 @@ export default function WebinarsPage() {
                   })
                 : "—",
           },
-          { key: "course_category_id", label: "Category", render: (r) => r.category?.category_name || "—" },
+          {
+            key: "course_category_id",
+            label: "Category",
+            render: (r) => r.category?.category_name || "—",
+          },
           {
             key: "webinar_image",
             label: "Image",
             render: (r) =>
               r.webinar_image ? (
                 <img
-                  src={r.webinar_image}
+                  src={server_url + r.webinar_image}
                   className="w-10 h-10 object-cover rounded-full"
                   alt="Webinar"
                 />

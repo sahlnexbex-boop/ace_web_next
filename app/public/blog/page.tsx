@@ -14,6 +14,7 @@ export default function BlogPage() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -102,17 +103,16 @@ export default function BlogPage() {
             >
               <div className="overflow-hidden relative">
                 <img
-                  src={blog.blog_image}
+                  src={server_url + blog.blog_image}
                   alt={blog.blog_title}
-                  className="w-full h-48 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+                  className="w-full h-56 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                 />
-                 {/* ⭐ Course Name */}
+                {/*  Course Name */}
                 {blog.course?.course_name && (
-                  <p className="text-[10px] absolute top-2 right-2 text-white bg-cyan-600 inline-block px-2 py-1 rounded-sm mb-2">
+                  <p className="text-[10px] absolute top-2 left-2 text-white bg-sky-500 inline-block px-2 py-1 rounded-sm mb-2">
                     {blog.course.course_name}
                   </p>
                 )}
-
               </div>
 
               <div className="p-5">
@@ -125,12 +125,10 @@ export default function BlogPage() {
                   })}
                 </p>
 
-               
                 {/* Title */}
                 <h3 className="text-gray-900 text-xl font-semibold mb-2">
                   {blog.blog_title}
                 </h3>
-                
 
                 {/* Description */}
                 <p className="text-gray-600 text-sm leading-snug line-clamp-3">

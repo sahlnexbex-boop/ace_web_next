@@ -29,6 +29,7 @@ export default function Webinars() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchWebinars = async () => {
@@ -146,7 +147,7 @@ export default function Webinars() {
                     >
                       <div className="flex-shrink-0 w-full md:w-1/2">
                         <img
-                          src={web.webinar_image || "/default-image.png"}
+                          src={server_url + web.webinar_image || "/default-image.png"}
                           alt={web.webinar_title}
                           className="rounded-xl object-cover w-full h-full"
                         />

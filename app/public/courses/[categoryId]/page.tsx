@@ -33,6 +33,8 @@ export default function CourseCategoryPage({
   const [courses, setCourses] = useState<Course[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
   const categoryId = params.categoryId;
 
@@ -143,7 +145,7 @@ export default function CourseCategoryPage({
             >
               <div className="relative w-full h-44 flex-shrink-0">
                 <Image
-                  src={course.course_image || "/placeholder.png"}
+                  src={server_url + course.course_image || "/placeholder.png"}
                   alt={course.course_name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
