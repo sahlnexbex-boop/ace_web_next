@@ -248,7 +248,16 @@ export default function SuccessStoriesPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "stories_title", label: "Title" },
+          { key: "stories_title", label: "Title", render: (r) => (
+            <div className="flex items-center gap-2">
+              <img
+                src={server_url + r.thumbnail_image}
+                alt="Thumbnail"
+                className="w-10 h-10 object-cover rounded-full"
+              />
+              <div className="max-w-[250px] line-clamp-1">{r.stories_title}</div>
+            </div>
+          ) },
           { key: "name_of_candidate", label: "Candidate" },
           { key: "year", label: "Year" },
           {
@@ -276,20 +285,20 @@ export default function SuccessStoriesPage() {
                 "—"
               ),
           },
-          {
-            key: "thumbnail_image",
-            label: "Thumbnail",
-            render: (r) =>
-              r.thumbnail_image ? (
-                <img
-                  src={server_url + r.thumbnail_image}
-                  className="w-10 h-10 object-cover rounded-full"
-                  alt="Thumbnail"
-                />
-              ) : (
-                "—"
-              ),
-          },
+          // {
+          //   key: "thumbnail_image",
+          //   label: "Thumbnail",
+          //   render: (r) =>
+          //     r.thumbnail_image ? (
+          //       <img
+          //         src={server_url + r.thumbnail_image}
+          //         className="w-10 h-10 object-cover rounded-full"
+          //         alt="Thumbnail"
+          //       />
+          //     ) : (
+          //       "—"
+          //     ),
+          // },
           {
             key: "status",
             label: "Status",

@@ -1,7 +1,7 @@
 export default function OurFeatures() {
   const offlineFeatures = [
     "Question Paper Discussion",
-    "Previous Year On Discussion",
+    "Previous Question paper Discussion",
     "SCERT& NCERT Based Classes",
     "Library Facilities",
     "Reading Facilities",

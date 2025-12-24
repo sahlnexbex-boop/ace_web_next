@@ -167,7 +167,6 @@ export default function ApplyOnlineModal({
   if (!open) return null;
 
   const BRANCH_OPTIONS = [
-    "AREACODE",
     "BALUSSERY",
     "CALICUT",
     "EDAPPAL",

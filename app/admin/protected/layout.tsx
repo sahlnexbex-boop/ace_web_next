@@ -91,6 +91,7 @@ const menuItems = [
     icon: Award,
     children: [
       { name: "Rank Holders", icon: Trophy, path: "/admin/protected/rank-holders" },
+      { name: "Rank Holders Forum", icon: Trophy, path: "/admin/protected/rank-forum" },
       { name: "Toppers", icon: GraduationCap, path: "/admin/protected/topper" },
     ],
   },

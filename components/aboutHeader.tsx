@@ -195,7 +195,7 @@ export default function AboutHeader() {
                   <span ref={facultyRef}>0+</span>
                 </div>
                 <div className="text-xs md:text-sm text-gray-600">
-                  Expert Faculty
+                  Expert Faculties
                 </div>
               </div>
             </div>

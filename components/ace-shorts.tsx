@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
 import { getShorts } from "@/lib/api/shorts";
-import DynamicVideoModal from "@/components/dynamicVideoModal";
+// import DynamicVideoModal from "@/components/dynamicVideoModal";
+import VideoModal from "./videoModal";
 
 interface ShortItem {
   shorts_id: number;
@@ -101,7 +102,7 @@ export default function AceShorts() {
         )}
 
         {/* Video Modal */}
-        <DynamicVideoModal
+        <VideoModal
           isOpen={!!selectedVideo}
           onClose={() => setSelectedVideo(null)}
           videoUrl={selectedVideo || ""}

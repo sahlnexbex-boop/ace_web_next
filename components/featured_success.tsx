@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getSuccessStories } from "@/lib/api/successStories";
-import DynamicVideoModal from "@/components/dynamicVideoModal";
+// import DynamicVideoModal from "@/components/dynamicVideoModal";
+// import { Video } from "lucide-react";
+import VideoModal from "./videoModal";
 
 export default function FeaturedSuccess() {
   const [stories, setStories] = useState<any[]>([]);
@@ -164,7 +166,7 @@ export default function FeaturedSuccess() {
         </div>
       </div>
 
-      <DynamicVideoModal
+      <VideoModal
         isOpen={isModalOpen}
         onClose={closeVideo}
         videoUrl={videoUrl}

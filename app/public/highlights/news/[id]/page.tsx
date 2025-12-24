@@ -9,6 +9,7 @@ export default function NewsDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const [news, setNews] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     if (!id) return;
@@ -83,7 +84,7 @@ export default function NewsDetailsPage() {
         {news.news_image && (
           <div className="rounded-xl overflow-hidden border border-cyan-200 mb-8">
             <img
-              src={news.news_image}
+              src={server_url + news.news_image}
               alt={news.news_title}
               className="w-full h-full object-cover"
             />

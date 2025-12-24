@@ -133,7 +133,7 @@ export default function SuccessStories() {
                 <p className="md:text-3xl text-2xl font-bold text-cyan-700">
                   <span ref={facultyRef}>0+</span>
                 </p>
-                <p className="text-xs text-gray-600">Expert Faculty</p>
+                <p className="text-xs text-gray-600">Expert Faculties</p>
               </div>
             </div>
           </div>

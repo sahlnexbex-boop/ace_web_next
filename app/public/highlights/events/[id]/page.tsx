@@ -10,6 +10,7 @@ export default function EventDetailsPage() {
   const { id } = useParams(); 
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     if (!id) return;
@@ -82,7 +83,7 @@ export default function EventDetailsPage() {
             {event.event_image && (
               <div className="rounded-xl overflow-hidden border border-cyan-200 mb-8">
                 <img
-                  src={event.event_image}
+                  src={server_url + event.event_image}
                   alt={event.event_title}
                   className="w-full h-full object-cover"
                 />

@@ -3,12 +3,28 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { gsap } from "gsap";
-import { getCourses } from "@/lib/api/course";
-import { getCourseCategories } from "@/lib/api/courseCategory";
-import { createRankHolder } from "@/lib/api/rankHolders";
 import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/contexts/ToastContext";
+import { createRankForum } from "@/lib/api/rankForum";
+import { getCourseCategories } from "@/lib/api/courseCategory";
+
+const KERALA_DISTRICTS = [
+  "Thiruvananthapuram",
+  "Kollam",
+  "Pathanamthitta",
+  "Alappuzha",
+  "Kottayam",
+  "Idukki",
+  "Ernakulam",
+  "Thrissur",
+  "Palakkad",
+  "Malappuram",
+  "Kozhikode",
+  "Wayanad",
+  "Kannur",
+  "Kasaragod",
+];
 
 export default function RankHoldersForum() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -96,71 +112,63 @@ export default function RankHoldersForum() {
         </div>
       </div>
 
-      {openModal && <RankHolderModal onClose={() => setOpenModal(false)} />}
+      {openModal && <RankForumModal onClose={() => setOpenModal(false)} />}
     </section>
   );
 }
 
-function RankHolderModal({ onClose }: { onClose: () => void }) {
+function RankForumModal({ onClose }: { onClose: () => void }) {
   const { showSuccess, showError } = useToast();
-
-  const [courses, setCourses] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [basedType, setBasedType] = useState("1");
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
-    watch,
     reset,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      student_name: "",
-      student_rank: "",
-      based_type: "1",
-      course_id: "",
-      category_id: "",
-      exam_name: "",
-      joining_date: "",
+      name: "",
+      mobile_no: "",
+      email: "",
+      rank: "",
+      category: "",
       name_of_office: "",
-      place: "",
-      phone_no: "",
-      year: "",
-      student_photo: null,
+      post: "",
+      district: "",
+      joining_date: "",
+      photo: null,
     },
   });
+
+  const photoField = watch("photo");
 
   useEffect(() => {
     (async () => {
       try {
-        const [courseRes, categoryRes] = await Promise.all([
-          getCourses(1, 100, ""),
-          getCourseCategories(1, 100, ""),
-        ]);
-        setCourses(courseRes?.data || []);
+        const categoryRes = await getCourseCategories(1, 100, "");
         setCategories(categoryRes?.data || []);
       } catch (err) {
-        console.error("Error loading dropdowns:", err);
+        console.error("Error loading categories:", err);
       }
     })();
   }, []);
 
-  const validateStudentRank = (val: string) => {
-    if (!/^\d+$/.test(val)) return "Rank must be numbers only";
-    if (val.length > 5) return "Rank must be at most 5 digits";
-    return true;
-  };
-
-  const validateYear = (val: string) => {
-    const y = Number(val);
-    const currentYear = new Date().getFullYear();
-    if (!Number.isInteger(y)) return "Invalid year";
-    if (y < 2000) return "Year must be 2000 or later";
-    if (y > currentYear) return `Year cannot be in the future (${currentYear})`;
-    return true;
-  };
+  useEffect(() => {
+    if (photoField && photoField.length > 0) {
+      const file = photoField[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  }, [photoField]);
 
   const validatePhone = (val: string) => {
     const digits = val.replace(/\D/g, "");
@@ -169,7 +177,13 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
     return true;
   };
 
-  const validateOfficePlace = (val: string) => {
+  const validateEmail = (val: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val)) return "Invalid email address";
+    return true;
+  };
+
+  const validateText = (val: string) => {
     if (!/^[A-Za-z0-9 .,'\-()]+$/.test(val)) return "Invalid characters";
     return true;
   };
@@ -179,24 +193,28 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
       setLoading(true);
       const formData = new FormData();
 
-      for (const key of Object.keys(data)) {
-        if (key === "student_photo" && data.student_photo?.length > 0) {
-          formData.append("student_photo", data.student_photo[0]);
-        } else {
-          formData.append(key, data[key]);
-        }
+      formData.append("name", data.name);
+      formData.append("mobile_no", data.mobile_no);
+      formData.append("email", data.email);
+      formData.append("rank", data.rank);
+      formData.append("department_id", data.category);
+      formData.append("name_of_office", data.name_of_office);
+      formData.append("post", data.post);
+      formData.append("district", data.district);
+      formData.append("joining_date", data.joining_date);
+
+      if (data.photo?.length > 0) {
+        formData.append("photo", data.photo[0]);
       }
 
-      formData.append("approval_status", "1");
-      formData.append("status", "1");
-
-      await createRankHolder(formData);
-      showSuccess?.("Rank holder applied successfully!");
+      await createRankForum(formData);
+      showSuccess?.("Application submitted successfully!");
       reset();
+      setImagePreview(null);
       onClose();
     } catch (err) {
-      console.error("Rank holder submit error:", err);
-      showError?.("Failed, please try again");
+      console.error("Rank forum submit error:", err);
+      showError?.("Failed to submit application, please try again");
     } finally {
       setLoading(false);
     }
@@ -210,7 +228,6 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
           maxHeight: "90vh",
         }}
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 cursor-pointer"
@@ -218,231 +235,241 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
           <X size={22} />
         </button>
 
-        {/* Header */}
         <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-cyan-600 text-center">
-          Apply for Rank Holder
+          Apply for Rank Holder Forum
         </h3>
 
-        {/* Scrollable Content */}
         <div className="overflow-y-auto flex-1 pr-1">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            {/* Student Name */}
+            {/* Name */}
             <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                placeholder="Student Name"
-                {...register("student_name", {
-                  required: "Student name is required",
+                placeholder="Enter your name"
+                {...register("name", {
+                  required: "Name is required",
                 })}
-                className="border p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
-              {errors.student_name && (
-                <span className="text-red-500 text-sm">
-                  {errors.student_name.message}
+              {errors.name && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.name.message}
                 </span>
               )}
             </div>
 
-            {/* Student Rank */}
+            {/* Mobile Number */}
             <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Mobile Number <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                placeholder="Student Rank"
-                {...register("student_rank", {
-                  required: "Student rank is required",
-                  validate: validateStudentRank,
+                placeholder="Enter mobile number"
+                {...register("mobile_no", {
+                  required: "Mobile number is required",
+                  validate: validatePhone,
                 })}
-                className="border p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
-              {errors.student_rank && (
-                <span className="text-red-500 text-sm">
-                  {errors.student_rank.message}
+              {errors.mobile_no && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.mobile_no.message}
                 </span>
               )}
             </div>
 
-            {/* Based Type */}
+            {/* Email */}
             <div className="col-span-1 md:col-span-2">
-              <select
-                {...register("based_type")}
-                onChange={(e) => setBasedType(e.target.value)}
-                className="border p-2 rounded w-full"
-              >
-                <option value="1">Course Based</option>
-                <option value="2">Category Based</option>
-              </select>
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Email <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                {...register("email", {
+                  required: "Email is required",
+                  validate: validateEmail,
+                })}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+              {errors.email && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </span>
+              )}
             </div>
 
-            {/* Conditional Select */}
-            {basedType === "1" && (
-              <div className="col-span-1 md:col-span-2">
-                <select
-                  {...register("course_id", { required: "Select a course" })}
-                  className="border p-2 rounded w-full"
-                >
-                  <option value="">Select Course</option>
-                  {courses.map((c) => (
-                    <option key={c.course_id} value={c.course_id}>
-                      {c.course_title || c.course_name}
-                    </option>
-                  ))}
-                </select>
-                {errors.course_id && (
-                  <span className="text-red-500 text-sm">
-                    {errors.course_id.message}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {basedType === "2" && (
-              <div className="col-span-1 md:col-span-2">
-                <select
-                  {...register("category_id", {
-                    required: "Select a category",
-                  })}
-                  className="border p-2 rounded w-full"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.category_id} value={cat.category_id}>
-                      {cat.category_name}
-                    </option>
-                  ))}
-                </select>
-                {errors.category_id && (
-                  <span className="text-red-500 text-sm">
-                    {errors.category_id.message}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Exam Name */}
+            {/* Rank */}
             <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Rank <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                placeholder="Exam Name"
-                {...register("exam_name", {
-                  required: "Exam name is required",
+                placeholder="Enter your rank"
+                {...register("rank", {
+                  required: "Rank is required",
                 })}
-                className="border p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
-              {errors.exam_name && (
-                <span className="text-red-500 text-sm">
-                  {errors.exam_name.message}
+              {errors.rank && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.rank.message}
+                </span>
+              )}
+            </div>
+
+            {/* Category (Department) */}
+            <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Category <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...register("category", {
+                  required: "Category is required",
+                })}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat.category_id} value={cat.category_id}>
+                    {cat.category_name}
+                  </option>
+                ))}
+              </select>
+              {errors.category && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.category.message}
+                </span>
+              )}
+            </div>
+
+            {/* Name of Office */}
+            <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Name of Office <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Enter office name"
+                {...register("name_of_office", {
+                  required: "Office name is required",
+                  validate: validateText,
+                })}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+              {errors.name_of_office && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.name_of_office.message}
+                </span>
+              )}
+            </div>
+
+            {/* Post */}
+            <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Post <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Enter post"
+                {...register("post", {
+                  required: "Post is required",
+                  validate: validateText,
+                })}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+              {errors.post && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.post.message}
+                </span>
+              )}
+            </div>
+
+            {/* District */}
+            <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                District <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...register("district", {
+                  required: "District is required",
+                })}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              >
+                <option value="">Select District</option>
+                {KERALA_DISTRICTS.map((district) => (
+                  <option key={district} value={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+              {errors.district && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.district.message}
                 </span>
               )}
             </div>
 
             {/* Joining Date */}
             <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Joining Date <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 {...register("joining_date", {
                   required: "Joining date is required",
                 })}
-                className="border p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
               {errors.joining_date && (
-                <span className="text-red-500 text-sm">
+                <span className="text-red-500 text-xs mt-1">
                   {errors.joining_date.message}
                 </span>
               )}
             </div>
 
-            {/* Office Name */}
-            <div className="col-span-1">
-              <input
-                type="text"
-                placeholder="Name of Office"
-                {...register("name_of_office", {
-                  required: "Office name is required",
-                  validate: validateOfficePlace,
-                })}
-                className="border p-2 rounded w-full"
-              />
-              {errors.name_of_office && (
-                <span className="text-red-500 text-sm">
-                  {errors.name_of_office.message}
-                </span>
-              )}
-            </div>
-
-            {/* Place */}
-            <div className="col-span-1">
-              <input
-                type="text"
-                placeholder="Place"
-                {...register("place", {
-                  required: "Place is required",
-                  validate: validateOfficePlace,
-                })}
-                className="border p-2 rounded w-full"
-              />
-              {errors.place && (
-                <span className="text-red-500 text-sm">
-                  {errors.place.message}
-                </span>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div className="col-span-1">
-              <input
-                type="text"
-                placeholder="Phone Number"
-                {...register("phone_no", {
-                  required: "Phone is required",
-                  validate: validatePhone,
-                })}
-                className="border p-2 rounded w-full"
-              />
-              {errors.phone_no && (
-                <span className="text-red-500 text-sm">
-                  {errors.phone_no.message}
-                </span>
-              )}
-            </div>
-
-            {/* Year */}
-            <div className="col-span-1">
-              <input
-                type="number"
-                placeholder="Year"
-                {...register("year", {
-                  required: "Year is required",
-                  validate: validateYear,
-                })}
-                className="border p-2 rounded w-full"
-              />
-              {errors.year && (
-                <span className="text-red-500 text-sm">
-                  {errors.year.message}
-                </span>
-              )}
-            </div>
-
-            {/* Student Photo */}
+            {/* Photo */}
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-gray-700 mb-1 font-medium">
-                Student Photo
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Photo <span className="text-red-500">*</span>
               </label>
               <input
                 type="file"
                 accept="image/*"
-                {...register("student_photo", {
-                  required: "Student photo is required",
+                {...register("photo", {
+                  required: "Photo is required",
                 })}
-                className="border p-2 rounded w-full"
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
-              {errors.student_photo && (
-                <span className="text-red-500 text-sm">
-                  {(errors.student_photo as any)?.message}
+              {errors.photo && (
+                <span className="text-red-500 text-xs mt-1">
+                  {(errors.photo as any)?.message}
                 </span>
+              )}
+              
+              {/* Image Preview */}
+              {imagePreview && (
+                <div className="mt-3 flex justify-center">
+                  <div className="relative inline-block">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="max-w-[200px] max-h-[200px] object-cover rounded-lg border-2 border-gray-300 shadow-md"
+                    />
+                    <div className="absolute -top-2 -right-2 bg-cyan-600 text-white text-xs px-2 py-1 rounded-full">
+                      Preview
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -451,9 +478,9 @@ function RankHolderModal({ onClose }: { onClose: () => void }) {
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#00A0E3] hover:to-[#1F67A5] text-white cursor-pointer"
+                className="bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#00A0E3] hover:to-[#1F67A5] text-white cursor-pointer px-8"
               >
-                {loading ? "Submitting..." : "Submit"}
+                {loading ? "Submitting..." : "Submit Application"}
               </Button>
             </div>
           </form>

@@ -319,7 +319,7 @@ export default function AboutUs() {
                 >
                   0
                 </div>
-                <div className="text-sm text-gray-600">Expert Faculty</div>
+                <div className="text-sm text-gray-600">Expert Faculties</div>
               </div>
             </div>
 

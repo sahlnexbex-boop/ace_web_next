@@ -227,7 +227,7 @@ export default function SuccessStories() {
             {story2 && (
               <Card
                 onClick={() => openVideo(story2.youtube_video_link)}
-                className="overflow-hidden rounded-3xl hover:shadow-lg transition-shadow bg-purple-50"
+                className="overflow-hidden cursor-pointer rounded-3xl hover:shadow-lg transition-shadow bg-purple-50"
               >
                 <CardContent className="p-0">
                   <img

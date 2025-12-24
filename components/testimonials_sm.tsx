@@ -228,7 +228,7 @@ export default function Testimonials() {
                 </p>
                 <div className="flex items-center gap-4">
                   <img
-                    src={modalData.image_of_candidate || "/default-avatar.png"}
+                    src={server_url + modalData.image_of_candidate || "/default-avatar.png"}
                     className="w-16 h-16 rounded-full object-cover"
                     alt={modalData.name_of_candidate}
                   />
