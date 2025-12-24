@@ -29,7 +29,7 @@ export default function OurFeatures() {
 
   return (
     <section className="md:py-16 py-10 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-5">
         {/* Main Heading with line */}
         <div className="relative mb-16 flex justify-center">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900">

@@ -128,6 +128,8 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
     handleSubmit,
     reset,
     watch,
+    setValue,
+    clearErrors,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -145,6 +147,12 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
   });
 
   const photoField = watch("photo");
+
+  const removeSelectedImage = () => {
+    setValue("photo", null);
+    clearErrors("photo");
+    setImagePreview(null);
+  };
 
   useEffect(() => {
     (async () => {
@@ -236,10 +244,10 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
         </button>
 
         <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-cyan-600 text-center">
-          Apply for Rank Holder Forum
+          Apply for Rank Holder
         </h3>
 
-        <div className="overflow-y-auto flex-1 pr-1">
+        <div className="overflow-y-auto flex-1 px-2">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -455,18 +463,21 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
                   {(errors.photo as any)?.message}
                 </span>
               )}
-              
+
               {/* Image Preview */}
               {imagePreview && (
-                <div className="mt-3 flex justify-center">
-                  <div className="relative inline-block">
+                <div className="mt-3 flex justify-start">
+                  <div className="relative inline-block  max-w-20 max-h-20">
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      className="max-w-[200px] max-h-[200px] object-cover rounded-lg border-2 border-gray-300 shadow-md"
+                      className="w-full h-fullobject-cover rounded-lg border-2 border-gray-300 shadow-md"
                     />
-                    <div className="absolute -top-2 -right-2 bg-cyan-600 text-white text-xs px-2 py-1 rounded-full">
-                      Preview
+                    <div
+                      onClick={removeSelectedImage}
+                      className="absolute -top-2 -right-2 bg-red-600 cursor-pointer text-white text-xs px-2 py-1 rounded-full hover:bg-red-700"
+                    >
+                      ✕
                     </div>
                   </div>
                 </div>

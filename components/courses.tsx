@@ -95,7 +95,7 @@ export default function Courses() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        { lastPathRef.current === "/public/home" && <h2 className="text-3xl md:text-4xl font-bold text-center md:mb-12 mb-6 text-gray-900 cursor-pointer">Courses</h2>}
+        { lastPathRef.current === "/public/home" && <h2 className="text-3xl md:text-4xl font-bold text-center md:mb-12 mb-6 text-gray-900 cursor-pointer">Under Test</h2>}
        
 
         {/* Tabs */}
