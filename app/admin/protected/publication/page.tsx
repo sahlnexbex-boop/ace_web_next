@@ -156,7 +156,7 @@ export default function PublicationPage() {
       type: "textarea",
       required: true,
     },
-    { name: "book_price", label: "Book Price", type: "text", required: true },
+    { name: "book_price", label: "Book Price", type: "number", required: true },
     { name: "book_author", label: "Author", type: "text", required: true },
     { name: "book_language", label: "Language", type: "text", required: true },
     {

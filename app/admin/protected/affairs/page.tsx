@@ -145,7 +145,7 @@ export default function CurrentAffairPage() {
       type: "textarea",
       required: true,
     },
-    { name: "affair_price", label: "Price", type: "text", required: true },
+    { name: "affair_price", label: "Price", type: "number", required: true },
     {
       name: "publishing_date",
       label: "Publishing Date",

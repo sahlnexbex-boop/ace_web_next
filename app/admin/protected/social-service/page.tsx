@@ -274,13 +274,25 @@ export default function SocialServicesPage() {
         setPage={setPage}
         setSearch={setSearch}
         onEdit={(row) => {
+          let parsedOtherImages: string[] = [];
+
+          try {
+            parsedOtherImages = Array.isArray(row.other_images)
+              ? row.other_images
+              : JSON.parse(row.other_images || "[]");
+          } catch {
+            parsedOtherImages = [];
+          }
+
           setSelected({
             ...row,
             status: String(row.status),
             service_date: row.service_date
               ? new Date(row.service_date).toISOString().split("T")[0]
               : "",
+            other_images: parsedOtherImages, 
           });
+
           setOpenForm(true);
         }}
         onDelete={(row) => {

@@ -236,7 +236,7 @@ export default function RankForumPage() {
           {
             name: "mobile_no",
             label: "Mobile No",
-            type: "text",
+            type: "number",
             required: true,
           },
           { name: "email", label: "Email", type: "email", required: true },
