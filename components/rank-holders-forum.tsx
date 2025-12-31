@@ -7,24 +7,7 @@ import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/contexts/ToastContext";
 import { createRankForum } from "@/lib/api/rankForum";
-import { getCourseCategories } from "@/lib/api/courseCategory";
-
-const KERALA_DISTRICTS = [
-  "Thiruvananthapuram",
-  "Kollam",
-  "Pathanamthitta",
-  "Alappuzha",
-  "Kottayam",
-  "Idukki",
-  "Ernakulam",
-  "Thrissur",
-  "Palakkad",
-  "Malappuram",
-  "Kozhikode",
-  "Wayanad",
-  "Kannur",
-  "Kasaragod",
-];
+import Select from "react-select";
 
 export default function RankHoldersForum() {
   const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -67,16 +50,15 @@ export default function RankHoldersForum() {
               Rank Holders Forum
             </h2>
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              Our students are our pride and inspiration. By consistently
-              securing top ranks, they stand as a testament to the quality of
-              our education, dedicated faculty guidance and unwavering support
-              we offer to each student. We at ACE strongly believe dreams
-              shouldn't be hindered by distance. Our PSC coaching app ensures
-              that you get to prepare at the comfort of your home. With
-              carefully curated syllabus and training methods we have emerged as
-              the best online psc coaching centre in Kerala. Our student success
-              stories from all over Kerala proves that distance is no barrier
-              when education is done right.
+              At a time when the representation of educated individuals from the
+              Malabar region in government services was extremely low, ACE was
+              founded in 2008. With a strong sense of social commitment, this
+              institution has so far enabled more than 25,000 candidates to
+              enter various positions in government service. From LGS to KAS,
+              and from LPST to College Lecturer, ACE alumni are serving in a
+              wide range of government posts. The objective of this forum is to
+              unite these former students and function collectively for the
+              greater good.
             </p>
             <Button
               size="lg"
@@ -123,6 +105,127 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
   const [categories, setCategories] = useState<any[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  const START_YEAR = 2000;
+  const CURRENT_YEAR = new Date().getFullYear();
+
+  const yearOptions = Array.from(
+    { length: CURRENT_YEAR - START_YEAR + 1 },
+    (_, i) => {
+      const year = START_YEAR + i;
+      return { label: String(year), value: String(year) };
+    }
+  );
+
+  const officeOptions = [
+    "Agriculture Department",
+    "Akshaya State Project",
+    "Animal Husbandry",
+    "Archaeology",
+    "Archives Department",
+    "Bhoomikeralam Project",
+    "Kerala State Electricity Board Ltd.",
+    "Kerala Water Authority",
+    "Kudumbashree- State Poverty Eradication Mission",
+    "Directorate of Ayurveda Medical Education",
+    "Co-operative Audit",
+    "Co-operative Societies",
+    "Commercial Taxes",
+    "Commissionerate of Civil Supplies",
+    "Directorate of Civil Supplies",
+    "Commissioner for Entrance Examinations",
+    "Census Operations- Kerala",
+    "Coir Development",
+    "Directorate of Culture",
+    "Dairy Development Department",
+    "Directorate of Handlooms and Textiles",
+    "Directorate of Medical Education",
+    "Directorate of Prosecution",
+    "Drugs Control Department",
+    "Directorate of Economics and Statistics",
+    "Environment and Climate Change",
+    "Collegiate Education",
+    "Public Instructions",
+    "Excise Commissionerate",
+    "Directorate of Vocational Higher Secondary Education",
+    "Grand Kerala Shopping Festival (GKSF)",
+    "IT@school Project",
+    "Electrical Inspectorate",
+    "Inquiry Commissioner and Special Judge- Thiruvananthapuram",
+    "Jalanidhi",
+    "Factories and Boilers Department",
+    "Fire and Rescue Services Department",
+    "Fisheries Department",
+    "Food Safety Commissioner",
+    "Forest Department",
+    "Ground Water Department",
+    "Harbour Engineering Department",
+    "Directorate of Health Services",
+    "Directorate of Higher Secondary Education",
+    "Homoeopathic Department",
+    "Hydrographic Survey Wing",
+    "Indian Systems of Medicine",
+    "Industrial Tribunal and Judge",
+    "Industries and Commerce Directorate",
+    "Industries Training",
+    "Information and Public Relations",
+    "IMG (Institute of Management in Government)",
+    "Insurance Medical Services Department",
+    "Irrigation Department",
+    "Jail Department",
+    "KIRTADS",
+    "Kuttanad Package",
+    "Kerala Medical Services Corporation Limited",
+    "Kerala Minerals and Metals Limited",
+    "The Kerala State Co-Operative Bank Ltd.",
+    "Kerala State Industrial Development Corporation Ltd.",
+    "Kerala State IT Mission",
+    "Kerala State Civil Supplies Corporation",
+    "Kerala State Insurance Department",
+    "Kerala State Land Use Board",
+    "Kerala State Planning Board",
+    "Kerala State Remote Sensing and Environment Centre",
+    "Kerala State Roads and Bridges Development Corporation",
+    "Kerala Tourism Development Corporation Limited",
+    "Labour Commissionerate",
+    "Land Board",
+    "Commissionerate of Land Revenue",
+    "Legal Metrology Department",
+    "Kerala State Audit Department",
+    "MGNREGS",
+    "Mining and Geology Department",
+    "Motor Vehicles Department",
+    "Museums and Zoos Directorate",
+    "NCC Directorate",
+    "National Employment Service",
+    "National Rural Health Mission (NRHM)",
+    "Kerala State Nirmithi Kendra",
+    "Panchayat Department",
+    "Police Department",
+    "Ports Department",
+    "Printing Directorate",
+    "Public Works Department",
+    "Registration Department",
+    "Rural Development",
+    "Sarva Shiksha Abhiyan- Kerala",
+    "Sainik Welfare Department",
+    "Scheduled Caste Development Department",
+    "Scheduled Tribe Development Department",
+    "Social Justice Directorate",
+    "Sports and Youth Affairs Department",
+    "State Central Library Department",
+    "State Water Transport Department",
+    "Stationery Department",
+    "Suchitwa Mission",
+    "Survey and Land Records Department",
+    "Town and Country Planning Department",
+    "Tourism Department",
+    "Treasuries Department",
+    "Urban Affairs Department",
+    "Vigilance and Anti-corruption Bureau",
+    "Backward Communities Development Department",
+    "Directorate of Minority Welfare",
+  ].map((o) => ({ label: o, value: o }));
+
   const {
     register,
     handleSubmit,
@@ -136,47 +239,16 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
       name: "",
       mobile_no: "",
       email: "",
-      rank: "",
-      category: "",
+      course: "",
+      batch: "",
+      year_of_study: "",
       name_of_office: "",
       post: "",
-      district: "",
+      reg_no: "",
       joining_date: "",
-      photo: null,
+      office_address: "",
     },
   });
-
-  const photoField = watch("photo");
-
-  const removeSelectedImage = () => {
-    setValue("photo", null);
-    clearErrors("photo");
-    setImagePreview(null);
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const categoryRes = await getCourseCategories(1, 100, "");
-        setCategories(categoryRes?.data || []);
-      } catch (err) {
-        console.error("Error loading categories:", err);
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (photoField && photoField.length > 0) {
-      const file = photoField[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setImagePreview(null);
-    }
-  }, [photoField]);
 
   const validatePhone = (val: string) => {
     const digits = val.replace(/\D/g, "");
@@ -204,16 +276,14 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
       formData.append("name", data.name);
       formData.append("mobile_no", data.mobile_no);
       formData.append("email", data.email);
-      formData.append("rank", data.rank);
-      formData.append("department_id", data.category);
+      formData.append("course", data.course);
+      formData.append("batch", data.batch);
+      formData.append("year_of_study", data.year_of_study);
+      formData.append("reg_no", data.reg_no);
       formData.append("name_of_office", data.name_of_office);
       formData.append("post", data.post);
-      formData.append("district", data.district);
       formData.append("joining_date", data.joining_date);
-
-      if (data.photo?.length > 0) {
-        formData.append("photo", data.photo[0]);
-      }
+      formData.append("office_address", data.office_address);
 
       await createRankForum(formData);
       showSuccess?.("Application submitted successfully!");
@@ -229,7 +299,7 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-[1px]">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-[1px] overflow-hidden">
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-2xl relative p-5 sm:p-6 flex flex-col"
         style={{
@@ -278,8 +348,8 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
                 Mobile Number <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                placeholder="Enter mobile number"
+                type="tel"
+                placeholder="1234567890"
                 {...register("mobile_no", {
                   required: "Mobile number is required",
                   validate: validatePhone,
@@ -294,13 +364,13 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Email */}
-            <div className="col-span-1 md:col-span-2">
+            <div className="col-span-1">
               <label className="block text-gray-700 mb-1 font-medium text-sm">
                 Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="example@gmail.com"
                 {...register("email", {
                   required: "Email is required",
                   validate: validateEmail,
@@ -314,114 +384,42 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
               )}
             </div>
 
-            {/* Rank */}
+            {/* course */}
             <div className="col-span-1">
               <label className="block text-gray-700 mb-1 font-medium text-sm">
-                Rank <span className="text-red-500">*</span>
+                Course <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                placeholder="Enter your rank"
-                {...register("rank", {
-                  required: "Rank is required",
-                })}
-                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.rank && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.rank.message}
-                </span>
-              )}
-            </div>
-
-            {/* Category (Department) */}
-            <div className="col-span-1">
-              <label className="block text-gray-700 mb-1 font-medium text-sm">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                {...register("category", {
+                placeholder="Enter your course"
+                {...register("course", {
                   required: "Category is required",
                 })}
                 className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.category_id} value={cat.category_id}>
-                    {cat.category_name}
-                  </option>
-                ))}
-              </select>
-              {errors.category && (
+              />
+              {errors.course && (
                 <span className="text-red-500 text-xs mt-1">
-                  {errors.category.message}
+                  {errors.course.message}
                 </span>
               )}
             </div>
 
-            {/* Name of Office */}
+            {/* Batch */}
             <div className="col-span-1">
               <label className="block text-gray-700 mb-1 font-medium text-sm">
-                Name of Office <span className="text-red-500">*</span>
+                Batch <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                placeholder="Enter office name"
-                {...register("name_of_office", {
-                  required: "Office name is required",
-                  validate: validateText,
+                placeholder="Enter batch"
+                {...register("batch", {
+                  required: "Batch is required",
                 })}
                 className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
-              {errors.name_of_office && (
+              {errors.batch && (
                 <span className="text-red-500 text-xs mt-1">
-                  {errors.name_of_office.message}
-                </span>
-              )}
-            </div>
-
-            {/* Post */}
-            <div className="col-span-1">
-              <label className="block text-gray-700 mb-1 font-medium text-sm">
-                Post <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter post"
-                {...register("post", {
-                  required: "Post is required",
-                  validate: validateText,
-                })}
-                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.post && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.post.message}
-                </span>
-              )}
-            </div>
-
-            {/* District */}
-            <div className="col-span-1">
-              <label className="block text-gray-700 mb-1 font-medium text-sm">
-                District <span className="text-red-500">*</span>
-              </label>
-              <select
-                {...register("district", {
-                  required: "District is required",
-                })}
-                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select District</option>
-                {KERALA_DISTRICTS.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
-              {errors.district && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.district.message}
+                  {errors.batch.message}
                 </span>
               )}
             </div>
@@ -445,42 +443,147 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
               )}
             </div>
 
-            {/* Photo */}
-            <div className="col-span-1 md:col-span-2">
+            {/* Registration Number */}
+            <div className="col-span-1">
               <label className="block text-gray-700 mb-1 font-medium text-sm">
-                Photo <span className="text-red-500">*</span>
+                Registration No: <span className="text-red-500">*</span>
               </label>
               <input
-                type="file"
-                accept="image/*"
-                {...register("photo", {
-                  required: "Photo is required",
+                type="text"
+                placeholder="Enter registration number"
+                {...register("reg_no", {
+                  required: "Registration number is required",
                 })}
                 className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
-              {errors.photo && (
+              {errors.reg_no && (
                 <span className="text-red-500 text-xs mt-1">
-                  {(errors.photo as any)?.message}
+                  {errors.reg_no.message}
                 </span>
               )}
+            </div>
 
-              {/* Image Preview */}
-              {imagePreview && (
-                <div className="mt-3 flex justify-start">
-                  <div className="relative inline-block  max-w-20 max-h-20">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-fullobject-cover rounded-lg border-2 border-gray-300 shadow-md"
-                    />
-                    <div
-                      onClick={removeSelectedImage}
-                      className="absolute -top-2 -right-2 bg-red-600 cursor-pointer text-white text-xs px-2 py-1 rounded-full hover:bg-red-700"
-                    >
-                      ✕
-                    </div>
-                  </div>
-                </div>
+            {/* Year */}
+            <div className="">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Year of Study <span className="text-red-500">*</span>
+              </label>
+              <Select
+                options={yearOptions}
+                placeholder="Select Year"
+                isSearchable
+                menuPlacement="auto"
+                menuPortalTarget={document.body}
+                styles={{
+                  menuPortal: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                    // border: "2px solid cyan"
+                  }),
+
+                  menu: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                  }),
+
+                  menuList: (base) => ({
+                    ...base,
+                    maxHeight: 180,
+                    overflowY: "auto",
+                  }),
+                }}
+                onChange={(opt) => {
+                  setValue("year_of_study", opt?.value || "");
+                  clearErrors("year_of_study");
+                }}
+              />
+            </div>
+
+            {/* Name of Office */}
+            <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Name of Office <span className="text-red-500">*</span>
+              </label>
+
+              <Select
+                options={officeOptions}
+                placeholder="Select office"
+                isSearchable
+                menuPlacement="auto"
+                menuPortalTarget={document.body}
+                styles={{
+                  menuPortal: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    zIndex: 9999,
+                  }),
+                  menuList: (base) => ({
+                    ...base,
+                    maxHeight: 180,
+                  }),
+                }}
+                onChange={(opt: any) => {
+                  setValue("name_of_office", opt?.value || "");
+                  clearErrors("name_of_office");
+                }}
+              />
+
+              {/* Hidden input for react-hook-form */}
+              <input
+                type="hidden"
+                {...register("name_of_office", {
+                  required: "Office name is required",
+                })}
+              />
+
+              {errors.name_of_office && (
+                <span className="text-red-500 text-xs">
+                  {errors.name_of_office.message}
+                </span>
+              )}
+            </div>
+
+            {/* Post */}
+            <div className="col-span-1">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Job Position <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Enter post"
+                {...register("post", {
+                  required: "Post is required",
+                  validate: validateText,
+                })}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+              {errors.post && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.post.message}
+                </span>
+              )}
+            </div>
+
+            {/* Address */}
+            <div className="col-span-1 md:col-span-2">
+              <label className="block text-gray-700 mb-1 font-medium text-sm">
+                Office Address <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                placeholder="Enter office address"
+                {...register("office_address", {
+                  required: "Office address is required",
+                  validate: validateText,
+                })}
+                className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+              {errors.office_address && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.office_address.message}
+                </span>
               )}
             </div>
 

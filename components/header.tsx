@@ -62,7 +62,7 @@ export default function Header() {
 
   /*  MENU STRUCTURE */
   const menuLinks = [
-    { label: "Home", href: "/public/home", icon: Home },
+    // { label: "Home", href: "/public/home", icon: Home },
     {
       label: "Courses",
       href: "/public/courses",
@@ -169,6 +169,10 @@ export default function Header() {
                 )}
               </div>
             ))}
+
+            <Link href="/user-portal/login" className="cursor-pointer bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-1 rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all duration-500 ease-in-out">
+              Login
+            </Link>
           </nav>
 
           {/*  MOBILE MENU BUTTON */}

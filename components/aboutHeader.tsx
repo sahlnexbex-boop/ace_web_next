@@ -9,6 +9,8 @@ export default function AboutHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
 
+  const youtubeVideoId = "50z-2jtr0C4";
+
   const yearsRef = useRef<HTMLSpanElement | null>(null);
   const studentsRef = useRef<HTMLSpanElement | null>(null);
   const facultyRef = useRef<HTMLSpanElement | null>(null);
@@ -124,7 +126,7 @@ export default function AboutHeader() {
           <div className="order-1 md:order-2 flex justify-center relative z-10">
             <div className="relative w-full max-w-md">
               <img
-                src="/about_thumbnail.png"
+                src="/about_image.jpeg"
                 alt="Success Stories"
                 className="rounded-xl shadow-lg w-full object-cover"
               />
@@ -211,7 +213,7 @@ export default function AboutHeader() {
       </section>
 
       <VideoModal
-        videoUrl="https://www.youtube.com/embed/sYNjG9tdhTo"
+        videoUrl={youtubeVideoId}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

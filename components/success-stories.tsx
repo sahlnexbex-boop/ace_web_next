@@ -6,9 +6,20 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import VideoModal from "./videoModal";
 
-import { getTestimonials } from "@/lib/api/testimonial";
+import { getTestimonialById, getTestimonials } from "@/lib/api/testimonial";
 import { getSuccessStories } from "@/lib/api/successStories";
 import { getShorts } from "@/lib/api/shorts";
+import Loader from "./loader";
+import { se } from "date-fns/locale";
+
+interface TestimonialItem {
+  testimonial_id: number;
+  name_of_candidate: string;
+  position_of_candidate: string;
+  content: string;
+  image_of_candidate: string;
+  status: number;
+}
 
 export default function SuccessStories() {
   const router = useRouter();
@@ -18,13 +29,38 @@ export default function SuccessStories() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [successStories, setSuccessStories] = useState<any[]>([]);
   const [videoUrl, setVideoUrl] = useState<string>("");
+  const [modalData, setModalData] = useState<TestimonialItem | null>(null);
+  const [isTestimonialOpen, setIsTestimonialOpen] = useState(false);
+  const [testimonialLoading, setTestimonialLoading] = useState(false);
+
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const openVideo = (url: string) => {
+    setIsTestimonialOpen(false);
     setVideoUrl(url);
     setModalOpen(true);
   };
+
   const closeVideo = () => setModalOpen(false);
+
+  //  Open modal and fetch full data
+  const openTestimonialModal = async (id: number) => {
+    // close video modal if open
+    setModalOpen(false);
+
+    setIsTestimonialOpen(true);
+    setTestimonialLoading(true);
+    setModalData(null);
+
+    try {
+      const res = await getTestimonialById(id);
+      setModalData(res?.data || null);
+    } catch (error) {
+      console.error("Error loading testimonial:", error);
+    } finally {
+      setTestimonialLoading(false);
+    }
+  };
 
   // Fetch all API data
   useEffect(() => {
@@ -33,7 +69,7 @@ export default function SuccessStories() {
         const [shortsRes, testiRes, successRes] = await Promise.all([
           getShorts(1, 2, "", 1),
           getTestimonials(1, 3, "", { status: "1" }),
-          getSuccessStories(1,2, "", "", 1),
+          getSuccessStories(1, 2, "", "", 1),
         ]);
 
         setShorts(shortsRes?.data || []);
@@ -48,7 +84,8 @@ export default function SuccessStories() {
   }, []);
 
   // Helper: safely get data or fallback
-  const getItem = (arr: any[], index: number) => (arr && arr[index] ? arr[index] : null);
+  const getItem = (arr: any[], index: number) =>
+    arr && arr[index] ? arr[index] : null;
 
   const shorts1 = getItem(shorts, 0);
   const shorts2 = getItem(shorts, 1);
@@ -97,28 +134,29 @@ export default function SuccessStories() {
                       alt={shorts1.shorts_title}
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
-                    {
-                      shorts1.shorts_title && (
-                        <div className="absolute bottom-14 bg-white rounded-xl left-0 right-0 px-6 py-3 mx-4">
-                          <h3 className="text-gray-800 font-bold text-xl mb-1">
-                            {shorts1.shorts_title}
-                          </h3>
-                        </div>
-                      )
-                    }
+                    {shorts1.shorts_title && (
+                      <div className="absolute bottom-14 bg-white rounded-xl left-0 right-0 px-6 py-3 mx-4">
+                        <h3 className="text-gray-800 font-bold text-xl mb-1">
+                          {shorts1.shorts_title}
+                        </h3>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             )}
 
             {testi1 && (
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-3xl bg-[#022935]">
+              <Card
+                onClick={() => openTestimonialModal(testi1.testimonial_id)}
+                className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow rounded-3xl bg-[#022935]"
+              >
                 <CardContent className="p-6">
                   <img src="/quates_white.png" alt="" className="mb-2" />
                   <h3 className="font-bold text-lg text-white mb-2">
                     {testi1.name_of_candidate}
                   </h3>
-                  <p className="text-sm mb-3 leading-relaxed text-gray-300 line-clamp-12">
+                  <p className="text-sm mb-3 leading-relaxed text-gray-300 line-clamp-6">
                     {testi1.content}
                   </p>
                   <div className="flex items-center">
@@ -147,13 +185,16 @@ export default function SuccessStories() {
           ============================ */}
           <div className="flex flex-col gap-6">
             {testi2 && (
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow rounded-3xl bg-[#d3f9ff]">
+              <Card
+                onClick={() => openTestimonialModal(testi2.testimonial_id)}
+                className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow rounded-3xl bg-[#0437551e]"
+              >
                 <CardContent className="p-6">
                   <img src="/quates_blue.png" alt="" className="mb-10" />
                   <h3 className="font-bold text-lg mb-2 text-gray-800">
                     {testi2.name_of_candidate}
                   </h3>
-                  <p className="text-sm mb-10 leading-relaxed text-gray-700 line-clamp-12">
+                  <p className="text-sm mb-8 leading-relaxed text-gray-700 line-clamp-12">
                     {testi2.content}
                   </p>
                   <div className="flex items-center">
@@ -163,8 +204,12 @@ export default function SuccessStories() {
                       className="w-10 h-10 rounded-full mr-3"
                     />
                     <div>
-                      <p className="font-semibold text-sm">{testi2.name_of_candidate}</p>
-                      <p className="text-xs opacity-70">{testi2.position_of_candidate}</p>
+                      <p className="font-semibold text-sm">
+                        {testi2.name_of_candidate}
+                      </p>
+                      <p className="text-xs opacity-70">
+                        {testi2.position_of_candidate}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -183,8 +228,12 @@ export default function SuccessStories() {
                     className="w-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                   <div className="p-4">
-                    <h3 className="font-bold text-xl line-clamp-2 text-gray-700">{story1.stories_title}</h3>
-                    <p className="line-clamp-4 text-gray-500">{story1.description}</p>
+                    <h3 className="font-bold text-xl line-clamp-2 text-gray-700">
+                      {story1.stories_title}
+                    </h3>
+                    <p className="line-clamp-6 text-gray-500">
+                      {story1.description}
+                    </p>
                     <div className="text-xs text-gray-100 bg-blue-500 w-fit px-3 py-1 mt-3 rounded-md">
                       {story1.year}
                     </div>
@@ -239,10 +288,12 @@ export default function SuccessStories() {
                     <h3 className="font-bold text-lg text-gray-700 line-clamp-2">
                       {story2.stories_title}
                     </h3>
-                    <p className="text-sm my-2 text-gray-500 line-clamp-4">{story2.description}</p>
-                    <div className="text-xs text-gray-100 bg-blue-500 w-fit px-3 py-1 mt-3 rounded-md">
+                    <p className="text-sm my-2 text-gray-500 line-clamp-2">
+                      {story2.description}
+                    </p>
+                    {/* <div className="text-xs text-gray-100 bg-blue-500 w-fit px-3 py-1 mt-3 rounded-md">
                       {story2.year}
-                    </div>
+                    </div> */}
                   </div>
                 </CardContent>
               </Card>
@@ -259,7 +310,7 @@ export default function SuccessStories() {
                     alt={shorts2.shorts_title}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
-                  { shorts2.shorts_title && (
+                  {shorts2.shorts_title && (
                     <div className="absolute flex items-end bottom-10 bg-blue-400 me-10 rounded-e-full">
                       <div className="px-6 py-3 md:py-5">
                         <p className="text-white font-bold sm:text-sm text-xs leading-relaxed">
@@ -275,7 +326,69 @@ export default function SuccessStories() {
         </div>
       </div>
 
-      <VideoModal isOpen={isModalOpen} onClose={closeVideo} videoUrl={videoUrl} />
+      <VideoModal
+        isOpen={isModalOpen}
+        onClose={closeVideo}
+        videoUrl={videoUrl}
+      />
+
+      {/*  FULL DATA MODAL */}
+      {isTestimonialOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center px-4"
+          onClick={() => {
+            setIsTestimonialOpen(false);
+            setModalData(null);
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => {
+                setIsTestimonialOpen(false);
+                setModalData(null);
+              }}
+              className="absolute cursor-pointer top-3 right-3 text-gray-600 hover:text-red-600 text-xl"
+            >
+              ✕
+            </button>
+
+            {testimonialLoading || !modalData ? (
+              <div className="py-10 text-center">
+                <Loader />
+              </div>
+            ) : (
+              <>
+                <img src="/quates_blue.png" className="h-14 opacity-80 mb-4" />
+
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
+                  {modalData.content}
+                </p>
+                <div className="flex items-center gap-4">
+                  <img
+                    src={
+                      server_url + modalData.image_of_candidate ||
+                      "/default-avatar.png"
+                    }
+                    className="w-16 h-16 rounded-full object-cover"
+                    alt={modalData.name_of_candidate}
+                  />
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      {modalData.name_of_candidate}
+                    </h3>
+                    <p className="text-cyan-600">
+                      {modalData.position_of_candidate}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

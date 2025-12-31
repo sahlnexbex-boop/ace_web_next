@@ -7,6 +7,8 @@ import VideoModal from "@/components/videoModal";
 export default function SuccessStories() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const youtubeVideoId = "F2ZenrcTMsw";
+
   const yearsRef = useRef(null);
   const studentsRef = useRef(null);
   const facultyRef = useRef(null);
@@ -139,11 +141,11 @@ export default function SuccessStories() {
           </div>
 
           <div className="flex justify-center relative z-10">
-            <div className="relative">
+            <div className="relative max-w-md">
               <img
-                src="/highlight_thumbnail.png"
+                src="/success_image.jpeg"
                 alt="Success Stories"
-                className="rounded-xl shadow-lg w-full max-w-md"
+                className="rounded-xl shadow-lg w-full h-full"
               />
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -174,7 +176,7 @@ export default function SuccessStories() {
       <VideoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        videoUrl="https://www.youtube.com/embed/WVxdvMX9C2Q?si=rKsLx1Pdkm2hhv-o"
+        videoUrl={youtubeVideoId}
       />
     </>
   );

@@ -5,7 +5,7 @@ export const getBlogs = async (
   limit = 10,
   search = "",
   status?: number,
-  course_id?: number // ✔ added
+  course_id?: number 
 ) => {
   const params = new URLSearchParams({
     page: String(page),
@@ -14,7 +14,7 @@ export const getBlogs = async (
 
   if (search) params.append("search", search);
   if (status !== undefined) params.append("status", String(status));
-  if (course_id !== undefined) params.append("course_id", String(course_id)); // ✔ added
+  if (course_id !== undefined) params.append("course_id", String(course_id)); 
 
   return apiRequest(`/api/blogs?${params.toString()}`, "GET");
 };

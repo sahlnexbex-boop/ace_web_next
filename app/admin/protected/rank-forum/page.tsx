@@ -17,8 +17,6 @@ import {
   deleteRankForum,
 } from "@/lib/api/rankForum";
 
-import { getCourseCategories } from "@/lib/api/courseCategory";
-
 const REQUEST_STATUS_MAP: Record<string, string> = {
   "1": "Pending",
   "2": "Approved",
@@ -38,14 +36,117 @@ export default function RankForumPage() {
   const [openView, setOpenView] = useState(false);
   const [viewData, setViewData] = useState<any>(null);
 
-  const debouncedSearch = useDebounce(search, 500);
-  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const officeOptions = [
+    "Agriculture Department",
+    "Akshaya State Project",
+    "Animal Husbandry",
+    "Archaeology",
+    "Archives Department",
+    "Bhoomikeralam Project",
+    "Kerala State Electricity Board Ltd.",
+    "Kerala Water Authority",
+    "Kudumbashree- State Poverty Eradication Mission",
+    "Directorate of Ayurveda Medical Education",
+    "Co-operative Audit",
+    "Co-operative Societies",
+    "Commercial Taxes",
+    "Commissionerate of Civil Supplies",
+    "Directorate of Civil Supplies",
+    "Commissioner for Entrance Examinations",
+    "Census Operations- Kerala",
+    "Coir Development",
+    "Directorate of Culture",
+    "Dairy Development Department",
+    "Directorate of Handlooms and Textiles",
+    "Directorate of Medical Education",
+    "Directorate of Prosecution",
+    "Drugs Control Department",
+    "Directorate of Economics and Statistics",
+    "Environment and Climate Change",
+    "Collegiate Education",
+    "Public Instructions",
+    "Excise Commissionerate",
+    "Directorate of Vocational Higher Secondary Education",
+    "Grand Kerala Shopping Festival (GKSF)",
+    "IT@school Project",
+    "Electrical Inspectorate",
+    "Inquiry Commissioner and Special Judge- Thiruvananthapuram",
+    "Jalanidhi",
+    "Factories and Boilers Department",
+    "Fire and Rescue Services Department",
+    "Fisheries Department",
+    "Food Safety Commissioner",
+    "Forest Department",
+    "Ground Water Department",
+    "Harbour Engineering Department",
+    "Directorate of Health Services",
+    "Directorate of Higher Secondary Education",
+    "Homoeopathic Department",
+    "Hydrographic Survey Wing",
+    "Indian Systems of Medicine",
+    "Industrial Tribunal and Judge",
+    "Industries and Commerce Directorate",
+    "Industries Training",
+    "Information and Public Relations",
+    "IMG (Institute of Management in Government)",
+    "Insurance Medical Services Department",
+    "Irrigation Department",
+    "Jail Department",
+    "KIRTADS",
+    "Kuttanad Package",
+    "Kerala Medical Services Corporation Limited",
+    "Kerala Minerals and Metals Limited",
+    "The Kerala State Co-Operative Bank Ltd.",
+    "Kerala State Industrial Development Corporation Ltd.",
+    "Kerala State IT Mission",
+    "Kerala State Civil Supplies Corporation",
+    "Kerala State Insurance Department",
+    "Kerala State Land Use Board",
+    "Kerala State Planning Board",
+    "Kerala State Remote Sensing and Environment Centre",
+    "Kerala State Roads and Bridges Development Corporation",
+    "Kerala Tourism Development Corporation Limited",
+    "Labour Commissionerate",
+    "Land Board",
+    "Commissionerate of Land Revenue",
+    "Legal Metrology Department",
+    "Kerala State Audit Department",
+    "MGNREGS",
+    "Mining and Geology Department",
+    "Motor Vehicles Department",
+    "Museums and Zoos Directorate",
+    "NCC Directorate",
+    "National Employment Service",
+    "National Rural Health Mission (NRHM)",
+    "Kerala State Nirmithi Kendra",
+    "Panchayat Department",
+    "Police Department",
+    "Ports Department",
+    "Printing Directorate",
+    "Public Works Department",
+    "Registration Department",
+    "Rural Development",
+    "Sarva Shiksha Abhiyan- Kerala",
+    "Sainik Welfare Department",
+    "Scheduled Caste Development Department",
+    "Scheduled Tribe Development Department",
+    "Social Justice Directorate",
+    "Sports and Youth Affairs Department",
+    "State Central Library Department",
+    "State Water Transport Department",
+    "Stationery Department",
+    "Suchitwa Mission",
+    "Survey and Land Records Department",
+    "Town and Country Planning Department",
+    "Tourism Department",
+    "Treasuries Department",
+    "Urban Affairs Department",
+    "Vigilance and Anti-corruption Bureau",
+    "Backward Communities Development Department",
+    "Directorate of Minority Welfare",
+  ].map((o) => ({ label: o, value: o }));
 
-  // Load departments
-  const loadDepartments = async () => {
-    const res = await getCourseCategories(1, 200, "");
-    setDepartments(res?.data || []);
-  };
+  const debouncedSearch = useDebounce(search, 500);
 
   // Load rank forums
   const loadData = async () => {
@@ -78,17 +179,8 @@ export default function RankForumPage() {
   };
 
   useEffect(() => {
-    loadDepartments();
-  }, []);
-
-  useEffect(() => {
     loadData();
   }, [page, debouncedSearch, filters]);
-
-  const departmentOptions = departments.map((d) => ({
-    label: d.category_name,
-    value: String(d.category_id),
-  }));
 
   return (
     <div className="p-4 sm:p-6">
@@ -98,12 +190,6 @@ export default function RankForumPage() {
         <div className="flex items-center gap-3">
           <TableFilter
             fields={[
-              {
-                key: "department_id",
-                label: "Department",
-                type: "select",
-                options: departmentOptions,
-              },
               {
                 key: "request_status",
                 label: "Request Status",
@@ -137,7 +223,8 @@ export default function RankForumPage() {
             }}
             className="bg-cyan-700 cursor-pointer flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800"
           >
-            Create Forum<IconPlus size={18} />
+            Create Forum
+            <IconPlus size={18} />
           </button>
         </div>
       </div>
@@ -149,30 +236,33 @@ export default function RankForumPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          {
-            key: "photo",
-            label: "Photo",
-            render: (r) =>
-              r.photo ? (
-                <img
-                  src={server_url + r.photo}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                "—"
-              ),
-          },
           { key: "name", label: "Name" },
-          { key: "rank", label: "Rank" },
-          {
-            key: "department",
-            label: "Department",
-            render: (r) => r.department?.category_name || "—",
-          },
+          { key: "course", label: "Course" },
+          { key: "batch", label: "Batch" },
+          { key: "year_of_study", label: "Year" },
+          { key: "reg_no", label: "Reg No" },
           {
             key: "request_status",
             label: "Request",
-            render: (r) => REQUEST_STATUS_MAP[r.request_status] || "—",
+            render: (r) => (
+              <>
+                {r.request_status == 1 && (
+                  <span className="bg-orange-100 px-3 py-0.5 rounded-full text-xs">
+                    Pending
+                  </span>
+                )}
+                {r.request_status == 2 && (
+                  <span className="bg-green-100 px-3 py-0.5 rounded-full text-xs">
+                    Approved
+                  </span>
+                )}
+                {r.request_status == 3 && (
+                  <span className="bg-red-100 px-3 py-0.5 rounded-full text-xs">
+                    Rejected
+                  </span>
+                )}
+              </>
+            ),
           },
         ]}
         data={data}
@@ -201,24 +291,20 @@ export default function RankForumPage() {
 
           setViewData({
             Name: r.name,
-            Rank: r.rank,
-            Department: r.department?.category_name,
-            "Mobile No": r.mobile_no,
             Email: r.email,
+            "Mobile No": r.mobile_no,
+            Course: r.course,
+            Batch: r.batch || "—",
+            "Year of Study": r.year_of_study,
+            "Registration No": r.reg_no,
+            "Office Name": r.name_of_office,
             Post: r.post,
-            District: r.district,
             "Joining Date": new Date(r.joining_date).toLocaleDateString(
               "en-IN"
             ),
-            "Request Status": REQUEST_STATUS_MAP[r.request_status],
-            Photo: r.photo ? (
-              <img
-                src={server_url + r.photo}
-                className="w-16 h-16 rounded object-cover"
-              />
-            ) : (
-              "—"
-            ),
+            "Office Address": r.office_address || "—",
+            "Request Status": REQUEST_STATUS_MAP[String(r.request_status)],
+            Status: r.status == 1 ? "Active" : "Inactive",
           });
 
           setOpenView(true);
@@ -236,31 +322,52 @@ export default function RankForumPage() {
           {
             name: "mobile_no",
             label: "Mobile No",
-            type: "number",
+            type: "text",
             required: true,
           },
           { name: "email", label: "Email", type: "email", required: true },
-          { name: "rank", label: "Rank", type: "text", required: true },
+
+          { name: "course", label: "Course", type: "text", required: true },
+          { name: "batch", label: "Batch", type: "text" },
+
           {
-            name: "department_id",
-            label: "Department",
+            name: "year_of_study",
+            label: "Year of Study",
             type: "select",
-            options: departmentOptions,
+            options: Array.from(
+              { length: new Date().getFullYear() - 1999 },
+              (_, i) => {
+                const y = 2000 + i;
+                return { label: String(y), value: String(y) };
+              }
+            ),
+            required: true,
+          },
+
+          {
+            name: "reg_no",
+            label: "Registration No",
+            type: "text",
             required: true,
           },
           {
             name: "name_of_office",
-            label: "Office",
-            type: "text",
+            label: "Office Name",
+            type: "select",
+            options: officeOptions,
             required: true,
           },
           { name: "post", label: "Post", type: "text", required: true },
-          { name: "district", label: "District", type: "text", required: true },
           {
             name: "joining_date",
             label: "Joining Date",
             type: "date",
             required: true,
+          },
+          {
+            name: "office_address",
+            label: "Office Address",
+            type: "textarea",
           },
           {
             name: "request_status",
@@ -272,6 +379,7 @@ export default function RankForumPage() {
               { label: "Rejected", value: "3" },
             ],
           },
+
           {
             name: "status",
             label: "Status",
@@ -281,7 +389,6 @@ export default function RankForumPage() {
               { label: "Inactive", value: "0" },
             ],
           },
-          { name: "photo", label: "Photo", type: "file" },
         ]}
         onSubmit={async (fd) => {
           if (selected) await updateRankForum(selected.rankforum_id, fd);
