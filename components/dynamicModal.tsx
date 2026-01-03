@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import { X, RotateCw, Check, ZoomIn, ZoomOut, Edit2 } from "lucide-react";
+import { useToast } from "@/contexts/ToastContext";
+import Cropper from "react-easy-crop";
 
 interface Point {
   x: number;
@@ -78,6 +80,17 @@ export default function DynamicFormModal({
   const [rotation, setRotation] = useState(0);
   const [aspect, setAspect] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const { showSuccess, showError } = useToast();
+  const cropRef = React.useRef<Point>({ x: 0, y: 0 });
+  const rafRef = React.useRef<number | null>(null);
+  const ASPECT_RATIOS = [
+    { label: "Free", value: 0 },
+    { label: "1:1", value: 1 },
+    { label: "16:9", value: 16 / 9 },
+    { label: "4:3", value: 4 / 3 },
+    { label: "3:4", value: 3 / 4 },
+    { label: "9:16", value: 9 / 16 },
+  ];
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   useEffect(() => {
@@ -114,12 +127,10 @@ export default function DynamicFormModal({
     setError("");
   }, [isOpen]);
 
-  const onCropComplete = useCallback(
-    (croppedArea: Area, croppedAreaPixels: Area) => {
-      setCroppedAreaPixels(croppedAreaPixels);
-    },
-    []
-  );
+  const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
+    setCrop(cropRef.current); // sync once
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -285,6 +296,17 @@ export default function DynamicFormModal({
     });
   };
 
+  const onCropChange = (c: Point) => {
+    cropRef.current = c;
+
+    if (rafRef.current) return;
+
+    rafRef.current = requestAnimationFrame(() => {
+      setCrop(cropRef.current);
+      rafRef.current = null;
+    });
+  };
+
   const handleCropImage = async () => {
     if (!cropState || !croppedAreaPixels) return;
 
@@ -368,13 +390,14 @@ export default function DynamicFormModal({
       else await defaultSubmit(fd);
 
       onSuccess?.();
+      showSuccess("Submitted successfully!");
       onClose();
     } catch (err: any) {
       const msg =
         err?.message || (typeof err === "string" ? err : "An error occurred");
-
       setError(msg);
       console.error("Submit error:", err);
+      showError(msg);
     } finally {
       setLoading(false);
     }
@@ -537,153 +560,6 @@ export default function DynamicFormModal({
     return null;
   };
 
-  if (cropState) {
-    return (
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-[1px] flex justify-center items-center z-50">
-        <div
-          className="bg-white rounded-2xl shadow-lg w-full max-w-4xl mx-4 flex flex-col"
-          style={{ height: "90vh" }}
-        >
-          <div className="flex justify-between items-center p-6 border-b">
-            <h2 className="text-xl font-semibold text-cyan-700">
-              Crop & Rotate Image
-            </h2>
-            <button
-              onClick={() => setCropState(null)}
-              className="text-gray-500 hover:text-black cursor-pointer"
-            >
-              <X size={24} />
-            </button>
-          </div>
-
-          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-            <div className="flex-1 relative bg-gray-900">
-              {/* Cropper would go here - removed due to external dependency */}
-              <div className="w-full h-full flex items-center justify-center text-white">
-                <img
-                  src={cropState.image}
-                  alt="Crop preview"
-                  className="max-w-full max-h-full"
-                />
-              </div>
-            </div>
-
-            <div className="w-full md:w-80 p-6 space-y-4 overflow-y-auto bg-gray-50">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Aspect Ratio
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { label: "Free", value: 0 },
-                    { label: "1:1", value: 1 },
-                    { label: "16:9", value: 16 / 9 },
-                    { label: "4:3", value: 4 / 3 },
-                    { label: "3:4", value: 3 / 4 },
-                    { label: "9:16", value: 9 / 16 },
-                  ].map((ratio) => (
-                    <button
-                      key={ratio.label}
-                      type="button"
-                      onClick={() => setAspect(ratio.value)}
-                      className={`px-3 py-2 cursor-pointer rounded text-sm font-medium transition ${
-                        aspect === ratio.value
-                          ? "bg-cyan-600 text-white"
-                          : "bg-white text-gray-700 border hover:bg-gray-50"
-                      }`}
-                    >
-                      {ratio.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center justify-between">
-                    <span>Zoom</span>
-                    <span className="text-xs text-gray-500">
-                      {zoom.toFixed(1)}x
-                    </span>
-                  </div>
-                </label>
-                <div className="flex items-center gap-2">
-                  <ZoomOut size={16} className="text-gray-500" />
-                  <input
-                    type="range"
-                    min="1"
-                    max="3"
-                    step="0.1"
-                    value={zoom}
-                    onChange={(e) => setZoom(Number(e.target.value))}
-                    className="flex-1 cursor-pointer"
-                  />
-                  <ZoomIn size={16} className="text-gray-500" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <div className="flex items-center justify-between">
-                    <span>Rotation</span>
-                    <span className="text-xs text-gray-500">{rotation}°</span>
-                  </div>
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="360"
-                  step="1"
-                  value={rotation}
-                  onChange={(e) => setRotation(Number(e.target.value))}
-                  className="w-full mb-2 cursor-pointer"
-                />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setRotation((prev) => (prev - 90 + 360) % 360)
-                    }
-                    className="flex-1 cursor-pointer flex items-center justify-center gap-1 px-3 py-2 bg-white border rounded text-sm hover:bg-gray-50 transition"
-                  >
-                    <RotateCw size={14} className="transform -scale-x-100" />
-                    -90°
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRotation((prev) => (prev + 90) % 360)}
-                    className="flex-1 cursor-pointer flex items-center justify-center gap-1 px-3 py-2 bg-white border rounded text-sm hover:bg-gray-50 transition"
-                  >
-                    <RotateCw size={14} />
-                    +90°
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-4 space-y-2 border-t">
-                <button
-                  type="button"
-                  onClick={handleCropImage}
-                  className="w-full flex cursor-pointer items-center justify-center gap-2 px-4 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition"
-                >
-                  <Check size={18} />
-                  Apply Crop
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCropState(null)}
-                  className="w-full px-4 cursor-pointer py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 backdrop-blur-sm p-4"
@@ -810,14 +686,116 @@ export default function DynamicFormModal({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={loading}
-              className="w-full cursor-pointer bg-cyan-700 text-white py-2 mt-5 rounded-md hover:bg-cyan-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || !!cropState}
+              className="w-full cursor-pointer bg-cyan-700 text-white py-2 rounded"
             >
               {loading ? "Saving..." : "Submit"}
             </button>
           </div>
         </div>
       </div>
+
+      {/* ================= IMAGE CROP MODAL ================= */}
+      {cropState && (
+        <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center">
+          <div className="bg-white rounded-xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-semibold text-cyan-700">
+                Crop & Rotate Image
+              </h3>
+              <button
+                onClick={() => setCropState(null)}
+                className="cursor-pointer"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="flex flex-1">
+              {/* Cropper */}
+              <div className="relative flex-1 bg-black min-h-0 will-change-transform">
+                <Cropper
+                  image={cropState.image}
+                  crop={crop}
+                  zoom={zoom}
+                  rotation={rotation}
+                  aspect={aspect || undefined}
+                  onCropChange={onCropChange}
+                  onZoomChange={setZoom}
+                  onRotationChange={setRotation}
+                  onCropComplete={onCropComplete}
+                />
+              </div>
+
+              {/* Controls */}
+              <div className="w-80 flex-shrink-0 p-4 bg-gray-50 space-y-4 overflow-y-auto">
+                {/* Aspect */}
+                <div>
+                  <p className="text-sm font-medium mb-2">Aspect Ratio</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ASPECT_RATIOS.map((r) => (
+                      <button
+                        key={r.label}
+                        onClick={() => setAspect(r.value)}
+                        className={`px-3 cursor-pointer py-2 rounded text-sm font-medium ${
+                          aspect === r.value
+                            ? "bg-cyan-600 text-white"
+                            : "bg-white border"
+                        }`}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Zoom */}
+                <div>
+                  <p className="text-sm font-medium">Zoom</p>
+                  <input
+                    type="range"
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    value={zoom}
+                    onChange={(e) => setZoom(+e.target.value)}
+                    className="w-full cursor-pointer"
+                  />
+                </div>
+
+                {/* Rotation */}
+                <div>
+                  <p className="text-sm font-medium">Rotation</p>
+                  <input
+                    type="range"
+                    min={0}
+                    max={360}
+                    value={rotation}
+                    onChange={(e) => setRotation(+e.target.value)}
+                    className="w-full cursor-pointer"
+                  />
+                </div>
+
+                <button
+                  onClick={handleCropImage}
+                  className="w-full cursor-pointer bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded"
+                >
+                  Apply Crop
+                </button>
+
+                <button
+                  onClick={() => setCropState(null)}
+                  className="w-full cursor-pointer border py-2 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* =================================================== */}
     </div>
   );
 }

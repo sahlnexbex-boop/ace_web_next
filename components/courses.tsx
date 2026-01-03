@@ -124,7 +124,7 @@ export default function Courses() {
               key={cat.category_id}
               onClick={() => router.push(`/public/courses/${cat.category_id}`)}
               className="group course-card bg-gray-50/80 border-0 rounded-2xl cursor-pointer z-10
-                 transition-all duration-700 ease-in-out
+                 transition-all duration-700 ease-out
                  hover:bg-gradient-to-r hover:from-[#1b6dac] hover:to-[#0595d7] hover:shadow-lg"
             >
               <CardContent className="p-4 sm:p-6 flex flex-col items-start justify-between gap-4 sm:gap-6">

@@ -255,6 +255,17 @@ export default function EnquiryPage() {
             render: (r) => ENQUIRY_TYPE[r.enquiry_type] || "—",
           },
           {
+            key: "submit_date",
+            label: "Submitted On",
+            render: (r) =>
+              r.submit_date
+                ? new Date(r.submit_date).toLocaleString("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : "—",
+          },
+          {
             key: "enquiry_status",
             label: "Update Status",
             render: (r) =>
@@ -272,31 +283,20 @@ export default function EnquiryPage() {
                 </div>
               ),
           },
-          {
-            key: "submit_date",
-            label: "Submitted On",
-            render: (r) =>
-              r.submit_date
-                ? new Date(r.submit_date).toLocaleString("en-IN", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })
-                : "—",
-          },
-          {
-            key: "status",
-            label: "Status",
-            render: (r) =>
-              r.status === 1 || r.status === "1" ? (
-                <div className="bg-green-100 text-green-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
-                  Active
-                </div>
-              ) : (
-                <div className="bg-red-100 text-red-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
-                  Inactive
-                </div>
-              ),
-          },
+          // {
+          //   key: "status",
+          //   label: "Status",
+          //   render: (r) =>
+          //     r.status === 1 || r.status === "1" ? (
+          //       <div className="bg-green-100 text-green-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
+          //         Active
+          //       </div>
+          //     ) : (
+          //       <div className="bg-red-100 text-red-800 w-fit px-3 py-0.5 rounded-full text-xs font-medium">
+          //         Inactive
+          //       </div>
+          //     ),
+          // },
         ]}
         data={data}
         page={page}

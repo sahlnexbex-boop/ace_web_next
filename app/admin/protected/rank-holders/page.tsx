@@ -72,7 +72,6 @@ export default function RankHoldersPage() {
         based_type === "1" ? Number(course_id) : undefined,
         based_type === "2" ? Number(category_id) : undefined,
         year ? Number(year) : undefined,
-        approval_status ? Number(approval_status) : undefined
       );
 
       setData(res?.data || []);
@@ -133,12 +132,6 @@ export default function RankHoldersPage() {
         "Office Name": d.name_of_office || "—",
         Place: d.place || "—",
         "Phone No": d.phone_no || "—",
-        "Approval Status":
-          d.approval_status === 2
-            ? "Approved"
-            : d.approval_status === 3
-            ? "Rejected"
-            : "Pending",
         Status: d.status === 1 || d.status === "1" ? "Active" : "Inactive",
       };
 
@@ -185,17 +178,6 @@ export default function RankHoldersPage() {
     { name: "place", label: "Place", type: "text", required: true },
     { name: "phone_no", label: "Phone No", type: "text", required: true },
     {
-      name: "approval_status",
-      label: "Approval Status",
-      type: "select",
-      options: [
-        { label: "Pending", value: "1" },
-        { label: "Approved", value: "2" },
-        { label: "Rejected", value: "3" },
-      ],
-      required: true,
-    },
-    {
       name: "status",
       label: "Status",
       type: "select",
@@ -241,16 +223,6 @@ export default function RankHoldersPage() {
                 showIf: { field: "based_type", value: "2" },
               },
               {
-                key: "approval_status",
-                label: "Approval Status",
-                type: "select",
-                options: [
-                  { label: "Pending", value: "1" },
-                  { label: "Approved", value: "2" },
-                  { label: "Rejected", value: "3" },
-                ],
-              },
-              {
                 key: "year",
                 label: "Year",
                 type: "year",
@@ -277,7 +249,7 @@ export default function RankHoldersPage() {
               setBasedType("");
               setOpenForm(true);
             }}
-            className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800"
+            className="bg-cyan-700 cursor-pointer flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800"
           >
             Create Rank Holder <IconPlus size={20} />
           </button>
@@ -312,24 +284,6 @@ export default function RankHoldersPage() {
                 />
               ) : (
                 "—"
-              ),
-          },
-          {
-            key: "approval_status",
-            label: "Approval",
-            render: (r) =>
-              r.approval_status === 2 ? (
-                <span className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
-                  Approved
-                </span>
-              ) : r.approval_status === 3 ? (
-                <span className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
-                  Rejected
-                </span>
-              ) : (
-                <span className="bg-yellow-100 text-black w-fit px-3 py-0.5 rounded-full">
-                  Pending
-                </span>
               ),
           },
           {

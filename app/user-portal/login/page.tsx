@@ -10,6 +10,7 @@ import {
   resetStudentPassword,
 } from "@/lib/api/studentAuth";
 import { setToken, getToken } from "@/lib/auth";
+import { storeStudentIdFromToken } from "@/lib/studentAuthHelper";
 
 const BG_IMAGE = "/login_background_02.png";
 
@@ -40,6 +41,7 @@ export default function StudentAuthPage() {
     try {
       const res = await studentLogin(std_email, password);
       setToken(res.accessToken);
+      storeStudentIdFromToken(res.accessToken);
       router.push("/user-portal/protected/dashboard");
     } catch (err: any) {
       setError(err.message || "Login failed");
@@ -107,6 +109,7 @@ export default function StudentAuthPage() {
       const token = getToken();
       if (!token) throw new Error("Authentication token missing");
       await resetStudentPassword({ std_email, newPassword }, token);
+      storeStudentIdFromToken(token);
       router.push("/user-portal/protected/dashboard");
     } catch (err: any) {
       setError(err.message || "Password reset failed");

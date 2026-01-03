@@ -127,16 +127,16 @@ export default function CourseTypesPage() {
                 </span>
               ),
           },
-          {
-            key: "created_at",
-            label: "Created At",
-            render: (r) =>
-              new Date(r.created_at).toLocaleDateString("en-IN", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              }),
-          },
+          // {
+          //   key: "created_at",
+          //   label: "Created At",
+          //   render: (r) =>
+          //     new Date(r.created_at).toLocaleDateString("en-IN", {
+          //       year: "numeric",
+          //       month: "short",
+          //       day: "numeric",
+          //     }),
+          // },
         ]}
         data={data}
         page={page}

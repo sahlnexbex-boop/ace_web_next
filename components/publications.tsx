@@ -94,12 +94,12 @@ export default function Publications() {
           {publications.map((book) => (
             <Card
               key={book.book_id}
-              className="pub-card bg-white hover:shadow-2xl shadow-lg transition-shadow rounded-xl pt-6 sm:pt-10 cursor-pointer opacity-0"
+              className="pub-card bg-white hover:shadow-2xl shadow-lg transition-shadow rounded-xl pt-3 sm:pt-10 cursor-pointer opacity-0"
               onClick={() => router.push(`/public/publication/${book.book_id}`)}
             >
-              <CardContent className="pb-4 sm:pb-6 text-center">
+              <CardContent className="pb-3 sm:pb-6 text-center px-3">
                 <div className="mb-4 sm:mb-6">
-                  <div className="w-28 h-36 sm:w-32 sm:h-40 rounded-lg mx-auto flex items-center justify-center shadow-md">
+                  <div className="h-36 sm:w-32 sm:h-40 rounded-lg mx-auto flex items-center justify-center shadow-md">
                     <img
                       src={server_url + book.book_image || "/placeholder.svg"}
                       alt={book.book_title}
@@ -107,11 +107,11 @@ export default function Publications() {
                     />
                   </div>
                 </div>
-                <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2 text-gray-700 leading-tight line-clamp-2">
+                <h3 className="font-semibold line-clamp-1 md:line-clamp-2 text-sm sm:text-base mb-1 sm:mb-2 text-gray-700 leading-tight">
                   {book.book_title}
                 </h3>
-                <p>Author: {book.book_author}</p>
-                <p className="text-base sm:text-lg font-bold text-gray-900">
+                <p className="line-clamp-1">Author: {book.book_author}</p>
+                <p className="text-base sm:text-lg font-bold text-gray-900 line-clamp-1">
                   ₹{book.book_price}
                 </p>
               </CardContent>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { getCourses } from "@/lib/api/course";
 import { getCourseCategoryById } from "@/lib/api/courseCategory";
 
@@ -144,10 +143,9 @@ export default function CourseCategoryPage({
               className="bg-gray-100 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 cursor-pointer group flex flex-col"
             >
               <div className="relative w-full h-44 flex-shrink-0">
-                <Image
+                <img
                   src={server_url + course.course_image || "/placeholder.png"}
                   alt={course.course_name}
-                  fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>

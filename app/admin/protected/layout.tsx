@@ -70,6 +70,22 @@ const menuItems = [
     ],
   },
   {
+    name: "Exams",
+    icon: ClipboardList,
+    children: [
+      {
+        name: "Scholarship Exams",
+        icon: ClipboardList,
+        path: "/admin/protected/scholarship-exam",
+      },
+      {
+        name: "Exam Registartions",
+        icon: GraduationCap,
+        path: "/admin/protected/exam-enquiry",
+      },
+    ],
+  },
+  {
     name: "Learning Management",
     icon: BookOpen,
     children: [
@@ -153,12 +169,12 @@ const menuItems = [
     icon: HelpCircle,
     children: [
       {
-        name: "Connect Enquiry",
+        name: "Direct Enquiry's",
         icon: Trophy,
         path: "/admin/protected/enquiry",
       },
       {
-        name: "Online Registartion",
+        name: "Online Registartions",
         icon: GraduationCap,
         path: "/admin/protected/online-registration",
       },

@@ -31,6 +31,7 @@ const studentMenuItems = [
     name: "My Learning",
     icon: GraduationCap,
     children: [
+      { name: "My Exams", icon: BookOpen, path: "/user-portal/protected/my-exams" },
       { name: "My Courses", icon: BookOpen, path: "/user-portal/protected/courses" },
       { name: "Video Classes", icon: Video, path: "/user-portal/protected/video-classes" },
       { name: "Study Materials", icon: FileText, path: "/user-portal/protected/materials" },

@@ -335,57 +335,73 @@ export default function SuccessStories() {
       {/*  FULL DATA MODAL */}
       {isTestimonialOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center px-4"
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center px-3 sm:px-4"
           onClick={() => {
             setIsTestimonialOpen(false);
             setModalData(null);
           }}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative"
+            className="
+        bg-white rounded-xl shadow-xl
+        w-full max-w-lg
+        max-h-[90vh]
+        flex flex-col
+        relative
+      "
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close button (always visible) */}
             <button
               onClick={() => {
                 setIsTestimonialOpen(false);
                 setModalData(null);
               }}
-              className="absolute cursor-pointer top-3 right-3 text-gray-600 hover:text-red-600 text-xl"
+              className="absolute cursor-pointer top-3 right-3 text-gray-600 hover:text-red-600 text-xl z-10"
             >
               ✕
             </button>
 
-            {testimonialLoading || !modalData ? (
-              <div className="py-10 text-center">
-                <Loader />
-              </div>
-            ) : (
-              <>
-                <img src="/quates_blue.png" className="h-14 opacity-80 mb-4" />
-
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
-                  {modalData.content}
-                </p>
-                <div className="flex items-center gap-4">
-                  <img
-                    src={
-                      server_url + modalData.image_of_candidate ||
-                      "/default-avatar.png"
-                    }
-                    className="w-16 h-16 rounded-full object-cover"
-                    alt={modalData.name_of_candidate}
-                  />
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {modalData.name_of_candidate}
-                    </h3>
-                    <p className="text-cyan-600">
-                      {modalData.position_of_candidate}
-                    </p>
-                  </div>
+            {/* Scrollable content */}
+            <div className="overflow-y-auto p-5 sm:p-6">
+              {testimonialLoading || !modalData ? (
+                <div className="py-10 text-center">
+                  <Loader />
                 </div>
-              </>
-            )}
+              ) : (
+                <>
+                  <img
+                    src="/quates_blue.png"
+                    className="h-12 sm:h-14 opacity-80 mb-4"
+                    alt=""
+                  />
+
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-6 text-sm sm:text-base">
+                    {modalData.content}
+                  </p>
+
+                  <div className="flex items-center gap-4 mt-auto">
+                    <img
+                      src={
+                        modalData.image_of_candidate && server_url
+                          ? `${server_url}${modalData.image_of_candidate}`
+                          : "/default-avatar.png"
+                      }
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover"
+                      alt={modalData.name_of_candidate}
+                    />
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+                        {modalData.name_of_candidate}
+                      </h3>
+                      <p className="text-cyan-600 text-sm sm:text-base">
+                        {modalData.position_of_candidate}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

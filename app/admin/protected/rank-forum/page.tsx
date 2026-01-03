@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconPlus } from "@tabler/icons-react";
+import { IconBook, IconDownload, IconFileTypeXls, IconPageBreak, IconPlus } from "@tabler/icons-react";
 import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
 import { useDebounce } from "@/hooks/debounce";
+import { useRef } from "react";
+import { downloadRankForumExcel } from "@/lib/api/rankForum";
 
 import {
   getRankForums,
@@ -23,6 +25,8 @@ const REQUEST_STATUS_MAP: Record<string, string> = {
   "3": "Rejected",
 };
 
+
+
 export default function RankForumPage() {
   const [data, setData] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -35,6 +39,8 @@ export default function RankForumPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [viewData, setViewData] = useState<any>(null);
+  const [openDownload, setOpenDownload] = useState(false);
+  const downloadRef = useRef<HTMLDivElement | null>(null);
 
   const officeOptions = [
     "Agriculture Department",
@@ -146,6 +152,21 @@ export default function RankForumPage() {
     "Directorate of Minority Welfare",
   ].map((o) => ({ label: o, value: o }));
 
+  // Close accordion on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        downloadRef.current &&
+        !downloadRef.current.contains(e.target as Node)
+      ) {
+        setOpenDownload(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const debouncedSearch = useDebounce(search, 500);
 
   // Load rank forums
@@ -188,6 +209,45 @@ export default function RankForumPage() {
         <h1 className="text-2xl font-semibold text-cyan-700">Rank Forum</h1>
 
         <div className="flex items-center gap-3">
+          <div className="relative" ref={downloadRef}>
+            <button
+              onClick={() => setOpenDownload((p) => !p)}
+              className="flex gap-1 border border-cyan-700 text-cyan-700 px-4 py-2 rounded-md hover:text-white hover:bg-cyan-700 cursor-pointer"
+            >
+              <IconFileTypeXls  size={18} />
+              <span>Download</span>
+            </button>
+
+            {openDownload && (
+              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg z-50">
+                <button
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadRankForumExcel({
+                      page,
+                      limit: 10,
+                    });
+                  }}
+                >
+                  <IconDownload size={18} className="text-cyan-800" /> <span>Current Page</span>
+                </button>
+
+                <button
+                  className="w-full flex gap-2 text-left px-4 py-2 text-sm hover:bg-cyan-50/80 cursor-pointer"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadRankForumExcel({
+                      exportAll: true,
+                    });
+                  }}
+                >
+                   <IconDownload size={18} className="text-cyan-800" /> <span>Full Page</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           <TableFilter
             fields={[
               {

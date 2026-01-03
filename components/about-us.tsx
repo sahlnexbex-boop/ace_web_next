@@ -216,7 +216,7 @@ export default function AboutUs() {
                 </svg>
               </div>
 
-              <div className="space-y-4 max-h-[21rem] relative z-10 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              <div className="space-y-4 max-h-[22rem] relative z-10 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {notifications.map((item) => (
                   <div
                     key={item.result_id}

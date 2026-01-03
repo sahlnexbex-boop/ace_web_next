@@ -9,7 +9,6 @@ export const getRankHolders = async (
   course_id?: number,
   category_id?: number,
   year?: number,
-  approval_status?: number
 ) => {
   const params = new URLSearchParams();
   if (search) params.append("search", search);
@@ -18,8 +17,6 @@ export const getRankHolders = async (
   if (course_id !== undefined) params.append("course_id", String(course_id));
   if (category_id !== undefined) params.append("category_id", String(category_id));
   if (year !== undefined) params.append("year", String(year));
-  if (approval_status !== undefined)
-    params.append("approval_status", String(approval_status));
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/rankholders?page=${page}&limit=${limit}&${params.toString()}`,
