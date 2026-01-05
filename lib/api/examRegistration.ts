@@ -6,7 +6,8 @@ export const getExamRegistrations = (
   page = 1,
   limit = 10,
   search = "",
-  status?: number
+  status?: number,
+  std_id?: number
 ) => {
   const params = new URLSearchParams({
     page: String(page),
@@ -15,6 +16,7 @@ export const getExamRegistrations = (
 
   if (search) params.append("search", search);
   if (status !== undefined) params.append("status", String(status));
+  if (std_id !== undefined) params.append("std_id", String(std_id));
 
   return apiRequest(`${BASE_URL}?${params.toString()}`, "GET");
 };
@@ -30,3 +32,7 @@ export const updateExamRegistration = (id: number, data: any) =>
 
 export const deleteExamRegistration = (id: number) =>
   apiRequest(`${BASE_URL}/${id}`, "DELETE");
+
+export const getHallTicketByRegistrationId = (id: number) =>
+  apiRequest(`/api/exam-registration/hallticket/${id}`, "GET");
+

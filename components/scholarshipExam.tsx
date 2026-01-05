@@ -62,7 +62,7 @@ export default function ScholarshipExamPage() {
       await verifyStudentToken(token);
 
       //  token valid
-      router.push("/user-portal/protected/my-exams");
+      router.push(`/user-portal/protected/reg-exam/${exam.exam_id}`);
     } catch (err) {
       console.error(err);
       showError("Please login or signup first", "error");
@@ -181,7 +181,7 @@ function SingleExamHero({
           onClick={() => onRegister(exam)}
           disabled={verifyingId === exam.exam_id}
           className={`mt-4 inline-flex items-center
-            bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-blue-500 hover:to-cyan-600
+            bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-blue-600 hover:to-cyan-600
             text-white px-6 py-2.5 rounded-lg font-medium cursor-pointer
             ${
               verifyingId === exam.exam_id

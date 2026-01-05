@@ -11,11 +11,12 @@ export async function apiRequest(
 ) {
   const headers: Record<string, string> = {};
 
-  //  Add JSON Content-Type only when not FormData
+  // Attach JSON header only when not FormData
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
-  //  Attach token unless explicitly skipped
+
+  // Attach token unless skipped
   if (!skipAuth) {
     const token = getToken?.();
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -30,9 +31,8 @@ export async function apiRequest(
 
   if (data) {
     if (isFormData) {
-      // Browser will handle boundary & content-type automatically
       options.body = data;
-      delete headers["Content-Type"];
+      delete headers["Content-Type"]; // browser sets boundary
     } else {
       options.body = JSON.stringify(data);
     }
@@ -45,11 +45,25 @@ export async function apiRequest(
     throw new Error(`Network error: ${err.message || err}`);
   }
 
-  const text = await response.text();
   const contentType = response.headers.get("content-type") || "";
 
-  let parsed: any = null;
+  /* =========================
+     🔥 HANDLE PDF / BINARY
+     ========================= */
+  if (contentType.includes("application/pdf")) {
+    if (!response.ok) {
+      throw new Error(`PDF request failed (HTTP ${response.status})`);
+    }
+    return response; // 👈 RETURN RAW RESPONSE
+  }
+
+  /* =========================
+     HANDLE JSON
+     ========================= */
   if (contentType.includes("application/json")) {
+    const text = await response.text();
+    let parsed: any;
+
     try {
       parsed = text ? JSON.parse(text) : {};
     } catch {
@@ -57,26 +71,28 @@ export async function apiRequest(
         `Invalid JSON response from ${fullUrl}. Raw response: ${text.slice(0, 200)}`
       );
     }
-  } else {
+
     if (!response.ok) {
-      throw new Error(
-        `Unexpected non-JSON error response (HTTP ${response.status}): ${text.slice(
-          0,
-          300
-        )}`
-      );
+      const msg =
+        parsed?.message ||
+        parsed?.error ||
+        parsed?.msg ||
+        `HTTP ${response.status} ${response.statusText}`;
+      throw new Error(msg);
     }
-    return text;
+
+    return parsed;
   }
 
+  /* =========================
+     OTHER TEXT RESPONSES
+     ========================= */
+  const text = await response.text();
   if (!response.ok) {
-    const msg =
-      parsed?.message ||
-      parsed?.error ||
-      parsed?.msg ||
-      `HTTP ${response.status} ${response.statusText}`;
-    throw new Error(msg);
+    throw new Error(
+      `Unexpected response (HTTP ${response.status}): ${text.slice(0, 300)}`
+    );
   }
 
-  return parsed;
+  return text;
 }
