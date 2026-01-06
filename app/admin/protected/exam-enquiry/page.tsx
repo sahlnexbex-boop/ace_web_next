@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
@@ -15,7 +15,10 @@ import {
   createExamRegistration,
   updateExamRegistration,
   deleteExamRegistration,
+  downloadExamRegistrationExcel,
 } from "@/lib/api/examRegistration";
+import { getHallTicketByRegistrationId } from "@/lib/api/examRegistration";
+import { IconDownload, IconFileTypeXls } from "@tabler/icons-react";
 
 export default function ExamRegistrationPage() {
   const [data, setData] = useState<any[]>([]);
@@ -24,6 +27,9 @@ export default function ExamRegistrationPage() {
   const [openView, setOpenView] = useState(false);
   const [selected, setSelected] = useState<any>(null);
   const [viewData, setViewData] = useState<any>(null);
+
+  const [openDownload, setOpenDownload] = useState(false);
+  const downloadRef = useRef<HTMLDivElement | null>(null);
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -48,6 +54,40 @@ export default function ExamRegistrationPage() {
     { label: "TIRUR - TR", value: "TR" },
   ];
 
+  const makeSafeFileName = (value: string = "") =>
+    value
+      .trim()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-zA-Z0-9_-]/g, "");
+
+  const downloadHallTicket = async (row: any) => {
+    try {
+      const response = await getHallTicketByRegistrationId(row.reg_id);
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const safeStudent = makeSafeFileName(row.name || "Student");
+      const safeExam = makeSafeFileName(
+        row.ScholarshipExam?.exam_title || "Exam"
+      );
+
+      const fileName = `${safeStudent}_${safeExam}_Hall_Ticket.pdf`;
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      console.error("Hall ticket download failed", err);
+    }
+  };
+
   /* ===========================
      LOAD DATA
   ============================ */
@@ -70,7 +110,7 @@ export default function ExamRegistrationPage() {
   //load exam options
   const loadExamOptions = async () => {
     try {
-      const res = await getScholarshipExams(1, 100, "", 1); 
+      const res = await getScholarshipExams(1, 100, "", 1);
       const options =
         res?.data?.map((e: any) => ({
           label: e.exam_title,
@@ -89,6 +129,20 @@ export default function ExamRegistrationPage() {
 
   useEffect(() => {
     loadExamOptions();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        downloadRef.current &&
+        !downloadRef.current.contains(e.target as Node)
+      ) {
+        setOpenDownload(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /* ===========================
@@ -206,6 +260,51 @@ export default function ExamRegistrationPage() {
         </h1>
 
         <div className="flex items-center gap-3">
+          {/* DOWNLOAD EXCEL */}
+          <div className="relative" ref={downloadRef}>
+            <button
+              onClick={() => setOpenDownload((p) => !p)}
+              className="flex gap-1 border border-cyan-700 text-cyan-700 px-4 py-2 rounded-md hover:text-white hover:bg-cyan-700 cursor-pointer"
+            >
+              <IconFileTypeXls size={18} />
+              <span>Download</span>
+            </button>
+
+            {openDownload && (
+              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg z-50">
+                {/* CURRENT PAGE */}
+                <button
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadExamRegistrationExcel({
+                      page,
+                      limit: 10,
+                    });
+                  }}
+                >
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Current Page</span>
+                </button>
+
+                {/* FULL DATA */}
+                <button
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadExamRegistrationExcel({
+                      exportAll: true,
+                    });
+                  }}
+                >
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Full Page</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* FILTER */}
           <TableFilter
             fields={[
               {
@@ -224,6 +323,7 @@ export default function ExamRegistrationPage() {
             }}
           />
 
+          {/* CREATE BUTTON */}
           <button
             onClick={() => {
               setSelected(null);
@@ -252,6 +352,25 @@ export default function ExamRegistrationPage() {
             render: (r) => r.ScholarshipExam?.exam_title || "—",
           },
           { key: "registration_code", label: "Reg Code" },
+          {
+            key: "hallticket",
+            label: "Hall Ticket",
+            render: (row) =>
+              row.status === 1 ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadHallTicket(row);
+                  }}
+                  className="flex items-center gap-1 text-white bg-cyan-600 hover:bg-cyan-800 px-2 py-1 rounded-md cursor-pointer"
+                >
+                  <IconDownload size={16} />
+                  <span className="text-xs font-medium">Hall Ticket</span>
+                </button>
+              ) : (
+                <span className="text-xs text-gray-400">—</span>
+              ),
+          },
           {
             key: "status",
             label: "Status",

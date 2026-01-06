@@ -142,7 +142,7 @@ export default function CourseCategoryPage({
               onClick={() => handleNavigate(course.course_id)}
               className="bg-gray-100 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 cursor-pointer group flex flex-col"
             >
-              <div className="relative w-full h-44 flex-shrink-0">
+              <div className="relative w-full h-44 flex-shrink-0 overflow-hidden">
                 <img
                   src={server_url + course.course_image || "/placeholder.png"}
                   alt={course.course_name}

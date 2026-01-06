@@ -49,7 +49,7 @@ export default function RankHoldersForum() {
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
               Rank Holders Forum
             </h2>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+            <p className="md:text-lg text-md text-gray-600 mb-8 leading-relaxed">
               At a time when the representation of educated individuals from the
               Malabar region in government services was extremely low, ACE was
               founded in 2008. With a strong sense of social commitment, this

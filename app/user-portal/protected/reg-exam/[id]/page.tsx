@@ -3,10 +3,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getScholarshipExams } from "@/lib/api/scholarshipExam";
-import { createExamRegistration } from "@/lib/api/examRegistration";
+import { getStudentById } from "@/lib/api/student";
+import {
+  createExamRegistration,
+  getExamRegistrations,
+} from "@/lib/api/examRegistration";
 import { useToast } from "@/contexts/ToastContext";
+import { useRouter } from "next/navigation";
 
-/* ================= BRANCH OPTIONS ================= */
+// branch options
 const BRANCH_OPTIONS = [
   { label: "BALUSSERY - BLS", value: "BLS" },
   { label: "CALICUT - CLT", value: "CLT" },
@@ -23,7 +28,6 @@ const BRANCH_OPTIONS = [
 const initialFormState = {
   name: "",
   mobile: "",
-  email: "",
   date_of_birth: "",
   branch: "",
   address: "",
@@ -39,10 +43,100 @@ export default function ExamRegisterPage() {
   const [exam, setExam] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
+
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+  const [registeredData, setRegisteredData] = useState<any>(null);
+  const [countdown, setCountdown] = useState(10);
+  const [studentEmail, setStudentEmail] = useState("");
 
   const { showSuccess, showError } = useToast();
 
-  /* ================= FETCH EXAMS & MATCH URL ID ================= */
+  const Info = ({
+    label,
+    value,
+    highlight = false,
+  }: {
+    label: string;
+    value: any;
+    highlight?: boolean;
+  }) => (
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p
+        className={`font-medium ${
+          highlight ? "text-cyan-700" : "text-gray-800"
+        }`}
+      >
+        {value || "—"}
+      </p>
+    </div>
+  );
+
+  useEffect(() => {
+    if (!exam || !std_id) return;
+
+    const checkRegistration = async () => {
+      try {
+        const res = await getExamRegistrations(
+          1,
+          50,
+          "",
+          undefined,
+          Number(std_id)
+        );
+
+        const match = res?.data?.find((r: any) => r.exam_id === exam.exam_id);
+
+        if (match) {
+          setAlreadyRegistered(true);
+          setRegisteredData(match);
+        }
+      } catch (err) {
+        console.error("Registration check failed", err);
+      }
+    };
+
+    checkRegistration();
+  }, [exam, std_id]);
+
+  useEffect(() => {
+    if (!std_id) return;
+
+    const fetchStudent = async () => {
+      try {
+        const res = await getStudentById(Number(std_id));
+        const student = res?.data;
+
+        if (student?.std_email) {
+          setStudentEmail(student.std_email);
+        }
+      } catch (err) {
+        console.error("Failed to fetch student details", err);
+      }
+    };
+
+    fetchStudent();
+  }, [std_id]);
+
+  useEffect(() => {
+    if (!alreadyRegistered) return;
+
+    const timer = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(timer);
+          router.push("/user-portal/protected/my-exams");
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [alreadyRegistered, router]);
+
+  //   FETCH EXAM
   useEffect(() => {
     if (!numericExamId) return;
 
@@ -67,17 +161,16 @@ export default function ExamRegisterPage() {
     fetchExam();
   }, [numericExamId]);
 
-  /* ================= VALIDATION ================= */
+  //   VALIDATE FORM
   const validate = () => {
     if (!form.name) return "Name is required";
     if (!/^\d{10}$/.test(form.mobile)) return "Mobile number must be 10 digits";
-    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(form.email))
-      return "Only Gmail addresses are allowed";
+    // if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(form.email))
+    //   return "Only Gmail addresses are allowed";
     if (!form.branch) return "Please select a branch";
     return "";
   };
 
-  /* ================= SUBMIT ================= */
   const submit = async () => {
     const err = validate();
     if (err) {
@@ -91,6 +184,7 @@ export default function ExamRegisterPage() {
         ...form,
         exam_id: exam.exam_id,
         std_id: Number(std_id),
+        email: studentEmail,
       });
 
       showSuccess("Registration successful");
@@ -103,7 +197,7 @@ export default function ExamRegisterPage() {
     }
   };
 
-  /* ================= LOADING / ERROR STATES ================= */
+  //   RENDER
   if (error && !exam) {
     return (
       <div className="max-w-xl mx-auto mt-24 text-center text-red-600">
@@ -120,7 +214,57 @@ export default function ExamRegisterPage() {
     );
   }
 
-  /* ================= UI ================= */
+  //   ALREADY REGISTERED
+  if (alreadyRegistered && registeredData) {
+    return (
+      <div className="max-w-3xl mx-auto mt-20 bg-white rounded-xl shadow-lg border">
+        <div className="p-6 border-b bg-green-50">
+          <h2 className="text-xl font-semibold text-green-700">
+            You are already registered for this exam
+          </h2>
+          <p className="text-sm text-green-600 mt-1">
+            Registration details are shown below
+          </p>
+        </div>
+
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <Info label="Student Name" value={registeredData.Student?.std_name} />
+          <Info
+            label="Exam"
+            value={registeredData.ScholarshipExam?.exam_title}
+          />
+          <Info label="Branch" value={registeredData.branch} />
+          <Info label="Mobile" value={registeredData.mobile} />
+          <Info label="Email" value={registeredData.email} />
+          <Info label="DOB" value={registeredData.date_of_birth} />
+          <Info
+            label="Registration Code"
+            value={registeredData.registration_code}
+            highlight
+          />
+          <Info
+            label="ACE Student"
+            value={registeredData.is_ace_std ? "Yes" : "No"}
+          />
+        </div>
+
+        <div className="px-6 py-4 border-t bg-gray-50 flex flex-wrap gap-5 md:gap-0 justify-between items-center">
+          <p className="text-sm text-gray-600">
+            Redirecting to <b>My Exams</b> in{" "}
+            <span className="text-cyan-700 font-semibold">{countdown}s</span>
+          </p>
+
+          <button
+            onClick={() => router.push("/user-portal/protected/my-exams")}
+            className="px-4 py-2 cursor-pointer bg-cyan-700 text-white rounded-md hover:bg-cyan-800"
+          >
+            Go Now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto my-14 bg-white rounded-xl shadow-md">
       {/* Header */}
@@ -170,10 +314,9 @@ export default function ExamRegisterPage() {
             Email
           </label>
           <input
-            placeholder="example@gmail.com"
-            className="input"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="input bg-gray-100 cursor-not-allowed"
+            value={studentEmail}
+            disabled
           />
         </div>
 
@@ -232,7 +375,6 @@ export default function ExamRegisterPage() {
           />
         </div>
 
-        {/* ACE Student */}
         <label className="flex items-center gap-3 text-sm">
           <input
             type="checkbox"

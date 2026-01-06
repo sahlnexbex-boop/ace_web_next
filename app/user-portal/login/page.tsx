@@ -11,6 +11,8 @@ import {
 } from "@/lib/api/studentAuth";
 import { setToken, getToken } from "@/lib/auth";
 import { storeStudentIdFromToken } from "@/lib/studentAuthHelper";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 const BG_IMAGE = "/login_background_02.png";
 
@@ -131,7 +133,16 @@ export default function StudentAuthPage() {
   const isForgotFlow = stage !== "auth" && mode === "login";
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white relative">
+      {/* absolute back button */}
+
+      <Link href="/public/home" className="absolute top-4 left-4 cursor-pointer z-10">
+        <button className=" bg-gradient-to-r from-cyan-600 to-sky-700 hover:from-cyan-700 hover:to-sky-800 flex gap-3 items-center cursor-pointer text-white py-1 px-4 rounded-lg">
+          <ArrowLeft size={20} />
+          Back
+        </button>
+      </Link>
+
       {/* ── Form Side ── */}
       <div className="relative flex items-center justify-center min-h-screen sm:px-5 py-0 ">
         {/* Subtle mobile background */}
@@ -143,7 +154,11 @@ export default function StudentAuthPage() {
         <div className="relative backdrop-blur-[2px] w-full max-w-[420px] md:bg-white sm:rounded-2xl  p-8 md:p-10 lg:shadow-none lg:bg-transparent">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <img src="/ace_text.png" alt="ACE Institutions" className="md:h-16 h-14" />
+            <img
+              src="/ace_text.png"
+              alt="ACE Institutions"
+              className="md:h-16 h-14"
+            />
           </div>
 
           {/* Title */}

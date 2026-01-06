@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { IconPlus } from "@tabler/icons-react";
+import { useEffect, useState, useRef } from "react";
+import { IconPlus, IconDownload, IconFileTypeXls } from "@tabler/icons-react";
 
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
@@ -16,6 +16,7 @@ import {
   createOnlineRegistration,
   updateOnlineRegistration,
   deleteOnlineRegistration,
+  downloadOnlineRegistrationExcel,
 } from "@/lib/api/registration";
 
 import { getCourseCategories } from "@/lib/api/courseCategory";
@@ -30,6 +31,9 @@ export default function OnlineRegistrationPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+
+  const [openDownload, setOpenDownload] = useState(false);
+  const downloadRef = useRef<HTMLDivElement | null>(null);
 
   const [openForm, setOpenForm] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -115,6 +119,20 @@ export default function OnlineRegistrationPage() {
     "SSLC",
     "Others",
   ].map((v) => ({ label: v, value: v }));
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        downloadRef.current &&
+        !downloadRef.current.contains(e.target as Node)
+      ) {
+        setOpenDownload(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   /* ---------------- LOAD MASTER DATA ---------------- */
 
@@ -217,6 +235,51 @@ export default function OnlineRegistrationPage() {
         </h1>
 
         <div className="flex items-center gap-3">
+          {/* DOWNLOAD EXCEL */}
+          <div className="relative" ref={downloadRef}>
+            <button
+              onClick={() => setOpenDownload((p) => !p)}
+              className="flex gap-1 border border-cyan-700 text-cyan-700 px-4 py-2 rounded-md hover:text-white hover:bg-cyan-700 cursor-pointer"
+            >
+              <IconFileTypeXls size={18} />
+              <span>Download</span>
+            </button>
+
+            {openDownload && (
+              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg z-50">
+                {/* CURRENT PAGE */}
+                <button
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadOnlineRegistrationExcel({
+                      page,
+                      limit: 10,
+                    });
+                  }}
+                >
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Current Page</span>
+                </button>
+
+                {/* FULL DATA */}
+                <button
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadOnlineRegistrationExcel({
+                      exportAll: true,
+                    });
+                  }}
+                >
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Full Page</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* FILTER */}
           <TableFilter
             fields={[
               {
@@ -247,7 +310,6 @@ export default function OnlineRegistrationPage() {
               setFilters(f);
               setPage(1);
 
-              // 🔁 Reload course list when department filter changes
               if (f.department_id) loadCourses(f.department_id);
               else {
                 setCourses([]);
@@ -256,6 +318,7 @@ export default function OnlineRegistrationPage() {
             }}
           />
 
+          {/* ADD BUTTON */}
           <button
             onClick={() => {
               setSelected(null);

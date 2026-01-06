@@ -48,13 +48,18 @@ export async function apiRequest(
   const contentType = response.headers.get("content-type") || "";
 
   /* =========================
-     🔥 HANDLE PDF / BINARY
+      HANDLE PDF / BINARY
      ========================= */
-  if (contentType.includes("application/pdf")) {
+  if (
+    contentType.includes("application/pdf") ||
+    contentType.includes(
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+  ) {
     if (!response.ok) {
-      throw new Error(`PDF request failed (HTTP ${response.status})`);
+      throw new Error(`File download failed (HTTP ${response.status})`);
     }
-    return response; // 👈 RETURN RAW RESPONSE
+    return response; //  return raw response
   }
 
   /* =========================
@@ -68,7 +73,10 @@ export async function apiRequest(
       parsed = text ? JSON.parse(text) : {};
     } catch {
       throw new Error(
-        `Invalid JSON response from ${fullUrl}. Raw response: ${text.slice(0, 200)}`
+        `Invalid JSON response from ${fullUrl}. Raw response: ${text.slice(
+          0,
+          200
+        )}`
       );
     }
 

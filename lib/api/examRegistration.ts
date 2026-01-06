@@ -36,3 +36,39 @@ export const deleteExamRegistration = (id: number) =>
 export const getHallTicketByRegistrationId = (id: number) =>
   apiRequest(`/api/exam-registration/hallticket/${id}`, "GET");
 
+export const downloadExamRegistrationExcel = async (options?: {
+  page?: number;
+  limit?: number;
+  exportAll?: boolean;
+}) => {
+  const params = new URLSearchParams();
+
+  if (options?.exportAll) {
+    params.append("export", "all");
+  } else {
+    params.append("page", String(options?.page || 1));
+    params.append("limit", String(options?.limit || 10));
+  }
+
+  const response = (await apiRequest(
+    `${BASE_URL}/download-excel?${params.toString()}`,
+    "GET"
+  )) as Response;
+
+  const blob = await response.blob();
+
+  //  Trigger browser download
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = options?.exportAll
+    ? "exam_registrations_full.xlsx"
+    : `exam_registrations_page_${options?.page || 1}.xlsx`;
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  window.URL.revokeObjectURL(url);
+};

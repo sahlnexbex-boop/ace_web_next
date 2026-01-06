@@ -28,25 +28,25 @@ const studentMenuItems = [
     path: "/user-portal/protected/dashboard",
   },
   {
-    name: "My Learning",
+    name: "My Exams",
     icon: GraduationCap,
     children: [
-      { name: "My Exams", icon: BookOpen, path: "/user-portal/protected/my-exams" },
-      { name: "My Courses", icon: BookOpen, path: "/user-portal/protected/courses" },
-      { name: "Video Classes", icon: Video, path: "/user-portal/protected/video-classes" },
-      { name: "Study Materials", icon: FileText, path: "/user-portal/protected/materials" },
+      { name: "Registered Exams", icon: BookOpen, path: "/user-portal/protected/my-exams" },
+      // { name: "My Courses", icon: BookOpen, path: "/user-portal/protected/courses" },
+      // { name: "Video Classes", icon: Video, path: "/user-portal/protected/video-classes" },
+      // { name: "Study Materials", icon: FileText, path: "/user-portal/protected/materials" },
     ],
   },
-  {
-    name: "Achievements",
-    icon: Award,
-    path: "/user-portal/protected/achievements",
-  },
-  {
-    name: "Events",
-    icon: Calendar,
-    path: "/user-portal/protected/events",
-  },
+  // {
+  //   name: "Achievements",
+  //   icon: Award,
+  //   path: "/user-portal/protected/achievements",
+  // },
+  // {
+  //   name: "Events",
+  //   icon: Calendar,
+  //   path: "/user-portal/protected/events",
+  // },
 ];
 
 /* ================= SIDEBAR ================= */
