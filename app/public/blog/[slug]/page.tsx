@@ -3,50 +3,64 @@ import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { getBlogById, getBlogs } from "@/lib/api/blogs";
+import { getBlogBySlug, getBlogs } from "@/lib/api/blogs";
+import { slugify } from "@/lib/slugify";
+import { BlogDetailsSkeleton } from "@/components/skeltons/skelton";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function BlogDetails() {
-  const { id } = useParams();
+  const params = useParams();
   const router = useRouter();
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   const [blog, setBlog] = useState<any>(null);
   const [recentBlogs, setRecentBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // Load Blog + Recent Blogs
   useEffect(() => {
     const fetchBlogData = async () => {
       try {
-        const blogRes = await getBlogById(Number(id));
+        const slug = params.slug as string;
+
+        if (!slug) {
+          setError("No slug found in URL");
+          setLoading(false);
+          return;
+        }
+        const blogRes = await getBlogBySlug(slug);
 
         if (blogRes?.data) {
           setBlog(blogRes.data);
-        }
 
-        const recentRes = await getBlogs(1, 4, "", 1);
-        if (recentRes?.data) {
-          const filtered = recentRes.data.filter(
-            (b: any) => b.blog_id !== Number(id)
-          );
-          setRecentBlogs(filtered.slice(0, 3));
+          // Fetch recent blogs
+          const recentRes = await getBlogs(1, 4, "", 1);
+          if (recentRes?.data) {
+            const filtered = recentRes.data.filter(
+              (b: any) => b.blog_id !== blogRes.data.blog_id
+            );
+            setRecentBlogs(filtered.slice(0, 3));
+          }
+        } else {
+          setError("Blog not found");
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching blog:", error);
+        setError(error?.message || "Failed to load blog");
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchBlogData();
-  }, [id]);
+    fetchBlogData();
+  }, [params]);
 
   // GSAP Animations
   useLayoutEffect(() => {
-    if (loading) return;
+    if (loading || !blog) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -101,19 +115,22 @@ export default function BlogDetails() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [loading]);
+  }, [loading, blog]);
 
-  if (loading)
-    return (
-      <div className="text-center py-20 text-gray-500 text-sm">
-        Loading blog details...
-      </div>
-    );
+  if (loading) return <BlogDetailsSkeleton />;
 
-  if (!blog)
+  if (error || !blog)
     return (
-      <div className="text-center py-20 text-gray-500 text-sm">
-        Blog not found.
+      <div className="text-center py-20">
+        <p className="text-gray-500 text-sm mb-4">
+          {error || "Blog not found."}
+        </p>
+        <button
+          onClick={() => router.push("/public/blog")}
+          className="text-cyan-600 hover:underline text-sm"
+        >
+          ← Back to Blogs
+        </button>
       </div>
     );
 
@@ -146,7 +163,7 @@ export default function BlogDetails() {
       </div>
 
       <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
-        {/* ================= Main Blog ================= */}
+        {/* Main Blog */}
         <div className="blog-main">
           <div className="flex justify-between items-center flex-wrap">
             <div>
@@ -164,7 +181,7 @@ export default function BlogDetails() {
               </p>
             </div>
             <div>
-              {/*  Course Badge (Navigate to /public/courses/:category_id/:course_id) */}
+              {/*  Course Badge */}
               {blog.course && (
                 <div
                   className="inline-block bg-sky-500 text-white text-xs px-3 py-1 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
@@ -191,7 +208,7 @@ export default function BlogDetails() {
           </div>
         </div>
 
-        {/* ================= Recent Blogs ================= */}
+        {/* Recent Blogs */}
         <div>
           <h3 className="font-semibold text-lg mb-4 text-gray-900">
             Recent Blogs
@@ -205,10 +222,12 @@ export default function BlogDetails() {
                 <div
                   key={b.blog_id}
                   className="recent-blog-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition"
-                  onClick={() => router.push(`/public/blog/${b.blog_id}`)}
+                  onClick={() =>
+                    router.push(`/public/blog/${slugify(b.blog_title)}`)
+                  }
                 >
                   <img
-                    src={ server_url + b.blog_image}
+                    src={server_url + b.blog_image}
                     alt={b.blog_title}
                     className="w-20 h-16 object-cover rounded-md"
                   />

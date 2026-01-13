@@ -21,6 +21,10 @@ export const getCourses = async (
 export const getCourseById = async (id: number) =>
   apiRequest(`/api/courses/${id}`, "GET");
 
+// get course by slug
+export const getCourseBySlug = async (slug: string) =>
+  apiRequest(`/api/courses/slug/${slug}`, "GET");
+
 export const createCourse = (data: FormData) =>
   apiRequest("/api/courses", "POST", data, true);
 

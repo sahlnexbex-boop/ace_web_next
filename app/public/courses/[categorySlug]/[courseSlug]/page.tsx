@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, FileText } from "lucide-react";
-import { getCourseById } from "@/lib/api/course";
-import Loader from "@/components/loader";
+import { getCourseById, getCourseBySlug } from "@/lib/api/course";
 import EnquiryModal from "@/components/enquiryModal";
+import { CourseDetailsSkeleton } from "@/components/skeltons/skelton";
 
 interface Course {
   course_id: number;
@@ -29,7 +29,7 @@ interface Course {
 export default function CourseDetailsPage({
   params,
 }: {
-  params: { categoryId: string; courseId: string };
+  params: { categorySlug: string; courseSlug: string; };
 }) {
   const router = useRouter();
   const [course, setCourse] = useState<Course | null>(null);
@@ -41,7 +41,7 @@ export default function CourseDetailsPage({
   useEffect(() => {
     (async () => {
       try {
-        const res = await getCourseById(Number(params.courseId));
+        const res = await getCourseBySlug(params.courseSlug);
         setCourse(res?.data || null);
       } catch (error) {
         console.error("Error loading course:", error);
@@ -49,7 +49,7 @@ export default function CourseDetailsPage({
         setLoading(false);
       }
     })();
-  }, [params.courseId]);
+  }, [params.courseSlug]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -75,11 +75,7 @@ export default function CourseDetailsPage({
   );
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[60vh] text-gray-600">
-        <Loader />
-      </div>
-    );
+    return <CourseDetailsSkeleton />;
   }
 
   if (!course) {
@@ -139,7 +135,7 @@ export default function CourseDetailsPage({
               <span
                 className="cursor-pointer hover:underline"
                 onClick={() =>
-                  router.push(`/public/courses/${params.categoryId}`)
+                  router.push(`/public/courses/${params.categorySlug}`)
                 }
               >
                 {course.category?.category_name || "Category"}

@@ -104,6 +104,7 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isOtherOffice, setIsOtherOffice] = useState(false);
 
   const START_YEAR = 2000;
   const CURRENT_YEAR = new Date().getFullYear();
@@ -117,114 +118,117 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
   );
 
   const officeOptions = [
-    "Agriculture Department",
-    "Akshaya State Project",
-    "Animal Husbandry",
-    "Archaeology",
-    "Archives Department",
-    "Bhoomikeralam Project",
-    "Kerala State Electricity Board Ltd.",
-    "Kerala Water Authority",
-    "Kudumbashree- State Poverty Eradication Mission",
-    "Directorate of Ayurveda Medical Education",
-    "Co-operative Audit",
-    "Co-operative Societies",
-    "Commercial Taxes",
-    "Commissionerate of Civil Supplies",
-    "Directorate of Civil Supplies",
-    "Commissioner for Entrance Examinations",
-    "Census Operations- Kerala",
-    "Coir Development",
-    "Directorate of Culture",
-    "Dairy Development Department",
-    "Directorate of Handlooms and Textiles",
-    "Directorate of Medical Education",
-    "Directorate of Prosecution",
-    "Drugs Control Department",
-    "Directorate of Economics and Statistics",
-    "Environment and Climate Change",
-    "Collegiate Education",
-    "Public Instructions",
-    "Excise Commissionerate",
-    "Directorate of Vocational Higher Secondary Education",
-    "Grand Kerala Shopping Festival (GKSF)",
-    "IT@school Project",
-    "Electrical Inspectorate",
-    "Inquiry Commissioner and Special Judge- Thiruvananthapuram",
-    "Jalanidhi",
-    "Factories and Boilers Department",
-    "Fire and Rescue Services Department",
-    "Fisheries Department",
-    "Food Safety Commissioner",
-    "Forest Department",
-    "Ground Water Department",
-    "Harbour Engineering Department",
-    "Directorate of Health Services",
-    "Directorate of Higher Secondary Education",
-    "Homoeopathic Department",
-    "Hydrographic Survey Wing",
-    "Indian Systems of Medicine",
-    "Industrial Tribunal and Judge",
-    "Industries and Commerce Directorate",
-    "Industries Training",
-    "Information and Public Relations",
-    "IMG (Institute of Management in Government)",
-    "Insurance Medical Services Department",
-    "Irrigation Department",
-    "Jail Department",
-    "KIRTADS",
-    "Kuttanad Package",
-    "Kerala Medical Services Corporation Limited",
-    "Kerala Minerals and Metals Limited",
-    "The Kerala State Co-Operative Bank Ltd.",
-    "Kerala State Industrial Development Corporation Ltd.",
-    "Kerala State IT Mission",
-    "Kerala State Civil Supplies Corporation",
-    "Kerala State Insurance Department",
-    "Kerala State Land Use Board",
-    "Kerala State Planning Board",
-    "Kerala State Remote Sensing and Environment Centre",
-    "Kerala State Roads and Bridges Development Corporation",
-    "Kerala Tourism Development Corporation Limited",
-    "Labour Commissionerate",
-    "Land Board",
-    "Commissionerate of Land Revenue",
-    "Legal Metrology Department",
-    "Kerala State Audit Department",
-    "MGNREGS",
-    "Mining and Geology Department",
-    "Motor Vehicles Department",
-    "Museums and Zoos Directorate",
-    "NCC Directorate",
-    "National Employment Service",
-    "National Rural Health Mission (NRHM)",
-    "Kerala State Nirmithi Kendra",
-    "Panchayat Department",
-    "Police Department",
-    "Ports Department",
-    "Printing Directorate",
-    "Public Works Department",
-    "Registration Department",
-    "Rural Development",
-    "Sarva Shiksha Abhiyan- Kerala",
-    "Sainik Welfare Department",
-    "Scheduled Caste Development Department",
-    "Scheduled Tribe Development Department",
-    "Social Justice Directorate",
-    "Sports and Youth Affairs Department",
-    "State Central Library Department",
-    "State Water Transport Department",
-    "Stationery Department",
-    "Suchitwa Mission",
-    "Survey and Land Records Department",
-    "Town and Country Planning Department",
-    "Tourism Department",
-    "Treasuries Department",
-    "Urban Affairs Department",
-    "Vigilance and Anti-corruption Bureau",
-    "Backward Communities Development Department",
-    "Directorate of Minority Welfare",
-  ].map((o) => ({ label: o, value: o }));
+    ...[
+      "Agriculture Department",
+      "Akshaya State Project",
+      "Animal Husbandry",
+      "Archaeology",
+      "Archives Department",
+      "Bhoomikeralam Project",
+      "Kerala State Electricity Board Ltd.",
+      "Kerala Water Authority",
+      "Kudumbashree- State Poverty Eradication Mission",
+      "Directorate of Ayurveda Medical Education",
+      "Co-operative Audit",
+      "Co-operative Societies",
+      "Commercial Taxes",
+      "Commissionerate of Civil Supplies",
+      "Directorate of Civil Supplies",
+      "Commissioner for Entrance Examinations",
+      "Census Operations- Kerala",
+      "Coir Development",
+      "Directorate of Culture",
+      "Dairy Development Department",
+      "Directorate of Handlooms and Textiles",
+      "Directorate of Medical Education",
+      "Directorate of Prosecution",
+      "Drugs Control Department",
+      "Directorate of Economics and Statistics",
+      "Environment and Climate Change",
+      "Collegiate Education",
+      "Public Instructions",
+      "Excise Commissionerate",
+      "Directorate of Vocational Higher Secondary Education",
+      "Grand Kerala Shopping Festival (GKSF)",
+      "IT@school Project",
+      "Electrical Inspectorate",
+      "Inquiry Commissioner and Special Judge- Thiruvananthapuram",
+      "Jalanidhi",
+      "Factories and Boilers Department",
+      "Fire and Rescue Services Department",
+      "Fisheries Department",
+      "Food Safety Commissioner",
+      "Forest Department",
+      "Ground Water Department",
+      "Harbour Engineering Department",
+      "Directorate of Health Services",
+      "Directorate of Higher Secondary Education",
+      "Homoeopathic Department",
+      "Hydrographic Survey Wing",
+      "Indian Systems of Medicine",
+      "Industrial Tribunal and Judge",
+      "Industries and Commerce Directorate",
+      "Industries Training",
+      "Information and Public Relations",
+      "IMG (Institute of Management in Government)",
+      "Insurance Medical Services Department",
+      "Irrigation Department",
+      "Jail Department",
+      "KIRTADS",
+      "Kuttanad Package",
+      "Kerala Medical Services Corporation Limited",
+      "Kerala Minerals and Metals Limited",
+      "The Kerala State Co-Operative Bank Ltd.",
+      "Kerala State Industrial Development Corporation Ltd.",
+      "Kerala State IT Mission",
+      "Kerala State Civil Supplies Corporation",
+      "Kerala State Insurance Department",
+      "Kerala State Land Use Board",
+      "Kerala State Planning Board",
+      "Kerala State Remote Sensing and Environment Centre",
+      "Kerala State Roads and Bridges Development Corporation",
+      "Kerala Tourism Development Corporation Limited",
+      "Labour Commissionerate",
+      "Land Board",
+      "Commissionerate of Land Revenue",
+      "Legal Metrology Department",
+      "Kerala State Audit Department",
+      "MGNREGS",
+      "Mining and Geology Department",
+      "Motor Vehicles Department",
+      "Museums and Zoos Directorate",
+      "NCC Directorate",
+      "National Employment Service",
+      "National Rural Health Mission (NRHM)",
+      "Kerala State Nirmithi Kendra",
+      "Panchayat Department",
+      "Police Department",
+      "Ports Department",
+      "Printing Directorate",
+      "Public Works Department",
+      "Registration Department",
+      "Rural Development",
+      "Sarva Shiksha Abhiyan- Kerala",
+      "Sainik Welfare Department",
+      "Scheduled Caste Development Department",
+      "Scheduled Tribe Development Department",
+      "Social Justice Directorate",
+      "Sports and Youth Affairs Department",
+      "State Central Library Department",
+      "State Water Transport Department",
+      "Stationery Department",
+      "Suchitwa Mission",
+      "Survey and Land Records Department",
+      "Town and Country Planning Department",
+      "Tourism Department",
+      "Treasuries Department",
+      "Urban Affairs Department",
+      "Vigilance and Anti-corruption Bureau",
+      "Backward Communities Development Department",
+      "Directorate of Minority Welfare",
+    ].map((o) => ({ label: o, value: o })),
+    { label: "Others", value: "OTHERS" },
+  ];
 
   const {
     register,
@@ -499,34 +503,31 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
               />
             </div>
 
-            {/* Name of Office */}
+            {/* Department */}
             <div className="col-span-1">
               <label className="block text-gray-700 mb-1 font-medium text-sm">
-                Name of Office <span className="text-red-500">*</span>
+                Department <span className="text-red-500">*</span>
               </label>
 
               <Select
                 options={officeOptions}
-                placeholder="Select office"
+                placeholder="Select Department"
                 isSearchable
                 menuPlacement="auto"
                 menuPortalTarget={document.body}
                 styles={{
-                  menuPortal: (base) => ({
-                    ...base,
-                    zIndex: 9999,
-                  }),
-                  menu: (base) => ({
-                    ...base,
-                    zIndex: 9999,
-                  }),
-                  menuList: (base) => ({
-                    ...base,
-                    maxHeight: 180,
-                  }),
+                  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                  menu: (base) => ({ ...base, zIndex: 9999 }),
+                  menuList: (base) => ({ ...base, maxHeight: 180 }),
                 }}
                 onChange={(opt: any) => {
-                  setValue("name_of_office", opt?.value || "");
+                  if (opt?.value === "OTHERS") {
+                    setIsOtherOffice(true);
+                    setValue("name_of_office", "");
+                  } else {
+                    setIsOtherOffice(false);
+                    setValue("name_of_office", opt?.value || "");
+                  }
                   clearErrors("name_of_office");
                 }}
               />
@@ -546,8 +547,33 @@ function RankForumModal({ onClose }: { onClose: () => void }) {
               )}
             </div>
 
+            {/* Other Department Input */}
+            {isOtherOffice && (
+              <div className="col-span-1">
+                <label className="block text-gray-700 mb-1 font-medium text-sm">
+                  Specify Department <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter department name"
+                  {...register("name_of_office", {
+                    required: "Please specify department name",
+                    validate: validateText,
+                  })}
+                  className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+                {errors.name_of_office && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.name_of_office.message}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Post */}
-            <div className="col-span-1">
+            <div
+              className={`col-span-1 ${isOtherOffice ? "md:col-span-2" : ""}`}
+            >
               <label className="block text-gray-700 mb-1 font-medium text-sm">
                 Job Position <span className="text-red-500">*</span>
               </label>

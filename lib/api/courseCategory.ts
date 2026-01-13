@@ -20,6 +20,10 @@ export const getCourseCategories = async (
   return apiRequest(`/api/course-category?${params.toString()}`, "GET");
 };
 
+// by slug
+export const getCourseCategoryBySlug = async (slug: string) =>
+  apiRequest(`/api/course-category/slug/${slug}`, "GET");
+
 export const getCourseCategoryById = async (id: number) =>
   apiRequest(`/api/course-category/${id}`, "GET");
 

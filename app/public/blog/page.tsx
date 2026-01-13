@@ -6,6 +6,8 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { getBlogs } from "@/lib/api/blogs";
 import Loader from "@/components/loader";
+import { slugify } from "@/lib/slugify";
+import { BlogSkeletonGrid } from "@/components/skeltons/skelton";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +17,8 @@ export default function BlogPage() {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -34,7 +38,9 @@ export default function BlogPage() {
   }, []);
 
   useLayoutEffect(() => {
-    if (loading || blogs.length === 0) return;
+    if (loading || blogs.length === 0 || hasAnimatedRef.current) return;
+
+    hasAnimatedRef.current = true;
 
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>(".blog-card").forEach((card, i) => {
@@ -45,13 +51,12 @@ export default function BlogPage() {
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.8,
+            duration: 0.7,
             ease: "power2.out",
-            delay: i * 0.1,
+            delay: i * 0.08,
             scrollTrigger: {
               trigger: card,
               start: "top 85%",
-              toggleActions: "play none none none",
               once: true,
             },
           }
@@ -88,7 +93,7 @@ export default function BlogPage() {
       </h1>
 
       {loading ? (
-        <Loader />
+        <BlogSkeletonGrid />
       ) : blogs.length === 0 ? (
         <div className="flex justify-center items-center min-h-[70vh] md:min-h-auto">
           <img src="../../no_data.png" alt="no data" className="opacity-30" />
@@ -98,7 +103,9 @@ export default function BlogPage() {
           {blogs.map((blog) => (
             <div
               key={blog.blog_id}
-              onClick={() => router.push(`/public/blog/${blog.blog_id}`)}
+              onClick={() =>
+                router.push(`/public/blog/${slugify(blog.blog_title)}`)
+              }
               className="blog-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer overflow-hidden group"
             >
               <div className="overflow-hidden relative">

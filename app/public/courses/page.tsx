@@ -13,7 +13,6 @@ export default function ListCourses() {
     header: "Our Courses",
     content_01:
       "From foundation courses to advanced training we offer a wide range of courses specially curated keeping students in mind.",
-    // content_02: "guidance for complete exam preparation.",
   };
   
   return (
