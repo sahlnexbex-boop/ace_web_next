@@ -1,6 +1,3 @@
-// Location: components/CKEditorUploadAdapter.ts
-// This is a NEW FILE - create it in your components folder
-
 export default class CKEditorUploadAdapter {
   loader: any;
 
