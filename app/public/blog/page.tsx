@@ -138,9 +138,10 @@ export default function BlogPage() {
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-600 text-sm leading-snug line-clamp-3">
-                  {blog.blog_content}
-                </p>
+                <div
+                  className="prose max-w-none blog-text line-clamp-3 text-gray-700 text-sm"
+                  dangerouslySetInnerHTML={{ __html: blog.blog_content }}
+                />
               </div>
             </div>
           ))}

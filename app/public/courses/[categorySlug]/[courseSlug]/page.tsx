@@ -184,7 +184,7 @@ export default function CourseDetailsPage({
                   <p className="text-sm text-gray-900">Course Duration</p>
                   <p className="font-semibold text-[#087fc2]">
                     {course.course_duration
-                      ? `${course.course_duration} Days`
+                      ? `${course.course_duration} Hours`
                       : "N/A"}
                   </p>
                 </div>

@@ -18,7 +18,7 @@ export default function DynamicViewModal({
   if (!isOpen || !data) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-50 overflow-hidden">
       <div className="bg-white rounded-2xl shadow-lg max-w-lg w-full p-6 relative">
         <button
           onClick={onClose}
@@ -29,16 +29,16 @@ export default function DynamicViewModal({
 
         <h2 className="text-xl font-semibold mb-5 text-cyan-700">{title}</h2>
 
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden px-1">
           {Object.entries(data).map(([label, value]) => (
             <div
               key={label}
-              className="flex justify-between items-start border-b border-gray-100 pb-2 px-4"
+              className="flex flex-wrap gap-3 justify-between items-start border-b border-gray-100 pb-2 px-4"
             >
-              <span className="font-medium text-gray-700 capitalize w-[40%]">
+              <span className="font-medium text-gray-700 capitalize max-w-[40%]">
                 {label.replace(/_/g, " ")}
               </span>
-              <div className="text-gray-600 text-sm w-[60%] text-right break-words">
+              <div className="text-gray-600 text-sm  text-right break-words">
                 {value}
               </div>
             </div>

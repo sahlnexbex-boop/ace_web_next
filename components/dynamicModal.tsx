@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { X, RotateCw, Check, ZoomIn, ZoomOut, Edit2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import Cropper from "react-easy-crop";
+import CKEditorField from "@/components/CKEditorField";
 
 interface Point {
   x: number;
@@ -83,6 +84,11 @@ export default function DynamicFormModal({
   const { showSuccess, showError } = useToast();
   const cropRef = React.useRef<Point>({ x: 0, y: 0 });
   const rafRef = React.useRef<number | null>(null);
+  const allEditorImagesRef = useRef<string[]>([]);
+  const [uploadedEditorImages, setUploadedEditorImages] = useState<string[]>(
+    []
+  );
+  const initialContentRef = useRef<string>("");
   const ASPECT_RATIOS = [
     { label: "Free", value: 0 },
     { label: "1:1", value: 1 },
@@ -92,6 +98,138 @@ export default function DynamicFormModal({
     { label: "9:16", value: 9 / 16 },
   ];
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+  const extractImageUrls = (html: string): string[] => {
+    if (!html) return [];
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const images = doc.querySelectorAll("img");
+      return Array.from(images).map((img) => img.src);
+    } catch (error) {
+      console.error("Error extracting image URLs:", error);
+      return [];
+    }
+  };
+
+  // ============= Track all images in editor =============
+  const trackAllEditorImages = (content: string) => {
+    const currentImages = extractImageUrls(content);
+
+    // Add any new images to our tracking list
+    currentImages.forEach((url) => {
+      if (!allEditorImagesRef.current.includes(url)) {
+        allEditorImagesRef.current.push(url);
+        console.log("📸 Now tracking image:", url);
+      }
+    });
+
+    console.log("📦 All tracked editor images:", allEditorImagesRef.current);
+  };
+
+  // REPLACE cleanupUnusedImages with this version that handles ALL scenarios correctly:
+  const cleanupUnusedImages = async (isSubmitting: boolean = false) => {
+    try {
+      const currentImages = extractImageUrls(formState.blog_content || "");
+      const initialImages = extractImageUrls(initialContentRef.current);
+
+      console.log("🔍 Cleanup check:", {
+        isSubmitting,
+        allTrackedImages: allEditorImagesRef.current,
+        currentImages,
+        initialImages,
+      });
+
+      let imagesToDelete: string[] = [];
+
+      if (isSubmitting) {
+        // =================== SUBMIT SCENARIO ===================
+        // Delete images that were in editor at some point but removed before submit
+        imagesToDelete = allEditorImagesRef.current.filter(
+          (url) => !currentImages.includes(url)
+        );
+
+        console.log("💾 Submit mode: Deleting images removed from editor");
+      } else {
+        // =================== CLOSE SCENARIO ===================
+        // Three types of images to delete:
+
+        // 1. Images from initial content that were removed
+        const removedFromInitial = initialImages.filter(
+          (url) => !currentImages.includes(url)
+        );
+
+        // 2. Images that were uploaded but then deleted from editor
+        const deletedAfterUpload = allEditorImagesRef.current.filter(
+          (url) => !currentImages.includes(url) && !initialImages.includes(url)
+        );
+
+        // 3. NEW: If this is a CREATE form (no initial content), delete ALL uploaded images
+        //    Because closing without submit means user cancelled
+        const isCreateForm = !initialImages || initialImages.length === 0;
+
+        if (isCreateForm) {
+          // Delete ALL tracked images (user is cancelling new blog creation)
+          imagesToDelete = [...allEditorImagesRef.current];
+          console.log(
+            "🚪 Close mode (CREATE): Deleting all uploaded images - user cancelled"
+          );
+        } else {
+          // Delete only removed and deleted images (user is cancelling edit)
+          imagesToDelete = [
+            ...new Set([...removedFromInitial, ...deletedAfterUpload]),
+          ];
+          console.log("🚪 Close mode (EDIT): Deleting removed/deleted images");
+        }
+
+        console.log("   Removed from initial:", removedFromInitial);
+        console.log("   Deleted after upload:", deletedAfterUpload);
+      }
+
+      console.log("🗑️ Images to delete:", imagesToDelete);
+
+      if (imagesToDelete.length > 0) {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/blogs/cleanup-editor-images`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ imageUrls: imagesToDelete }),
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log("✅ Cleaned up images:", result);
+        } else {
+          console.error("❌ Cleanup failed:", response.statusText);
+        }
+      } else {
+        console.log("✅ No images to clean up");
+      }
+    } catch (error) {
+      console.error("❌ Error cleaning up images:", error);
+    }
+  };
+
+  // ============= Handle modal close =============
+  const handleClose = async () => {
+    console.log("🚪 Closing modal without submitting");
+    await cleanupUnusedImages(false);
+    setUploadedEditorImages([]);
+    allEditorImagesRef.current = [];
+    initialContentRef.current = "";
+    onClose();
+  };
+
+  useEffect(() => {
+    if (isOpen && defaultValues?.blog_content) {
+      initialContentRef.current = defaultValues.blog_content;
+    }
+  }, [isOpen, defaultValues]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -379,15 +517,26 @@ export default function DynamicFormModal({
     return Promise.resolve({ success: true });
   };
 
+  // ============= Handle submit =============
   const handleSubmit = async () => {
     setError("");
     setLoading(true);
 
     try {
+      console.log("💾 Submitting form");
+
+      // Clean up images removed from editor before submitting
+      await cleanupUnusedImages(true);
+
       const fd = buildFormData();
 
       if (onSubmit) await onSubmit(fd);
       else await defaultSubmit(fd);
+
+      // Reset tracking
+      setUploadedEditorImages([]);
+      allEditorImagesRef.current = [];
+      initialContentRef.current = "";
 
       onSuccess?.();
       showSuccess("Submitted successfully!");
@@ -571,7 +720,7 @@ export default function DynamicFormModal({
       >
         <div style={modalInnerStyle} className="p-6">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute cursor-pointer top-3 right-3 text-gray-500 hover:text-black"
           >
             <X size={20} />
@@ -603,6 +752,38 @@ export default function DynamicFormModal({
                       disabled={field.disabled}
                       className="w-full border rounded p-2 focus:ring-2 focus:ring-cyan-500"
                       rows={4}
+                    />
+                  </div>
+                );
+              }
+
+              if (field.type === "richtext") {
+                return (
+                  <div key={field.name} className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {field.label}
+                      {field.required && (
+                        <span className="text-red-500 ml-1">*</span>
+                      )}
+                    </label>
+
+                    <CKEditorField
+                      value={formState[field.name] ?? ""}
+                      onChange={(val) => {
+                        setFormState((prev) => ({
+                          ...prev,
+                          [field.name]: val,
+                        }));
+                        trackAllEditorImages(val);
+                      }}
+                      onImagesUploaded={(urls) => {
+                        setUploadedEditorImages(urls);
+                        urls.forEach((url) => {
+                          if (!allEditorImagesRef.current.includes(url)) {
+                            allEditorImagesRef.current.push(url);
+                          }
+                        });
+                      }}
                     />
                   </div>
                 );

@@ -24,7 +24,6 @@ export default function RankHolders() {
           undefined,
           undefined,
           undefined,
-          2
         );
         const data = res?.data || [];
         setRankHolders(data);

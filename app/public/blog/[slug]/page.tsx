@@ -6,18 +6,40 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { getBlogBySlug, getBlogs } from "@/lib/api/blogs";
 import { slugify } from "@/lib/slugify";
 import { BlogDetailsSkeleton } from "@/components/skeltons/skelton";
+import { getShorts } from "@/lib/api/shorts";
+import VideoModal from "@/components/videoModal";
+import { Play } from "lucide-react";
+import EnquiryModal from "@/components/enquiryModal";
+import { getRankHolders } from "@/lib/api/rankHolders";
 
 gsap.registerPlugin(ScrollTrigger);
+
+interface ShortItem {
+  shorts_id: number;
+  shorts_title: string;
+  shorts_file: string;
+  shorts_link: string;
+  status: number;
+}
 
 export default function BlogDetails() {
   const params = useParams();
   const router = useRouter();
   const sectionRef = useRef<HTMLDivElement | null>(null);
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+
+  const [shorts, setShorts] = useState<ShortItem[]>([]);
+  const [activeShortIndex, setActiveShortIndex] = useState(0);
 
   const [blog, setBlog] = useState<any>(null);
   const [recentBlogs, setRecentBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const shortWrapperRef = useRef<HTMLDivElement | null>(null);
+  const shortImageRef = useRef<HTMLImageElement | null>(null);
+  const [rankHolders, setRankHolders] = useState<any[]>([]);
+
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // Load Blog + Recent Blogs
@@ -57,6 +79,74 @@ export default function BlogDetails() {
 
     fetchBlogData();
   }, [params]);
+
+  useLayoutEffect(() => {
+    if (!shortImageRef.current) return;
+
+    gsap.fromTo(
+      shortImageRef.current,
+      {
+        xPercent: 100,
+        opacity: 0,
+      },
+      {
+        xPercent: 0,
+        opacity: 1,
+        duration: 0.7,
+        ease: "power3.out",
+        clearProps: "transform",
+      }
+    );
+  }, [activeShortIndex]);
+
+  // Load Shorts
+  useEffect(() => {
+    const fetchShorts = async () => {
+      try {
+        const response = await getShorts(1, 4, "", 1);
+        setShorts(response?.data || []);
+      } catch (err) {
+        console.error("Error fetching shorts:", err);
+      }
+    };
+
+    fetchShorts();
+  }, []);
+
+  // Load Rank Holders
+  useEffect(() => {
+    const fetchRankHolders = async () => {
+      try {
+        const res = await getRankHolders(
+          1,
+          6,
+          "",
+          1,
+          undefined,
+          undefined,
+          undefined,
+          undefined
+        );
+        const data = res?.data || [];
+        setRankHolders(data);
+      } catch (error) {
+        console.error("Error fetching rank holders:", error);
+      }
+    };
+    fetchRankHolders();
+  }, []);
+
+  useEffect(() => {
+    if (shorts.length === 0) return;
+
+    const interval = setInterval(() => {
+      setActiveShortIndex((prev) =>
+        prev === shorts.length - 1 ? 0 : prev + 1
+      );
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [shorts]);
 
   // GSAP Animations
   useLayoutEffect(() => {
@@ -164,7 +254,7 @@ export default function BlogDetails() {
 
       <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
         {/* Main Blog */}
-        <div className="blog-main">
+        <div className="blog-main overflow-auto relative">
           <div className="flex justify-between items-center flex-wrap">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
@@ -180,20 +270,13 @@ export default function BlogDetails() {
                 • {blog.blog_author}
               </p>
             </div>
-            <div>
-              {/*  Course Badge */}
-              {blog.course && (
-                <div
-                  className="inline-block bg-sky-500 text-white text-xs px-3 py-1 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
-                  onClick={() =>
-                    router.push(
-                      `/public/courses/${blog.course.category_id}/${blog.course.course_id}`
-                    )
-                  }
-                >
-                  {blog.course.course_name}
-                </div>
-              )}
+            <div className="flex justify-end w-full">
+              <div
+                onClick={() => setShowEnquiryModal(true)}
+                className="inline-block bg-sky-500 text-white text-xs px-5 py-2 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
+              >
+                Enroll Now
+              </div>
             </div>
           </div>
 
@@ -203,17 +286,25 @@ export default function BlogDetails() {
             className="rounded-lg w-full h-auto mb-6 border border-gray-200"
           />
 
-          <div className="blog-text text-gray-700 leading-relaxed whitespace-pre-line">
-            {blog.blog_content}
-          </div>
+          {blog.course?.course_name && (
+            <p className="text-[10px] w-fit absolute md:top-[7.5rem] top-20 md:left-5  bg-cyan-600 text-white inline-block md:px-5 px-3 py-1 rounded-md mb-4 cursor-pointer">
+              {blog.course.course_name}
+            </p>
+          )}
+
+          <div
+            className="ck-content text-gray-700"
+            dangerouslySetInnerHTML={{ __html: blog.blog_content }}
+          />
         </div>
 
-        {/* Recent Blogs */}
+        {/* Right Side */}
         <div>
           <h3 className="font-semibold text-lg mb-4 text-gray-900">
             Recent Blogs
           </h3>
 
+          {/* recent blogs  */}
           {recentBlogs.length === 0 ? (
             <p className="text-sm text-gray-500">No recent blogs found.</p>
           ) : (
@@ -266,8 +357,93 @@ export default function BlogDetails() {
               ))}
             </div>
           )}
+
+          {/* ace shorts  */}
+          <div className="mt-10">
+            <h3 className="font-semibold text-lg mb-4 text-gray-900">
+              Ace Shorts
+            </h3>
+
+            {shorts.length === 0 ? (
+              <p className="text-sm text-gray-500">No shorts available.</p>
+            ) : (
+              <div className="relative  w-full lg:h-[600px] h-[500px] rounded-lg overflow-hidden group">
+                <img
+                  key={shorts[activeShortIndex]?.shorts_id}
+                  ref={shortImageRef}
+                  src={
+                    server_url + shorts[activeShortIndex]?.shorts_file ||
+                    "/placeholder.svg"
+                  }
+                  alt={shorts[activeShortIndex]?.shorts_title}
+                  className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                />
+
+                {/* Play button overlay */}
+                <div
+                  className="absolute inset-0 md:top-52 flex items-center justify-center cursor-pointer"
+                  onClick={() => setIsVideoOpen(true)}
+                >
+                  <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                    <Play
+                      className="w-6 h-6 text-cyan-600 ml-1"
+                      fill="currentColor"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* rank holders */}
+          <div className="mt-10">
+            <h3 className="font-semibold text-lg mb-4 text-gray-900">
+              Rank Holders
+            </h3>
+
+            {rankHolders.length === 0 ? (
+              <p className="text-sm text-gray-500">No rank holders found.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {rankHolders.map((r) => (
+                  <div
+                    key={r.rank_id}
+                    className="rank-holder-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition group"
+                  >
+                    <img
+                      src={server_url + r.student_photo}
+                      alt={r.course_name}
+                      className=" object-cover rounded-md group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* view full rank holders */}
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => router.push("/public/exams")}
+                className="text-cyan-600 hover:underline text-sm cursor-pointer"
+              >
+                View All Rank Holders →
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <VideoModal
+        videoUrl={shorts[activeShortIndex]?.shorts_link}
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+      />
+
+      <EnquiryModal
+        isOpen={showEnquiryModal}
+        onClose={() => setShowEnquiryModal(false)}
+        enquiryType={1}
+      />
     </div>
   );
 }

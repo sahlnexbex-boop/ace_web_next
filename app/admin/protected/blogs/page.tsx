@@ -48,7 +48,9 @@ export default function BlogsPage() {
   const loadData = async () => {
     try {
       const status =
-        filters.status && filters.status !== "" ? Number(filters.status) : undefined;
+        filters.status && filters.status !== ""
+          ? Number(filters.status)
+          : undefined;
 
       const course_id =
         filters.course_id && filters.course_id !== ""
@@ -69,7 +71,6 @@ export default function BlogsPage() {
       console.error("Error loading blogs:", err);
     }
   };
-
 
   useEffect(() => {
     loadCourses();
@@ -258,9 +259,10 @@ export default function BlogsPage() {
             Course: b.course?.course_name || "—",
 
             "Blog Content": (
-              <p className="text-gray-700 whitespace-pre-line">
-                {b.blog_content}
-              </p>
+              <div
+                className="ck-content text-gray-700"
+                dangerouslySetInnerHTML={{ __html: b.blog_content }}
+              />
             ),
             "Publishing Date": new Date(b.publishing_date).toLocaleDateString(
               "en-IN"
@@ -278,7 +280,7 @@ export default function BlogsPage() {
               ),
             Image: b.blog_image ? (
               <img
-                src={ server_url + b.blog_image}
+                src={server_url + b.blog_image}
                 className="w-14 h-14 rounded object-cover"
               />
             ) : (
@@ -297,12 +299,30 @@ export default function BlogsPage() {
         isOpen={openForm}
         onClose={() => setOpenForm(false)}
         fields={[
-          { name: "blog_title", label: "Blog Title", type: "text", required: true },
-          { name: "blog_author", label: "Author", type: "text", required: true },
-          { name: "blog_content", label: "Content", type: "textarea", required: true },
-          { name: "publishing_date", label: "Publishing Date", type: "date", required: true },
-
-          // ✔ NEW FIELD
+          {
+            name: "blog_title",
+            label: "Blog Title",
+            type: "text",
+            required: true,
+          },
+          {
+            name: "blog_author",
+            label: "Author",
+            type: "text",
+            required: true,
+          },
+          {
+            name: "blog_content",
+            label: "Content",
+            type: "richtext",
+            required: true,
+          },
+          {
+            name: "publishing_date",
+            label: "Publishing Date",
+            type: "date",
+            required: true,
+          },
           {
             name: "course_id",
             label: "Select Course",
