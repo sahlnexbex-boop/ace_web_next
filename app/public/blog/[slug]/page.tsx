@@ -230,7 +230,7 @@ export default function BlogDetails() {
       className="max-w-7xl mx-auto px-6 md:px-12 md:py-14 py-8"
     >
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-gray-600 text-sm mb-6">
+      <div className="flex md:items-center items-start gap-2 text-gray-600 text-sm mb-6">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="w-4 h-4 cursor-pointer"
@@ -249,7 +249,7 @@ export default function BlogDetails() {
           Blog
         </span>
         <span>/</span>
-        <span className="text-gray-800">{blog.blog_title}</span>
+        <span className="text-gray-800">{blog.course.course_name}</span>
       </div>
 
       <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
@@ -257,7 +257,7 @@ export default function BlogDetails() {
         <div className="blog-main overflow-auto relative">
           <div className="flex justify-between items-center flex-wrap">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2">
                 {blog.blog_title}
               </h1>
 
@@ -270,12 +270,12 @@ export default function BlogDetails() {
                 • {blog.blog_author}
               </p>
             </div>
-            <div className="flex justify-end w-full">
+            <div className="flex md:justify-end justify-start w-full">
               <div
                 onClick={() => setShowEnquiryModal(true)}
-                className="inline-block bg-sky-500 text-white text-xs px-5 py-2 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
+                className="inline-block bg-sky-600 text-white text-xs px-5 py-2.5 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
               >
-                Enroll Now
+                Connect with our Team
               </div>
             </div>
           </div>
@@ -286,11 +286,11 @@ export default function BlogDetails() {
             className="rounded-lg w-full h-auto mb-6 border border-gray-200"
           />
 
-          {blog.course?.course_name && (
+          {/* {blog.course?.course_name && (
             <p className="text-[10px] w-fit absolute md:top-[7.5rem] top-20 md:left-5  bg-cyan-600 text-white inline-block md:px-5 px-3 py-1 rounded-md mb-4 cursor-pointer">
               {blog.course.course_name}
             </p>
-          )}
+          )} */}
 
           <div
             className="ck-content text-gray-700"
