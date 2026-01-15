@@ -9,7 +9,10 @@ interface StudentJwtPayload {
   exp: number;
 }
 
+/* ================= STORE ================= */
 export const storeStudentIdFromToken = (token: string) => {
+  if (typeof window === "undefined") return;
+
   try {
     const decoded = jwtDecode<StudentJwtPayload>(token);
     if (decoded?.std_id) {
@@ -20,10 +23,14 @@ export const storeStudentIdFromToken = (token: string) => {
   }
 };
 
-export const getStudentId = () => {
+/* ================= GET ================= */
+export const getStudentId = (): string | null => {
+  if (typeof window === "undefined") return null;
   return localStorage.getItem(STUDENT_ID_KEY);
 };
 
+/* ================= CLEAR ================= */
 export const clearStudentId = () => {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(STUDENT_ID_KEY);
 };
