@@ -44,11 +44,13 @@ export const updateRankForum = (id: number, data: FormData) =>
 export const deleteRankForum = (id: number) =>
   apiRequest(`/api/rank-forum/${id}`, "DELETE", undefined, false, false);
 
-export const downloadRankForumExcel = async (options?: {
-  page?: number;
-  limit?: number;
-  exportAll?: boolean;
-}) => {
+export const downloadRankForumExcel = (
+  options?: {
+    page?: number;
+    limit?: number;
+    exportAll?: boolean;
+  }
+): Promise<Response> => {
   const params = new URLSearchParams();
 
   if (options?.exportAll) {
@@ -58,31 +60,11 @@ export const downloadRankForumExcel = async (options?: {
     params.append("limit", String(options?.limit || 10));
   }
 
-  const response = await fetch(`${base_url}/api/rank-forum/export?${params.toString()}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to download Excel file");
-  }
-
-  const blob = await response.blob();
-
-  // Trigger download
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = options?.exportAll
-    ? "rank_forum_full.xlsx"
-    : `rank_forum_page_${options?.page || 1}.xlsx`;
-
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  window.URL.revokeObjectURL(url);
+  return fetch(
+    `${base_url}/api/rank-forum/export?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include", // or rely on cookies
+    }
+  );
 };

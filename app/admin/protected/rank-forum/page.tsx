@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconBook, IconDownload, IconFileTypeXls, IconPageBreak, IconPlus } from "@tabler/icons-react";
+import {
+  IconBook,
+  IconDownload,
+  IconFileTypeXls,
+  IconPageBreak,
+  IconPlus,
+} from "@tabler/icons-react";
 import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
@@ -24,8 +30,6 @@ const REQUEST_STATUS_MAP: Record<string, string> = {
   "2": "Approved",
   "3": "Rejected",
 };
-
-
 
 export default function RankForumPage() {
   const [data, setData] = useState<any[]>([]);
@@ -167,6 +171,37 @@ export default function RankForumPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleDownloadExcel = async (options: {
+    page?: number;
+    limit?: number;
+    exportAll?: boolean;
+  }) => {
+    try {
+      const response = await downloadRankForumExcel(options);
+
+      if (!response.ok) {
+        throw new Error("Failed to download Excel");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = options.exportAll
+        ? "rank_forum_full.xlsx"
+        : `rank_forum_page_${page}.xlsx`;
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Excel download failed", err);
+    }
+  };
+
   const debouncedSearch = useDebounce(search, 500);
 
   // Load rank forums
@@ -214,7 +249,7 @@ export default function RankForumPage() {
               onClick={() => setOpenDownload((p) => !p)}
               className="flex gap-1 border border-cyan-700 text-cyan-700 px-4 py-2 rounded-md hover:text-white hover:bg-cyan-700 cursor-pointer"
             >
-              <IconFileTypeXls  size={18} />
+              <IconFileTypeXls size={18} />
               <span>Download</span>
             </button>
 
@@ -224,25 +259,22 @@ export default function RankForumPage() {
                   className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
                   onClick={async () => {
                     setOpenDownload(false);
-                    await downloadRankForumExcel({
-                      page,
-                      limit: 10,
-                    });
+                    await handleDownloadExcel({ page, limit: 10 });
                   }}
                 >
-                  <IconDownload size={18} className="text-cyan-800" /> <span>Current Page</span>
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Current Page</span>
                 </button>
 
                 <button
-                  className="w-full flex gap-2 text-left px-4 py-2 text-sm hover:bg-cyan-50/80 cursor-pointer"
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
                   onClick={async () => {
                     setOpenDownload(false);
-                    await downloadRankForumExcel({
-                      exportAll: true,
-                    });
+                    await handleDownloadExcel({ exportAll: true });
                   }}
                 >
-                   <IconDownload size={18} className="text-cyan-800" /> <span>Full Page</span>
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Full Page</span>
                 </button>
               </div>
             )}
