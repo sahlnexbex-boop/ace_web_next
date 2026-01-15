@@ -2,6 +2,7 @@ import { apiRequest } from "./apiClients";
 
 const BASE_URL = "/api/exam-registration";
 
+/* ================= FETCH LIST ================= */
 export const getExamRegistrations = (
   page = 1,
   limit = 10,
@@ -21,6 +22,7 @@ export const getExamRegistrations = (
   return apiRequest(`${BASE_URL}?${params.toString()}`, "GET");
 };
 
+/* ================= CRUD ================= */
 export const getExamRegistrationById = (id: number) =>
   apiRequest(`${BASE_URL}/${id}`, "GET");
 
@@ -36,6 +38,7 @@ export const deleteExamRegistration = (id: number) =>
 export const getHallTicketByRegistrationId = (id: number) =>
   apiRequest(`/api/exam-registration/hallticket/${id}`, "GET");
 
+/* ================= DOWNLOAD (FETCH ONLY) ================= */
 export const downloadExamRegistrationExcel = async (options?: {
   page?: number;
   limit?: number;
@@ -50,25 +53,9 @@ export const downloadExamRegistrationExcel = async (options?: {
     params.append("limit", String(options?.limit || 10));
   }
 
-  const response = (await apiRequest(
+  // ❗ ONLY fetch & return response
+  return apiRequest(
     `${BASE_URL}/download-excel?${params.toString()}`,
     "GET"
-  )) as Response;
-
-  const blob = await response.blob();
-
-  //  Trigger browser download
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = options?.exportAll
-    ? "exam_registrations_full.xlsx"
-    : `exam_registrations_page_${options?.page || 1}.xlsx`;
-
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  window.URL.revokeObjectURL(url);
+  ) as Promise<Response>;
 };

@@ -123,6 +123,33 @@ export default function ExamRegistrationPage() {
     }
   };
 
+  const downloadExcel = async (options: {
+    page?: number;
+    limit?: number;
+    exportAll?: boolean;
+  }): Promise<void> => {
+    try {
+      const response = await downloadExamRegistrationExcel(options);
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = options.exportAll
+        ? "exam_registrations_full.xlsx"
+        : `exam_registrations_page_${page}.xlsx`;
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Excel download failed", err);
+    }
+  };
+
   useEffect(() => {
     loadRegistrations();
   }, [page, debouncedSearch, filters]);
@@ -277,7 +304,7 @@ export default function ExamRegistrationPage() {
                   className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
                   onClick={async () => {
                     setOpenDownload(false);
-                    await downloadExamRegistrationExcel({
+                    await downloadExcel({
                       page,
                       limit: 10,
                     });
@@ -292,7 +319,7 @@ export default function ExamRegistrationPage() {
                   className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
                   onClick={async () => {
                     setOpenDownload(false);
-                    await downloadExamRegistrationExcel({
+                    await downloadExcel({
                       exportAll: true,
                     });
                   }}
