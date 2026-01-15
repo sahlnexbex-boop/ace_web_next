@@ -299,7 +299,8 @@ export default function BlogDetails() {
         </div>
 
         {/* Right Side */}
-        <div>
+        <div className="relative">
+        <div className="sticky top-24">
           <h3 className="font-semibold text-lg mb-4 text-gray-900">
             Recent Blogs
           </h3>
@@ -430,6 +431,7 @@ export default function BlogDetails() {
               </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
 
