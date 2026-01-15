@@ -309,7 +309,7 @@ export default function BlogDetails() {
           {recentBlogs.length === 0 ? (
             <p className="text-sm text-gray-500">No recent blogs found.</p>
           ) : (
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5 overflow-hidden">
               {recentBlogs.map((b) => (
                 <div
                   key={b.blog_id}
