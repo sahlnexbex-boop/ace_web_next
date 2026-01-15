@@ -249,7 +249,9 @@ export default function BlogDetails() {
           Blog
         </span>
         <span>/</span>
-        <span className="text-gray-800">{blog.course.course_name}</span>
+        <span className="text-gray-800">
+          {blog.course?.course_name ?? "General Blog"}
+        </span>
       </div>
 
       <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
@@ -300,138 +302,130 @@ export default function BlogDetails() {
 
         {/* Right Side */}
         <div className="relative">
-        <div className="sticky top-24">
-          <h3 className="font-semibold text-lg mb-4 text-gray-900">
-            Recent Blogs
-          </h3>
-
-          {/* recent blogs  */}
-          {recentBlogs.length === 0 ? (
-            <p className="text-sm text-gray-500">No recent blogs found.</p>
-          ) : (
-            <div className="flex flex-col gap-5 overflow-hidden">
-              {recentBlogs.map((b) => (
-                <div
-                  key={b.blog_id}
-                  className="recent-blog-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition"
-                  onClick={() =>
-                    router.push(`/public/blog/${slugify(b.blog_title)}`)
-                  }
-                >
-                  <img
-                    src={server_url + b.blog_image}
-                    alt={b.blog_title}
-                    className="w-20 h-16 object-cover rounded-md"
-                  />
-
-                  <div>
-                    {/*  Date */}
-                    <p className="text-cyan-700 text-xs font-semibold mb-1">
-                      {new Date(b.publishing_date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-
-                    {/*  Course badge */}
-                    {b.course && (
-                      <p
-                        className="text-[10px] bg-cyan-600 text-white inline-block px-2 py-1 rounded-md mb-1 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(
-                            `/public/courses/${b.course.category_id}/${b.course.course_id}`
-                          );
-                        }}
-                      >
-                        {b.course.course_name}
-                      </p>
-                    )}
-
-                    {/* Blog Title */}
-                    <h4 className="text-sm text-gray-800 font-medium leading-tight">
-                      {b.blog_title}
-                    </h4>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* ace shorts  */}
-          <div className="mt-10">
+          <div className="sticky top-24">
             <h3 className="font-semibold text-lg mb-4 text-gray-900">
-              Ace Shorts
+              Recent Blogs
             </h3>
 
-            {shorts.length === 0 ? (
-              <p className="text-sm text-gray-500">No shorts available.</p>
+            {/* recent blogs  */}
+            {recentBlogs.length === 0 ? (
+              <p className="text-sm text-gray-500">No recent blogs found.</p>
             ) : (
-              <div className="relative  w-full lg:h-[600px] h-[500px] rounded-lg overflow-hidden group">
-                <img
-                  key={shorts[activeShortIndex]?.shorts_id}
-                  ref={shortImageRef}
-                  src={
-                    server_url + shorts[activeShortIndex]?.shorts_file ||
-                    "/placeholder.svg"
-                  }
-                  alt={shorts[activeShortIndex]?.shorts_title}
-                  className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-500 ease-in-out"
-                />
-
-                {/* Play button overlay */}
-                <div
-                  className="absolute inset-0 md:top-52 flex items-center justify-center cursor-pointer"
-                  onClick={() => setIsVideoOpen(true)}
-                >
-                  <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                    <Play
-                      className="w-6 h-6 text-cyan-600 ml-1"
-                      fill="currentColor"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* rank holders */}
-          <div className="mt-10">
-            <h3 className="font-semibold text-lg mb-4 text-gray-900">
-              Rank Holders
-            </h3>
-
-            {rankHolders.length === 0 ? (
-              <p className="text-sm text-gray-500">No rank holders found.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {rankHolders.map((r) => (
+              <div className="flex flex-col gap-5 overflow-hidden">
+                {recentBlogs.map((b) => (
                   <div
-                    key={r.rank_id}
-                    className="rank-holder-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition group"
+                    key={b.blog_id}
+                    className="recent-blog-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition"
+                    onClick={() =>
+                      router.push(`/public/blog/${slugify(b.blog_title)}`)
+                    }
                   >
                     <img
-                      src={server_url + r.student_photo}
-                      alt={r.course_name}
-                      className=" object-cover rounded-md group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                      src={server_url + b.blog_image}
+                      alt={b.blog_title}
+                      className="w-20 h-16 object-cover rounded-md"
                     />
+
+                    <div>
+                      <h4 className="text-sm text-gray-800 font-medium leading-tight line-clamp-1">
+                        {b.blog_title}
+                      </h4>
+                      {/*  Date */}
+                      <p className="text-cyan-700 text-xs font-semibold mb-1">
+                        {new Date(b.publishing_date).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+
+                      {/* author  */}
+                      <p className="text-gray-800 text-xs font-semibold mb-1">
+                        {b.blog_author}
+                      </p>
+
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* view full rank holders */}
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => router.push("/public/exams")}
-                className="text-cyan-600 hover:underline text-sm cursor-pointer"
-              >
-                View All Rank Holders →
-              </button>
+            {/* ace shorts  */}
+            <div className="mt-10">
+              <h3 className="font-semibold text-lg mb-4 text-gray-900">
+                Ace Shorts
+              </h3>
+
+              {shorts.length === 0 ? (
+                <p className="text-sm text-gray-500">No shorts available.</p>
+              ) : (
+                <div className="relative  w-full lg:h-[600px] h-[500px] rounded-lg overflow-hidden group">
+                  <img
+                    key={shorts[activeShortIndex]?.shorts_id}
+                    ref={shortImageRef}
+                    src={
+                      server_url + shorts[activeShortIndex]?.shorts_file ||
+                      "/placeholder.svg"
+                    }
+                    alt={shorts[activeShortIndex]?.shorts_title}
+                    className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                  />
+
+                  {/* Play button overlay */}
+                  <div
+                    className="absolute inset-0 md:top-52 flex items-center justify-center cursor-pointer"
+                    onClick={() => setIsVideoOpen(true)}
+                  >
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                      <Play
+                        className="w-6 h-6 text-cyan-600 ml-1"
+                        fill="currentColor"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* rank holders */}
+            <div className="mt-10">
+              <h3 className="font-semibold text-lg mb-4 text-gray-900">
+                Rank Holders
+              </h3>
+
+              {rankHolders.length === 0 ? (
+                <p className="text-sm text-gray-500">No rank holders found.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {rankHolders.map((r) => (
+                    <div
+                      key={r.rank_id}
+                      className="rank-holder-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition group"
+                    >
+                      <img
+                        src={server_url + r.student_photo}
+                        alt={r.student_name}
+                        className=" object-cover rounded-md group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* view full rank holders */}
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => router.push("/public/exams")}
+                  className="text-cyan-600 hover:underline text-sm cursor-pointer"
+                >
+                  View All Rank Holders →
+                </button>
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
 

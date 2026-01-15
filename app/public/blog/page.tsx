@@ -133,7 +133,7 @@ export default function BlogPage() {
                 </p>
 
                 {/* Title */}
-                <h3 className="text-gray-900 text-xl font-semibold mb-2">
+                <h3 className="text-gray-900 text-xl font-semibold mb-2 line-clamp-1">
                   {blog.blog_title}
                 </h3>
 
