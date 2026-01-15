@@ -157,6 +157,7 @@ export default function OnlineRegistrationPage() {
   };
 
   /* ---------------- LOAD REGISTRATIONS ---------------- */
+
   const loadData = async () => {
     const department_id =
       filters.department_id && filters.department_id !== ""
@@ -184,37 +185,6 @@ export default function OnlineRegistrationPage() {
 
     setData(res?.data || []);
     setTotalPages(res?.totalPages || 1);
-  };
-
-  const handleDownloadExcel = async (options: {
-    page?: number;
-    limit?: number;
-    exportAll?: boolean;
-  }) => {
-    try {
-      const response = await downloadOnlineRegistrationExcel(options);
-
-      if (!response.ok) {
-        throw new Error("Failed to download Excel");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = options.exportAll
-        ? "online_registrations_full.xlsx"
-        : `online_registrations_page_${page}.xlsx`;
-
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Excel download failed", err);
-    }
   };
 
   useEffect(() => {
@@ -282,7 +252,10 @@ export default function OnlineRegistrationPage() {
                   className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
                   onClick={async () => {
                     setOpenDownload(false);
-                    await handleDownloadExcel({ page, limit: 10 });
+                    await downloadOnlineRegistrationExcel({
+                      page,
+                      limit: 10,
+                    });
                   }}
                 >
                   <IconDownload size={18} className="text-cyan-800" />
@@ -294,7 +267,9 @@ export default function OnlineRegistrationPage() {
                   className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
                   onClick={async () => {
                     setOpenDownload(false);
-                    await handleDownloadExcel({ exportAll: true });
+                    await downloadOnlineRegistrationExcel({
+                      exportAll: true,
+                    });
                   }}
                 >
                   <IconDownload size={18} className="text-cyan-800" />
