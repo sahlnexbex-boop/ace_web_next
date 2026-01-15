@@ -7,6 +7,7 @@ const axiosInstance = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Request Interceptor (This was already safe ✅)
 axiosInstance.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
@@ -20,12 +21,16 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Response Interceptor (Fixed 🛠️)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("accessToken");
-      window.location.href = "/admin/auth/login";
+    // Check if we are in the browser before using window or localStorage
+    if (typeof window !== "undefined") {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/admin/auth/login";
+      }
     }
     return Promise.reject(error);
   }

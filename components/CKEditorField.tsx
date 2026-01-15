@@ -1,24 +1,15 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useRef } from "react";
-import CKEditorUploadAdapter from "./CKEditorUploadAdapter";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import CKEditorUploadAdapter from "./CKEditorUploadAdapter";
+import { useRef, useEffect } from "react";
 
 interface Props {
   value: string;
   onChange: (value: string) => void;
   onImagesUploaded?: (imageUrls: string[]) => void;
 }
-
-/**
- * Dynamically load ONLY the React wrapper
- * (ClassicEditor is NOT a React component)
- */
-const CKEditor = dynamic(
-  () => import("@ckeditor/ckeditor5-react").then((m) => m.CKEditor),
-  { ssr: false }
-);
 
 export default function CKEditorField({
   value,
@@ -28,10 +19,28 @@ export default function CKEditorField({
   const uploadedImagesRef = useRef<string[]>([]);
   const editorRef = useRef<any>(null);
 
+  // Track uploaded images
   const trackUploadedImage = (imageUrl: string) => {
     if (!uploadedImagesRef.current.includes(imageUrl)) {
       uploadedImagesRef.current.push(imageUrl);
-      onImagesUploaded?.([...uploadedImagesRef.current]);
+      console.log(" Image uploaded and tracked:", imageUrl);
+      console.log(" All tracked images:", uploadedImagesRef.current);
+      // Notify parent component
+      onImagesUploaded?.(uploadedImagesRef.current);
+    }
+  };
+
+  // Extract image URLs from HTML content
+  const extractImageUrls = (html: string): string[] => {
+    if (!html) return [];
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const images = doc.querySelectorAll("img");
+      return Array.from(images).map((img) => img.src);
+    } catch (error) {
+      console.error("Error extracting images:", error);
+      return [];
     }
   };
 
@@ -42,21 +51,19 @@ export default function CKEditorField({
         data={value || ""}
         config={{
           extraPlugins: [
-            (editor: any) => {
+            function (editor: any) {
+              // Custom upload adapter
               editor.plugins.get("FileRepository").createUploadAdapter = (
                 loader: any
               ) => {
                 const adapter = new CKEditorUploadAdapter(loader);
+                // Wrap the upload method to track uploaded images
                 const originalUpload = adapter.upload.bind(adapter);
-
                 adapter.upload = async () => {
                   const result = await originalUpload();
-                  if (result?.default) {
-                    trackUploadedImage(result.default);
-                  }
+                  trackUploadedImage(result.default);
                   return result;
                 };
-
                 return adapter;
               };
             },
@@ -82,11 +89,21 @@ export default function CKEditorField({
           ],
         }}
         onChange={(_, editor) => {
-          onChange(editor.getData());
-          onImagesUploaded?.([...uploadedImagesRef.current]);
+          const data = editor.getData();
+          onChange(data);
+
+          // Update parent with current tracked images
+          onImagesUploaded?.(uploadedImagesRef.current);
         }}
         onReady={(editor) => {
           editorRef.current = editor;
+          console.log(" CKEditor is ready!");
+        }}
+        onError={(error, { willEditorRestart }) => {
+          console.error(" CKEditor error:", error);
+          if (willEditorRestart) {
+            console.log(" Editor will restart");
+          }
         }}
       />
     </div>
