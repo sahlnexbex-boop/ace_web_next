@@ -108,18 +108,18 @@ export default function BlogPage() {
               }
               className="blog-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all cursor-pointer overflow-hidden group"
             >
-              <div className="overflow-hidden relative">
+              <div className="overflow-hidden">
                 <img
                   src={server_url + blog.blog_image}
                   alt={blog.blog_title}
                   className="w-full h-56 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                 />
                 {/*  Course Name */}
-                {blog.course?.course_name && (
+                {/* {blog.course?.course_name && (
                   <p className="text-[10px] absolute top-2 left-2 text-white bg-sky-500 inline-block px-2 py-1 rounded-sm mb-2">
                     {blog.course.course_name}
                   </p>
-                )}
+                )} */}
               </div>
 
               <div className="p-5">

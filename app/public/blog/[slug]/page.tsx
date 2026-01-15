@@ -249,7 +249,15 @@ export default function BlogDetails() {
           Blog
         </span>
         <span>/</span>
-        <span className="text-gray-800">
+        <span
+        onClick={() => {
+          if (blog.course?.course_name) {
+            router.push(`/public/courses/${slugify(blog.course?.category?.category_name)}/${slugify(blog.course.course_name)}`);
+          } else {
+            router.push("/public/courses");
+          }
+        }}
+        className="text-gray-800 cursor-pointer">
           {blog.course?.course_name ?? "General Blog"}
         </span>
       </div>

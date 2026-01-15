@@ -37,7 +37,7 @@ export default function BlogsPage() {
   // Load courses
   const loadCourses = async () => {
     try {
-      const res = await getCourses(1, 200, "");
+      const res = await getCourses(1, 200, "", { status: "1" });
       setCourses(res?.data || []);
     } catch (err) {
       console.error("Error loading courses:", err);
