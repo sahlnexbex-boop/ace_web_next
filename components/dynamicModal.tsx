@@ -777,7 +777,15 @@ export default function DynamicFormModal({
                         trackAllEditorImages(val);
                       }}
                       onImagesUploaded={(urls) => {
-                        setUploadedEditorImages(urls);
+                        // Update the uploaded images state
+                        setUploadedEditorImages((prev) => {
+                          const newUrls = urls.filter(
+                            (url) => !prev.includes(url)
+                          );
+                          return [...prev, ...newUrls];
+                        });
+
+                        // Track all images in the ref
                         urls.forEach((url) => {
                           if (!allEditorImagesRef.current.includes(url)) {
                             allEditorImagesRef.current.push(url);
