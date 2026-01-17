@@ -280,13 +280,32 @@ export default function BlogDetails() {
                 • {blog.blog_author}
               </p>
             </div>
-            <div className="flex md:justify-end justify-start w-full">
-              <div
+            <div className="flex md:justify-end justify-between gap-3 w-full flex-wrap">
+              {blog.course?.course_id ? (
+                <button
+                  onClick={() => {
+                    const categorySlug = slugify(blog.course?.category?.category_name || "");
+                    const courseSlug = slugify(blog.course.course_name);
+                    router.push(`/public/courses/${categorySlug}/${courseSlug}`);
+                  }}
+                  className="inline-block bg-cyan-600 text-white text-xs px-5 py-2.5 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
+                >
+                  {blog.course.course_name}
+                </button>
+              ) : (
+                <button
+                  onClick={() => router.push("/public/courses")}
+                  className="inline-block bg-cyan-600 text-white text-xs px-5 py-2.5 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
+                >
+                  All Courses
+                </button>
+              )}
+              <button
                 onClick={() => setShowEnquiryModal(true)}
                 className="inline-block bg-sky-600 text-white text-xs px-5 py-2.5 rounded-md mb-3 cursor-pointer hover:bg-cyan-700 transition"
               >
-                Connect with our Team
-              </div>
+                Connect Us
+              </button>
             </div>
           </div>
 
@@ -446,7 +465,8 @@ export default function BlogDetails() {
       <EnquiryModal
         isOpen={showEnquiryModal}
         onClose={() => setShowEnquiryModal(false)}
-        enquiryType={1}
+        enquiryType={blog.course?.course_id ? 2 : 1}
+        courseId={blog.course?.course_id || undefined}
       />
     </div>
   );

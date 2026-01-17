@@ -285,6 +285,7 @@ export default function CourseDetailsPage({
         isOpen={showEnquiryModal}
         onClose={() => setShowEnquiryModal(false)}
         enquiryType={2}
+        courseId={course.course_id}
       />
     </div>
   );

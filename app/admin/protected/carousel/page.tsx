@@ -65,12 +65,12 @@ export default function CarouselPage() {
             {c.carousel_description || "—"}
           </p>
         ),
-        button_type:
-          c.button_type === 1
-            ? "Online Registration"
-            : c.button_type === 2
-            ? "Explore Now"
-            : "—",
+        // button_type:
+        //   c.button_type === 1
+        //     ? "Online Registration"
+        //     : c.button_type === 2
+        //     ? "Explore Now"
+        //     : "—",
         Status:
           c.status == 1 || c.status === "1" ? (
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -142,16 +142,16 @@ export default function CarouselPage() {
       type: "textarea",
       required: false,
     },
-    {
-      name: "button_type",
-      label: "Button Type",
-      type: "select",
-      options: [
-        { label: "Online Registration", value: "1" },
-        { label: "Explore Now", value: "2" },
-      ],
-      required: true,
-    },
+    // {
+    //   name: "button_type",
+    //   label: "Button Type",
+    //   type: "select",
+    //   options: [
+    //     { label: "Online Registration", value: "1" },
+    //     { label: "Explore Now", value: "2" },
+    //   ],
+    //   required: true,
+    // },
     {
       name: "status",
       label: "Status",
@@ -239,16 +239,16 @@ export default function CarouselPage() {
               </div>
             ),
           },
-          {
-            key: "button_type",
-            label: "Button Type",
-            render: (r) =>
-              r.button_type === 1
-                ? "Online Registration"
-                : r.button_type === 2
-                ? "Explore Now"
-                : "—",
-          },
+          // {
+          //   key: "button_type",
+          //   label: "Button Type",
+          //   render: (r) =>
+          //     r.button_type === 1
+          //       ? "Online Registration"
+          //       : r.button_type === 2
+          //       ? "Explore Now"
+          //       : "—",
+          // },
           // {
           //   key: "carousel_description",
           //   label: "Description",

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { gsap } from "gsap";
 import { getCarousels } from "@/lib/api/carousel";
+import EnquiryModal from "@/components/enquiryModal";
 import ApplyOnlineModal from "@/components/applyOnlineModal";
 
 export default function Hero() {
@@ -12,7 +13,8 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const [openApply, setOpenApply] = useState(false);
+  const [openEnquiry, setOpenEnquiry] = useState(false);
+  const [openAdmission, setOpenAdmission] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 
@@ -193,22 +195,22 @@ export default function Hero() {
                 </p>
 
                 {slide.carousel_title && (
-                  <div className="flex justify-start">
-                    {slide.button_type === 1 ? (
+                  <div className="flex justify-start md:gap-8 gap-4">
+                    {/* {slide.button_type === 1 ? ( */}
                       <button
-                        onClick={() => setOpenApply(true)}
-                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
+                        onClick={() => setOpenEnquiry(true)}
+                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 md:rounded-xl rounded-md text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-1.5 sm:py-3 text-sm sm:text-base md:font-semibold font-light transition"
                       >
-                        Online Registration
+                        Enquiry
                       </button>
-                    ) : (
-                      <a
-                        href="/public/contact"
-                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-2.5 sm:py-3 text-sm sm:text-base font-semibold transition"
+                    {/* ) : ( */}
+                      <button
+                        onClick={() => setOpenAdmission(true)}
+                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 md:rounded-xl rounded-md text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-1.5 sm:py-3 text-sm sm:text-base md:font-semibold font-light transition"
                       >
-                        Explore Now
-                      </a>
-                    )}
+                        Admission
+                      </button>
+                    {/* )} */}
                   </div>
                 )}
               </div>
@@ -232,7 +234,16 @@ export default function Hero() {
         ))}
       </div>
 
-      <ApplyOnlineModal open={openApply} onClose={() => setOpenApply(false)} />
+      <EnquiryModal 
+        isOpen={openEnquiry} 
+        onClose={() => setOpenEnquiry(false)} 
+        enquiryType={1}
+      />
+      
+      <ApplyOnlineModal 
+        open={openAdmission} 
+        onClose={() => setOpenAdmission(false)} 
+      />
     </section>
   );
 }

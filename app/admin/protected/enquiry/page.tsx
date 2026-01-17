@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import DataTable from "@/components/dynamicTable";
 import DynamicFormModal from "@/components/dynamicModal";
 import ConfirmDeleteModal from "@/components/deleteModal";
@@ -13,8 +13,10 @@ import {
   updateEnquiry,
   deleteEnquiry,
   getEnquiryById,
+  downloadEnquiryExcel,
 } from "@/lib/api/enquiry";
-import { IconPlus } from "@tabler/icons-react";
+import { getCourses } from "@/lib/api/course";
+import { IconPlus, IconDownload, IconFileTypeXls } from "@tabler/icons-react";
 
 const ENQUIRY_TYPE: Record<number, string> = {
   1: "General",
@@ -41,6 +43,10 @@ export default function EnquiryPage() {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [courses, setCourses] = useState<any[]>([]);
+  const [enquiryType, setEnquiryType] = useState<string>("");
+  const [openDownload, setOpenDownload] = useState(false);
+  const downloadRef = useRef<HTMLDivElement | null>(null);
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -68,6 +74,50 @@ export default function EnquiryPage() {
     loadEnquiries();
   }, [page, debouncedSearch, filters]);
 
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        const res = await getCourses(1, 100, "");
+        setCourses(res?.data || []);
+      } catch (err) {
+        console.error("Error loading courses:", err);
+      }
+    };
+    loadCourses();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        downloadRef.current &&
+        !downloadRef.current.contains(e.target as Node)
+      ) {
+        setOpenDownload(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const downloadExcel = async (options: {
+    page?: number;
+    limit?: number;
+    exportAll?: boolean;
+  }): Promise<void> => {
+    try {
+      await downloadEnquiryExcel({
+        ...options,
+        search: debouncedSearch,
+        status: filters.status ? Number(filters.status) : undefined,
+        enquiry_type: filters.enquiry_type ? Number(filters.enquiry_type) : undefined,
+        enquiry_status: filters.enquiry_status ? Number(filters.enquiry_status) : undefined,
+      });
+    } catch (err) {
+      console.error("Excel download failed", err);
+    }
+  };
+
   const handleRowClick = async (row: any) => {
     try {
       const res = await getEnquiryById(row.enquiry_id);
@@ -85,6 +135,7 @@ export default function EnquiryPage() {
           </p>
         ),
         "Enquiry Type": ENQUIRY_TYPE[d.enquiry_type] || "—",
+        "Course": d.course_name || "Not Available",
 
         "Enquiry Status":
           d.enquiry_status === 1 ? (
@@ -134,7 +185,7 @@ export default function EnquiryPage() {
     }
   };
 
-  const fields = [
+  const fields = useMemo(() => [
     {
       name: "cstmr_name",
       label: "Customer Name",
@@ -163,6 +214,27 @@ export default function EnquiryPage() {
         value: val,
         label,
       })),
+      onChange: (val: string) => {
+        setEnquiryType(val);
+        // Clear course_id when enquiry_type is not "2" (Course)
+        if (val !== "2" && selected) {
+          setSelected({
+            ...selected,
+            course_id: "",
+          });
+        }
+      },
+    },
+    {
+      name: "course_id",
+      label: "Course",
+      type: "select",
+      required: false,
+      disabled: enquiryType !== "2",
+      options: courses.map((course) => ({
+        value: String(course.course_id),
+        label: course.course_name || "—",
+      })),
     },
     {
       name: "enquiry_status",
@@ -184,7 +256,7 @@ export default function EnquiryPage() {
         { label: "Inactive", value: "0" },
       ],
     },
-  ];
+  ], [courses, enquiryType]);
 
   return (
     <div className="p-4 sm:p-6">
@@ -192,6 +264,50 @@ export default function EnquiryPage() {
         <h1 className="text-2xl font-semibold text-cyan-700">Enquiries</h1>
 
         <div className="flex items-center gap-3">
+          {/* DOWNLOAD EXCEL */}
+          <div className="relative" ref={downloadRef}>
+            <button
+              onClick={() => setOpenDownload((p) => !p)}
+              className="flex gap-1 border border-cyan-700 text-cyan-700 px-4 py-2 rounded-md hover:text-white hover:bg-cyan-700 cursor-pointer"
+            >
+              <IconFileTypeXls size={18} />
+              <span>Download</span>
+            </button>
+
+            {openDownload && (
+              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-md shadow-lg z-50">
+                {/* CURRENT PAGE */}
+                <button
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadExcel({
+                      page,
+                      limit: 10,
+                    });
+                  }}
+                >
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Current Page</span>
+                </button>
+
+                {/* FULL DATA */}
+                <button
+                  className="w-full flex gap-2 cursor-pointer text-left px-4 py-2 text-sm hover:bg-cyan-50/80"
+                  onClick={async () => {
+                    setOpenDownload(false);
+                    await downloadExcel({
+                      exportAll: true,
+                    });
+                  }}
+                >
+                  <IconDownload size={18} className="text-cyan-800" />
+                  <span>Full Data</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           <TableFilter
             fields={[
               {
@@ -231,6 +347,7 @@ export default function EnquiryPage() {
           <button
             onClick={() => {
               setSelected(null);
+              setEnquiryType("");
               setOpenForm(true);
             }}
             className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800"
@@ -253,6 +370,11 @@ export default function EnquiryPage() {
             key: "enquiry_type",
             label: "Type",
             render: (r) => ENQUIRY_TYPE[r.enquiry_type] || "—",
+          },
+          {
+            key: "course_name",
+            label: "Course",
+            render: (r) => r.course_name || "Not Available",
           },
           {
             key: "submit_date",
@@ -306,11 +428,14 @@ export default function EnquiryPage() {
         setSearch={setSearch}
         onRowClick={handleRowClick}
         onEdit={(row: any) => {
+          const enquiryTypeValue = String(row.enquiry_type);
+          setEnquiryType(enquiryTypeValue);
           setSelected({
             ...row,
             status: String(row.status),
-            enquiry_type: String(row.enquiry_type),
+            enquiry_type: enquiryTypeValue,
             enquiry_status: String(row.enquiry_status),
+            course_id: row.course_id ? String(row.course_id) : "",
           });
           setOpenForm(true);
         }}
@@ -323,11 +448,20 @@ export default function EnquiryPage() {
       <DynamicFormModal
         title={selected ? "Edit Enquiry" : "Create Enquiry"}
         isOpen={openForm}
-        onClose={() => setOpenForm(false)}
+        onClose={() => {
+          setOpenForm(false);
+          setEnquiryType("");
+        }}
         fields={fields}
         defaultValues={selected}
         onSubmit={async (fd: FormData) => {
           const plainObj = Object.fromEntries(fd.entries());
+          
+          // Remove course_id if enquiry_type is not "2" (Course)
+          if (plainObj.enquiry_type !== "2") {
+            delete plainObj.course_id;
+          }
+          
           if (selected) await updateEnquiry(selected.enquiry_id, plainObj);
           else await createEnquiry(plainObj);
         }}

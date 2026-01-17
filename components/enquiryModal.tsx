@@ -16,6 +16,7 @@ interface EnquiryModalProps {
   isOpen: boolean;
   onClose: () => void;
   enquiryType: string | number;
+  courseId?: string | number;
   fields?: Field[];
 }
 
@@ -23,6 +24,7 @@ export default function EnquiryModal({
   isOpen,
   onClose,
   enquiryType,
+  courseId,
   fields = [
     { name: "cstmr_name", label: "Full Name", type: "text", required: true },
     { name: "cstmr_email", label: "Email", type: "email" },
@@ -36,12 +38,14 @@ export default function EnquiryModal({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm({
     defaultValues: {
       cstmr_name: "",
       cstmr_email: "",
       cstmr_phone: "",
       cstmr_message: "",
+      course_id: courseId || "",
     },
   });
 
@@ -68,9 +72,18 @@ export default function EnquiryModal({
 
   const onSubmit = async (data: Record<string, any>) => {
     try {
-      const payload = { ...data, enquiry_type: enquiryType || 1 };
+      const payload: Record<string, any> = { ...data, enquiry_type: enquiryType || 1 };
+      
+      // Include course_id if provided and enquiry type is 2 (Course)
+      if (courseId && (enquiryType === 2 || enquiryType === "2")) {
+        payload.course_id = courseId;
+      } else {
+        // Remove course_id if enquiry type is not 2
+        delete payload.course_id;
+      }
+      
       await createEnquiry(payload);
-      showSuccess(`${enquiryType === 1 ? "Enquiry" : "Course Enquiry"} sent successfully`);
+      showSuccess(`${enquiryType === 1 || enquiryType === "1" ? "Enquiry" : "Course Enquiry"} sent successfully`);
       reset();
       onClose();
     } catch (err) {
@@ -80,7 +93,7 @@ export default function EnquiryModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[9999] px-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[100] px-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative p-6">
         <button
           onClick={onClose}
