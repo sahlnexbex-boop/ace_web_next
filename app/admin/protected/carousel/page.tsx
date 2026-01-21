@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { IconPlus } from "@tabler/icons-react";
 import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
@@ -17,6 +17,14 @@ import {
   deleteCarousel,
 } from "@/lib/api/carousel";
 
+const BUTTON_TYPES: Record<number, string> = {
+  1: "For Admission",
+  2: "For Enquiry",
+  3: "For Tuition",
+  4: "For Scholarship",
+  5: "For Interview",
+};
+
 export default function CarouselPage() {
   const [data, setData] = useState<any[]>([]);
   const [filters, setFilters] = useState<{ status?: string }>({});
@@ -28,6 +36,8 @@ export default function CarouselPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const [buttonType1, setButtonType1] = useState<string>("");
+  const [buttonType2, setButtonType2] = useState<string>("");
 
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -60,17 +70,20 @@ export default function CarouselPage() {
       const formatted = {
         "Carousel Title": c.carousel_title || "—",
         "Secondary Title": c.carousel_sec_title || "—",
+        "Badge Text": c.badge_text || "—",
         Description: (
           <p className="text-gray-700 whitespace-pre-line">
             {c.carousel_description || "—"}
           </p>
         ),
-        // button_type:
-        //   c.button_type === 1
-        //     ? "Online Registration"
-        //     : c.button_type === 2
-        //     ? "Explore Now"
-        //     : "—",
+        "Button 1 Type": c.button_type_1
+          ? BUTTON_TYPES[c.button_type_1] || `Type ${c.button_type_1}`
+          : "—",
+        "Button 1 Link": c.button_1_link || "—",
+        "Button 2 Type": c.button_type_2
+          ? BUTTON_TYPES[c.button_type_2] || `Type ${c.button_type_2}`
+          : "—",
+        "Button 2 Link": c.button_2_link || "—",
         Status:
           c.status == 1 || c.status === "1" ? (
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -123,58 +136,97 @@ export default function CarouselPage() {
     }
   };
 
-  const fields = [
-    {
-      name: "carousel_title",
-      label: "Carousel Title",
-      type: "text",
-      required: false,
-    },
-    {
-      name: "carousel_sec_title",
-      label: "Secondary Title",
-      type: "text",
-      required: false,
-    },
-    {
-      name: "carousel_description",
-      label: "Description",
-      type: "textarea",
-      required: false,
-    },
-    // {
-    //   name: "button_type",
-    //   label: "Button Type",
-    //   type: "select",
-    //   options: [
-    //     { label: "Online Registration", value: "1" },
-    //     { label: "Explore Now", value: "2" },
-    //   ],
-    //   required: true,
-    // },
-    {
-      name: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "1" },
-        { label: "Inactive", value: "0" },
-      ],
-      required: true,
-    },
-    {
-      name: "carousel_file",
-      label: "Carousel File - (Ratio 16:9)",
-      type: "file",
-      required: true,
-    },
-    {
-      name: "carousel_mobile_file",
-      label: "Mobile File - (Ratio 9:16)",
-      type: "file",
-      required: true,
-    },
-  ];
+  const fields = useMemo(
+    () => [
+      {
+        name: "carousel_title",
+        label: "Carousel Title",
+        type: "text",
+        required: false,
+      },
+      {
+        name: "carousel_sec_title",
+        label: "Secondary Title",
+        type: "text",
+        required: false,
+      },
+      {
+        name: "badge_text",
+        label: "Badge Text",
+        type: "text",
+        required: false,
+      },
+      {
+        name: "carousel_description",
+        label: "Description",
+        type: "textarea",
+        required: false,
+      },
+      {
+        name: "button_type_1",
+        label: "Button 1 Type",
+        type: "select",
+        options: Object.entries(BUTTON_TYPES).map(([value, label]) => ({
+          label,
+          value,
+        })),
+        required: false,
+        onChange: (val: string) => {
+          setButtonType1(val);
+        },
+      },
+      {
+        name: "button_1_link",
+        label: "Button 1 Link (for types 3–5)",
+        type: "text",
+        required: false,
+        disabled: buttonType1 === "1" || buttonType1 === "2",
+      },
+      {
+        name: "button_type_2",
+        label: "Button 2 Type",
+        type: "select",
+        options: Object.entries(BUTTON_TYPES).map(([value, label]) => ({
+          label,
+          value,
+        })),
+        required: false,
+        onChange: (val: string) => {
+          setButtonType2(val);
+        },
+      },
+      {
+        name: "button_2_link",
+        label: "Button 2 Link (for types 3–5)",
+        type: "text",
+        required: false,
+        disabled: buttonType2 === "1" || buttonType2 === "2",
+      },
+      {
+        name: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "1" },
+          { label: "Inactive", value: "0" },
+        ],
+        required: true,
+      },
+      {
+        name: "carousel_file",
+        label: "Carousel File - (Ratio 16:9)",
+        type: "file",
+        required: true,
+      },
+      {
+        name: "carousel_mobile_file",
+        label: "Mobile File - (Ratio 9:16)",
+        type: "file",
+        required: true,
+      },
+    ],
+    [buttonType1, buttonType2]
+  );
 
   return (
     <div className="p-4 sm:p-6">
@@ -202,6 +254,8 @@ export default function CarouselPage() {
           <button
             onClick={() => {
               setSelected(null);
+              setButtonType1("");
+              setButtonType2("");
               setOpenForm(true);
             }}
             className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
@@ -227,28 +281,48 @@ export default function CarouselPage() {
               </div>
             ),
           },
-          {
-            key: "carousel_sec_title",
-            label: "Sub Title",
-            render: (r) => (
-              <div
-                className="truncate max-w-[200px]"
-                title={r.carousel_sec_title}
-              >
-                {r.carousel_sec_title || "—"}
-              </div>
-            ),
-          },
           // {
-          //   key: "button_type",
-          //   label: "Button Type",
-          //   render: (r) =>
-          //     r.button_type === 1
-          //       ? "Online Registration"
-          //       : r.button_type === 2
-          //       ? "Explore Now"
-          //       : "—",
+          //   key: "carousel_sec_title",
+          //   label: "Sub Title",
+          //   render: (r) => (
+          //     <div
+          //       className="truncate max-w-[200px]"
+          //       title={r.carousel_sec_title}
+          //     >
+          //       {r.carousel_sec_title || "—"}
+          //     </div>
+          //   ),
           // },
+          // {
+          //   key: "badge_text",
+          //   label: "Badge",
+          //   render: (r) => (
+          //     <div
+          //       className="truncate max-w-[120px]"
+          //       title={r.badge_text}
+          //     >
+          //       {r.badge_text || "—"}
+          //     </div>
+          //   ),
+          // },
+          {
+            key: "button_type_1",
+            label: "Button 1 Type",
+            render: (r) =>
+              r.button_type_1
+                ? BUTTON_TYPES[r.button_type_1] ||
+                  `Type ${r.button_type_1}`
+                : "—",
+          },
+          {
+            key: "button_type_2",
+            label: "Button 2 Type",
+            render: (r) =>
+              r.button_type_2
+                ? BUTTON_TYPES[r.button_type_2] ||
+                  `Type ${r.button_type_2}`
+                : "—",
+          },
           // {
           //   key: "carousel_description",
           //   label: "Description",
@@ -331,9 +405,15 @@ export default function CarouselPage() {
         setPage={setPage}
         setSearch={setSearch}
         onEdit={(row) => {
+          const bt1 = row.button_type_1 ? String(row.button_type_1) : "";
+          const bt2 = row.button_type_2 ? String(row.button_type_2) : "";
+          setButtonType1(bt1);
+          setButtonType2(bt2);
           setSelected({
             ...row,
             status: String(row.status),
+            button_type_1: bt1,
+            button_type_2: bt2,
           });
           setOpenForm(true);
         }}
@@ -347,7 +427,11 @@ export default function CarouselPage() {
       <DynamicFormModal
         title={selected ? "Edit Carousel" : "Create Carousel"}
         isOpen={openForm}
-        onClose={() => setOpenForm(false)}
+        onClose={() => {
+          setOpenForm(false);
+          setButtonType1("");
+          setButtonType2("");
+        }}
         fields={fields}
         defaultValues={selected}
         onSubmit={async (fd: FormData) => {

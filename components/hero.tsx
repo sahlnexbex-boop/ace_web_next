@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { getCarousels } from "@/lib/api/carousel";
 import EnquiryModal from "@/components/enquiryModal";
 import ApplyOnlineModal from "@/components/applyOnlineModal";
+import { Zap } from "lucide-react";
 
 export default function Hero() {
   const [slides, setSlides] = useState<any[]>([]);
@@ -16,6 +18,7 @@ export default function Hero() {
   const [openEnquiry, setOpenEnquiry] = useState(false);
   const [openAdmission, setOpenAdmission] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -44,7 +47,13 @@ export default function Hero() {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     gsap.set(
-      [".hero-heading", ".hero-subheading", ".hero-text", ".hero-button"],
+      [
+        ".hero-heading",
+        ".hero-subheading",
+        ".hero-text",
+        ".hero-badge",
+        ".hero-button",
+      ],
       {
         clearProps: "all",
       }
@@ -68,10 +77,16 @@ export default function Hero() {
         "-=0.45"
       )
       .fromTo(
+        ".hero-badge",
+        { opacity: 0, y: 15, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5 },
+        "-=0.35"
+      )
+      .fromTo(
         ".hero-button",
         { opacity: 0, scale: 0.95 },
-        { opacity: 1, scale: 1, duration: 0.45 },
-        "-=0.3"
+        { opacity: 1, scale: 1, duration: 0.45, stagger: 0.1 },
+        "-=0.25"
       );
 
     return () => {
@@ -194,23 +209,59 @@ export default function Hero() {
                   {slide.carousel_description}
                 </p>
 
-                {slide.carousel_title && (
-                  <div className="flex justify-start md:gap-8 gap-4">
-                    {/* {slide.button_type === 1 ? ( */}
-                      <button
-                        onClick={() => setOpenEnquiry(true)}
-                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 md:rounded-xl rounded-md text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-1.5 sm:py-3 text-sm sm:text-base md:font-semibold font-light transition"
-                      >
-                        Enquiry
-                      </button>
-                    {/* ) : ( */}
-                      <button
-                        onClick={() => setOpenAdmission(true)}
-                        className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 md:rounded-xl rounded-md text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-1.5 sm:py-3 text-sm sm:text-base md:font-semibold font-light transition"
-                      >
-                        Admission
-                      </button>
-                    {/* )} */}
+                {slide.badge_text && (
+                  <div className="hero-badge flex items-center justify-center bg-white/30 rounded-lg shadow-md md:px-6 px-4 md:py-4 py-2 mb-4 w-fit backdrop-blur-sm">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-200 to-blue-200 text-white mr-2">
+                      <span className="text-base leading-none"><Zap className="text-cyan-700 fill-cyan-700" /></span>
+                    </div>
+                    <span className="text-[10px] md:text-[11px] font-semibold tracking-[0.18em] text-white uppercase">
+                      {slide.badge_text}
+                    </span>
+                  </div>
+                )}
+
+                {slide.carousel_title && (slide.button_type_1 || slide.button_type_2) && (
+                  <div className="flex justify-start md:gap-8 gap-4 flex-wrap">
+                    {[1, 2].map((btnIndex) => {
+                      const type = btnIndex === 1 ? slide.button_type_1 : slide.button_type_2;
+                      const link = btnIndex === 1 ? slide.button_1_link : slide.button_2_link;
+
+                      if (!type) return null;
+
+                      const labelMap: Record<number, string> = {
+                        1: "Admission",
+                        2: "Enquiry",
+                        3: "Tuition",
+                        4: "Scholarship",
+                        5: "Interview",
+                      };
+
+                      const label = labelMap[type] || "Learn More";
+
+                      const handleClick = () => {
+                        if (type === 1) {
+                          setOpenAdmission(true);
+                          return;
+                        }
+                        if (type === 2) {
+                          setOpenEnquiry(true);
+                          return;
+                        }
+                        if (link) {
+                          router.push(link);
+                        }
+                      };
+
+                      return (
+                        <button
+                          key={btnIndex}
+                          onClick={handleClick}
+                          className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 md:rounded-xl rounded-md text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-1.5 sm:py-3 text-sm sm:text-base md:font-semibold font-light transition"
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

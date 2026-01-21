@@ -70,7 +70,7 @@ const menuItems = [
     ],
   },
   {
-    name: "Exams",
+    name: "Exams & Tutions",
     icon: ClipboardList,
     children: [
       {
@@ -79,9 +79,9 @@ const menuItems = [
         path: "/admin/protected/scholarship-exam",
       },
       {
-        name: "Exam Registartions",
-        icon: GraduationCap,
-        path: "/admin/protected/exam-enquiry",
+        name: "Tutions",
+        icon: BookOpen,
+        path: "/admin/protected/tutions",
       },
     ],
   },
@@ -177,6 +177,16 @@ const menuItems = [
         name: "Online Registartions",
         icon: GraduationCap,
         path: "/admin/protected/online-registration",
+      },
+      {
+        name: "Exam Registartions",
+        icon: GraduationCap,
+        path: "/admin/protected/exam-enquiry",
+      },
+      {
+        name: "Tutions Enquiry's",
+        icon: Trophy,
+        path: "/admin/protected/tution-registration",
       },
     ],
   },
