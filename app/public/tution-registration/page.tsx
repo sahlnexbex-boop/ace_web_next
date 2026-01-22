@@ -121,7 +121,7 @@ export default function PublicTutionRegistrationPage() {
         <div className="relative bg-white/10 backdrop-blur-2xl border border-white/15 md:rounded-3xl rounded-lg shadow-2xl px-4 py-5 md:px-10 md:py-10 text-white">
           <div className="mb-6 md:mb-8 text-center">
             <h1 className="text-2xl md:text-3xl font-semibold tracking-wide">
-              Tution Registration
+              Tuition Registration
             </h1>
             <p className="mt-2 text-sm md:text-base text-slate-200/80">
               Fill in your details to register for the selected tution program.
