@@ -71,6 +71,18 @@ export default function CarouselPage() {
         "Carousel Title": c.carousel_title || "—",
         "Secondary Title": c.carousel_sec_title || "—",
         "Badge Text": c.badge_text || "—",
+        "Badge URL": c.badge_url ? (
+          <a
+            href={c.badge_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-700 underline"
+          >
+            {c.badge_url}
+          </a>
+        ) : (
+          "—"
+        ),
         Description: (
           <p className="text-gray-700 whitespace-pre-line">
             {c.carousel_description || "—"}
@@ -153,6 +165,12 @@ export default function CarouselPage() {
       {
         name: "badge_text",
         label: "Badge Text",
+        type: "text",
+        required: false,
+      },
+      {
+        name: "badge_url",
+        label: "Badge URL",
         type: "text",
         required: false,
       },

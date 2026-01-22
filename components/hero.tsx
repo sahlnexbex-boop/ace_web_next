@@ -209,59 +209,66 @@ export default function Hero() {
                   {slide.carousel_description}
                 </p>
 
-                {slide.badge_text && (
-                  <div className="hero-badge flex items-center justify-center bg-white/30 rounded-lg shadow-md md:px-6 px-4 md:py-4 py-2 mb-4 w-fit backdrop-blur-sm">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-200 to-blue-200 text-white mr-2">
-                      <span className="text-base leading-none"><Zap className="text-cyan-700 fill-cyan-700" /></span>
-                    </div>
-                    <span className="text-[10px] md:text-[11px] font-semibold tracking-[0.18em] text-white uppercase">
-                      {slide.badge_text}
-                    </span>
-                  </div>
-                )}
+                {(slide.badge_text || (slide.carousel_title && (slide.button_type_1 || slide.button_type_2))) && (
+                  <div className="w-fit">
+                    {slide.badge_text && (
+                      <div
+                        onClick={() => slide?.badge_url && router.push(`${slide.badge_url}`)}
+                        className={`hero-badge flex items-center justify-center ${slide?.badge_url ? 'cursor-pointer' : ''} bg-white/30 rounded-lg shadow-md md:px-6 px-4 md:py-4 py-2 mb-4 w-full backdrop-blur-sm`}
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-200 to-blue-200 text-white mr-2">
+                          <span className="text-base leading-none"><Zap className="text-cyan-700 fill-cyan-700" /></span>
+                        </div>
+                        <span className="text-[10px] md:text-[11px] font-semibold tracking-[0.18em] text-white uppercase">
+                          {slide.badge_text}
+                        </span>
+                      </div>
+                    )}
 
-                {slide.carousel_title && (slide.button_type_1 || slide.button_type_2) && (
-                  <div className="flex justify-start md:gap-8 gap-4 flex-wrap">
-                    {[1, 2].map((btnIndex) => {
-                      const type = btnIndex === 1 ? slide.button_type_1 : slide.button_type_2;
-                      const link = btnIndex === 1 ? slide.button_1_link : slide.button_2_link;
+                    {slide.carousel_title && (slide.button_type_1 || slide.button_type_2) && (
+                      <div className="flex justify-start md:gap-4 gap-3 w-full">
+                        {[1, 2].map((btnIndex) => {
+                          const type = btnIndex === 1 ? slide.button_type_1 : slide.button_type_2;
+                          const link = btnIndex === 1 ? slide.button_1_link : slide.button_2_link;
 
-                      if (!type) return null;
+                          if (!type) return null;
 
-                      const labelMap: Record<number, string> = {
-                        1: "Admission",
-                        2: "Enquiry",
-                        3: "Tuition",
-                        4: "Scholarship",
-                        5: "Interview",
-                      };
+                          const labelMap: Record<number, string> = {
+                            1: "Admission",
+                            2: "Enquiry",
+                            3: "Tuition",
+                            4: "Scholarship",
+                            5: "Interview",
+                          };
 
-                      const label = labelMap[type] || "Learn More";
+                          const label = labelMap[type] || "Learn More";
 
-                      const handleClick = () => {
-                        if (type === 1) {
-                          setOpenAdmission(true);
-                          return;
-                        }
-                        if (type === 2) {
-                          setOpenEnquiry(true);
-                          return;
-                        }
-                        if (link) {
-                          router.push(link);
-                        }
-                      };
+                          const handleClick = () => {
+                            if (type === 1) {
+                              setOpenAdmission(true);
+                              return;
+                            }
+                            if (type === 2) {
+                              setOpenEnquiry(true);
+                              return;
+                            }
+                            if (link) {
+                              router.push(link);
+                            }
+                          };
 
-                      return (
-                        <button
-                          key={btnIndex}
-                          onClick={handleClick}
-                          className="hero-button inline-block bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 md:rounded-xl rounded-md text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-1.5 sm:py-3 text-sm sm:text-base md:font-semibold font-light transition"
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
+                          return (
+                            <button
+                              key={btnIndex}
+                              onClick={handleClick}
+                              className="hero-button flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-cyan-500 md:rounded-xl rounded-md text-white cursor-pointer hover:opacity-90 px-5 sm:px-7 py-1.5 sm:py-3 text-sm sm:text-base md:font-semibold font-light transition"
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
