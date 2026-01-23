@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getTutions } from "@/lib/api/tution";
 import { createTutionRegistration } from "@/lib/api/tutionRegistration";
@@ -11,7 +11,8 @@ interface TutionItem {
   tution_title: string;
 }
 
-export default function PublicTutionRegistrationPage() {
+// a separate internal component
+function RegistrationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showSuccess, showError } = useToast();
@@ -56,7 +57,6 @@ export default function PublicTutionRegistrationPage() {
     };
 
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialTutionId]);
 
   const handleChange = (
@@ -96,7 +96,6 @@ export default function PublicTutionRegistrationPage() {
 
   return (
     <div className="min-h-screen tution-registration-page bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center px-4 py-10">
-      {/* CSS Hack to force Autocomplete/Autofill to match the dark theme */}
       <style>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
@@ -106,18 +105,16 @@ export default function PublicTutionRegistrationPage() {
         select:-webkit-autofill:hover, 
         select:-webkit-autofill:focus, 
         select:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important; /* Matches slate-900 */
-            -webkit-text-fill-color: #f1f5f9 !important; /* Matches slate-100 */
+            -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+            -webkit-text-fill-color: #f1f5f9 !important;
             transition: background-color 5000s ease-in-out 0s;
             caret-color: white;
         }
       `}</style>
 
       <div className="relative w-full max-w-3xl">
-        {/* Glow behind card */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/40 via-blue-500/40 to-purple-500/40 blur-3xl opacity-60 pointer-events-none" />
 
-        {/* Glassmorphism Card */}
         <div className="relative bg-white/10 backdrop-blur-2xl border border-white/15 md:rounded-3xl rounded-lg shadow-2xl px-4 py-5 md:px-10 md:py-10 text-white">
           <div className="mb-6 md:mb-8 text-center">
             <h1 className="text-2xl md:text-3xl font-semibold tracking-wide">
@@ -129,7 +126,6 @@ export default function PublicTutionRegistrationPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Tution */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="flex flex-col space-y-1.5">
                 <label className="text-xs md:text-sm text-slate-100/90">
@@ -167,7 +163,6 @@ export default function PublicTutionRegistrationPage() {
               </div>
             </div>
 
-            {/* Names */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="flex flex-col space-y-1.5">
                 <label className="text-xs md:text-sm text-slate-100/90">
@@ -198,7 +193,6 @@ export default function PublicTutionRegistrationPage() {
               </div>
             </div>
 
-            {/* Contact & Standard */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="flex flex-col space-y-1.5">
                 <label className="text-xs md:text-sm text-slate-100/90">
@@ -229,7 +223,6 @@ export default function PublicTutionRegistrationPage() {
               </div>
             </div>
 
-            {/* School */}
             <div className="flex flex-col space-y-1.5">
               <label className="text-xs md:text-sm text-slate-100/90">
                 School<span className="text-red-400">*</span>
@@ -244,7 +237,6 @@ export default function PublicTutionRegistrationPage() {
               />
             </div>
 
-            {/* Actions */}
             <div className="flex items-center justify-between pt-2">
               <button
                 type="button"
@@ -266,5 +258,18 @@ export default function PublicTutionRegistrationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+//  Main export wrapped in Suspense
+export default function PublicTutionRegistrationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+        Loading form...
+      </div>
+    }>
+      <RegistrationForm />
+    </Suspense>
   );
 }
