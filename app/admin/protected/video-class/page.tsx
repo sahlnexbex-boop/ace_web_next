@@ -208,7 +208,13 @@ const loadCategories = async () => {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "class_title", label: "Title" },
+          { key: "class_title", label: "Title", 
+            render: (r)=> (
+              <div className="max-w-32 truncate">
+                {r.class_title}
+              </div>
+            )
+           },
           {
             key: "category_id",
             label: "Category",

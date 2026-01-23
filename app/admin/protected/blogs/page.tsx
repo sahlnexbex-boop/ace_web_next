@@ -165,7 +165,11 @@ export default function BlogsPage() {
                 "—"
               ),
           },
-          { key: "blog_title", label: "Title" },
+          { key: "blog_title", label: "Title",
+            render: (r)=>(
+              <div className="max-w-32 truncate">{r.blog_title}</div>
+            )
+           },
           { key: "blog_author", label: "Author" },
 
           // ✔ NEW COLUMN
@@ -183,19 +187,19 @@ export default function BlogsPage() {
                 ? new Date(r.publishing_date).toLocaleDateString("en-IN")
                 : "—",
           },
-          {
-            key: "tags",
-            label: "Tags",
-            render: (r) => {
-              try {
-                const arr =
-                  typeof r.tags === "string" ? JSON.parse(r.tags) : r.tags;
-                return Array.isArray(arr) ? arr.join(", ") : "—";
-              } catch {
-                return "—";
-              }
-            },
-          },
+          // {
+          //   key: "tags",
+          //   label: "Tags",
+          //   render: (r) => {
+          //     try {
+          //       const arr =
+          //         typeof r.tags === "string" ? JSON.parse(r.tags) : r.tags;
+          //       return Array.isArray(arr) ? arr.join(", ") : "—";
+          //     } catch {
+          //       return "—";
+          //     }
+          //   },
+          // },
           {
             key: "status",
             label: "Status",

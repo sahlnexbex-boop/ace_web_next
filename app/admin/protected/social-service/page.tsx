@@ -228,7 +228,11 @@ export default function SocialServicesPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "service_title", label: "Title" },
+          { key: "service_title", label: "Title", 
+            render: (r)=>(
+              <div className="max-w-32 truncate">{r.service_title}</div>
+            )
+           },
           { key: "service_location", label: "Location" },
           {
             key: "service_date",

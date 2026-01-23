@@ -313,7 +313,11 @@ export default function ResultsPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "result_title", label: "Title" },
+          { key: "result_title", label: "Title", 
+            render: (r)=>(
+              <div className="max-w-32 truncate">{r.result_title}</div>
+            )
+           },
           {
             key: "result_date",
             label: "Date",

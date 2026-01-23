@@ -261,9 +261,13 @@ export default function WebinarsPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "webinar_title", label: "Title" },
+          { key: "webinar_title", label: "Title", 
+            render: (r)=> (
+              <div className="max-w-32 truncate">{r.webinar_title}</div>
+            )
+           },
           { key: "speaker_name", label: "Speaker Name" },
-          { key: "speaker_position", label: "Speaker Position" },
+          // { key: "speaker_position", label: "Speaker Position" },
           {
             key: "date_time",
             label: "Date & Time",

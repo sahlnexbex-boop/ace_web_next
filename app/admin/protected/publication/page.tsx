@@ -237,7 +237,11 @@ export default function PublicationPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "book_title", label: "Title" },
+          { key: "book_title", label: "Title",
+            render: (r)=>(
+              <div className="max-w-32 truncate">{r.book_title}</div>
+            )
+           },
           { key: "book_author", label: "Author" },
           { key: "book_language", label: "Language" },
           {

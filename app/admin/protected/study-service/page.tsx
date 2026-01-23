@@ -264,7 +264,11 @@ export default function StudyServicePage() {
             render: (r) => study_service_type[r.service_type] || "—",
           },
           { key: "subject_name", label: "Subject" },
-          { key: "exam_name", label: "Exam" },
+          { key: "exam_name", label: "Exam",
+            render: (r)=>(
+              <div className="max-w-32 truncate">{r.exam_name}</div>
+            )
+           },
           {
             key: "service_file",
             label: "File",

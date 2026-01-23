@@ -262,7 +262,13 @@ export default function CurrentAffairPage() {
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
-          { key: "affair_title", label: "Title" },
+          { key: "affair_title", label: "Title",
+            render: (r) => (
+              <div className="max-w-32 truncate">
+                {r.affair_title}
+              </div>
+            )
+           },
           { key: "affair_price", label: "Price" },
           {
             key: "publishing_date",

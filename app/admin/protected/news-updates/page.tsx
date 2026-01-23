@@ -169,7 +169,11 @@ export default function NewsPage() {
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
-          { key: "news_title", label: "Title" },
+          { key: "news_title", label: "Title",
+            render: (r)=> (
+              <div className="max-w-32 truncate">{r.news_title}</div>
+            )
+           },
           {
             key: "date_time",
             label: "Date & Time",
