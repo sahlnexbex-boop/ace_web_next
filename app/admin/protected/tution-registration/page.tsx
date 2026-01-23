@@ -148,7 +148,7 @@ export default function TutionRegistrationPage() {
   const fields = [
     {
       name: "tution_id",
-      label: "Tution",
+      label: "Tuition",
       type: "select",
       options: tutionOptions,
       required: true,
@@ -221,7 +221,7 @@ export default function TutionRegistrationPage() {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <h1 className="text-2xl font-semibold text-cyan-700">
-          Tution Registrations
+          Tuition Registrations
         </h1>
 
         <div className="flex items-center gap-3">
@@ -307,7 +307,7 @@ export default function TutionRegistrationPage() {
             fields={[
               {
                 key: "tution_id",
-                label: "Tution",
+                label: "Tuition",
                 type: "select",
                 options: tutionOptions,
               },
@@ -369,7 +369,7 @@ export default function TutionRegistrationPage() {
           },
           {
             key: "tution_title",
-            label: "Tution",
+            label: "Tuition",
           },
           {
             key: "std_name",

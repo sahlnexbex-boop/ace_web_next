@@ -70,7 +70,7 @@ const menuItems = [
     ],
   },
   {
-    name: "Exams & Tutions",
+    name: "Exams & Tuitions",
     icon: ClipboardList,
     children: [
       {
@@ -79,7 +79,7 @@ const menuItems = [
         path: "/admin/protected/scholarship-exam",
       },
       {
-        name: "Tutions",
+        name: "Tuitions",
         icon: BookOpen,
         path: "/admin/protected/tutions",
       },
@@ -184,7 +184,7 @@ const menuItems = [
         path: "/admin/protected/exam-enquiry",
       },
       {
-        name: "Tutions Enquiry's",
+        name: "Tuitions Enquiry's",
         icon: Trophy,
         path: "/admin/protected/tution-registration",
       },

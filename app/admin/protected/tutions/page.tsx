@@ -67,7 +67,7 @@ export default function TutionsPage() {
       ) : (
         "—"
       ),
-      "Tution Title": d.tution_title || "—",
+      "Tuition Title": d.tution_title || "—",
       Description: (
         <p className="text-gray-700 whitespace-pre-line">
           {d.tution_description || "—"}
@@ -97,7 +97,7 @@ export default function TutionsPage() {
   const fields = [
     {
       name: "tution_title",
-      label: "Tution Title",
+      label: "Tuition Title",
       type: "text",
       required: true,
     },
@@ -109,7 +109,7 @@ export default function TutionsPage() {
     },
     {
       name: "tution_image",
-      label: "Tution Image",
+      label: "Tuition Image",
       type: "file",
       required: true,
     },
@@ -153,7 +153,7 @@ export default function TutionsPage() {
     <div className="p-4 sm:p-6">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-        <h1 className="text-2xl font-semibold text-cyan-700">Tutions</h1>
+        <h1 className="text-2xl font-semibold text-cyan-700">Tuitions</h1>
 
         <div className="flex items-center gap-3">
           <TableFilter
@@ -181,7 +181,7 @@ export default function TutionsPage() {
             }}
             className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md hover:bg-cyan-800 cursor-pointer"
           >
-            Create Tution <IconPlus size={20} />
+            Create Tuition <IconPlus size={20} />
           </button>
         </div>
       </div>
@@ -279,7 +279,7 @@ export default function TutionsPage() {
             loadTutions();
           }
         }}
-        title="Delete Tution"
+        title="Delete Tuition"
         message={`Are you sure you want to delete "${selected?.tution_title}"?`}
       />
 
