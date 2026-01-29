@@ -89,109 +89,143 @@ export default function Branches() {
 
   const branchInfo: Record<
     string,
-    { description: string; phone: string; images: string[]; map: string }
+    {
+      description: string;
+      phone: string;
+      address: string;
+      images: string[];
+      map: string;
+      mapLink: string;
+    }
   > = {
     Calicut: {
       description:
         "Our Calicut branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 7593 002 221",
+      address:
+        "CITY TOWER BUILDING, OPPO. RENAULT SHOWROOM, THAZHEKKOD, KOZHIKODE, PIN: 673004",
       images: [...branchImages],
+      mapLink: "https://maps.app.goo.gl/wH7ZUEHJUs6oFR6g8",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3913.0354897015527!2d75.78191267481233!3d11.258799588920853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba6593f52be59a5%3A0xcf8150daaf9ed65a!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Center%20CALICUT!5e0!3m2!1sen!2sin!4v1769602908316!5m2!1sen!2sin",
     },
     Balussery: {
       description:
         "Our Balussery branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 7034 030 306",
+      address:
+        "POYILIL COMPLEX, CALICUT ROAD, BALUSSERY MUKKU, PIN: 673612",
       images: [
         branchImages[1],
         branchImages[0],
         branchImages[3],
         branchImages[2],
       ],
+      mapLink: "https://maps.app.goo.gl/vXMiQdWKRxCeJUS79",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3910.47719408982!2d75.83236387481537!3d11.445442388746958!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba66785d2a6c8c7%3A0xfe7213941bad58c7!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Balussery!5e0!3m2!1sen!2sin!4v1769603000982!5m2!1sen!2sin",
     },
     Malappuram: {
       description:
         "Our Malappuram branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 9846 925 678",
+      address:
+        "GRAND ARCADE BUILDING, MIDDLE HILL, MALAPPURAM, PIN:676505",
       images: [
         branchImages[2],
         branchImages[3],
         branchImages[1],
         branchImages[0],
       ],
+      mapLink: "https://maps.app.goo.gl/RYbnZA3mfxd3oato8",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3915.9274966531484!2d76.07811937480899!3d11.044062789121444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba64a9ec5b4ec07%3A0xfd07f2690735e4fb!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Malappuram!5e0!3m2!1sen!2sin!4v1769603096903!5m2!1sen!2sin",
     },
     Nilambur: {
       description:
         "Our Nilambur branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 8893 324 004, 04931 220 221",
+      address:
+        "FATIMAGIRI SCHOOL ROAD, CHANDAKKUNNU BUS STAND, NILAMBUR, MALAPPURAM DISTRICT. PIN: 679329",
       images: [
         branchImages[3],
         branchImages[2],
         branchImages[0],
         branchImages[1],
       ],
+      mapLink: "https://maps.app.goo.gl/mSJ4YThryzbkcp8x7",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3912.649623194259!2d76.23831187481282!3d11.287145888894377!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba63b63c0fce0c1%3A0xf7742856e2495642!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Nilambur!5e0!3m2!1sen!2sin!4v1769603200290!5m2!1sen!2sin",
     },
     Perinthalmanna: {
       description:
         "Our Perinthalmanna branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 8943 058 888",
+      address:
+        "CTM TOWER, PALAKKAD ROAD, PERINTHALMANNA, PIN:679322",
       images: [
         branchImages[0],
         branchImages[2],
         branchImages[1],
         branchImages[3],
       ],
+      mapLink: "https://maps.app.goo.gl/nUYF7MH2FPrM8vrP8",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.834048088797!2d76.22414957480787!3d10.97589578918524!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7cd37f9e16807%3A0x52ac5ecd0e69c37d!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Perinthalmanna!5e0!3m2!1sen!2sin!4v1769603290522!5m2!1sen!2sin",
     },
     Edappal: {
       description:
         "Our Edappal branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 7593 002 223, 0494 268 5555",
+      address:
+        "CRESCENT PLAZA BUILDING, KUTTIPPURAM ROAD, EDAPPAL, PIN:679576",
       images: [
         branchImages[1],
         branchImages[3],
         branchImages[0],
         branchImages[2],
       ],
+      mapLink: "https://maps.app.goo.gl/JnVmFBS3aQ3MTDfw5",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.337469542276!2d76.00533477480504!3d10.785444389363851!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b933313d3d19%3A0xda6f876430b8b163!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%20%7C%20Edappal!5e0!3m2!1sen!2sin!4v1769601247710!5m2!1sen!2sin",
     },
     Tirur: {
       description:
         "Our Tirur branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 8129 049 049",
+      address:
+        "NEAR KORANGATH SAMUCHAYAM, EZHOOR ROAD, TIRUR, PIN:676101",
       images: [
         branchImages[2],
         branchImages[0],
         branchImages[3],
         branchImages[1],
       ],
+      mapLink: "https://maps.app.goo.gl/fkq7KAbjz9EBcgsNA",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.6395937620946!2d75.923258974807!3d10.914970989242342!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b1ba980b9e11%3A0x4f426035006d3aa1!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Tirur!5e0!3m2!1sen!2sin!4v1769600828288!5m2!1sen!2sin",
     },
     Palakkad: {
       description:
         "Our Palakkad branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 9072 330 044",
+      address:
+        "M.A COMPLEX, T.B ROAD, PALAKKAD, PIN : 678014",
       images: [
         branchImages[3],
         branchImages[1],
         branchImages[2],
         branchImages[0],
       ],
+      mapLink: "https://maps.app.goo.gl/HxbWqBGQ5a8GLTMC8",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.531764495445!2d76.64884607480485!3d10.770523989377905!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba86d002800a31d%3A0xbde50ea8f58a5104!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Palakkad!5e0!3m2!1sen!2sin!4v1769601047662!5m2!1sen!2sin",
     },
     Pattambi: {
       description:
         "Our Pattambi branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
       phone: "+91 7510 239 575",
+      address:
+        "CITY TOWER, MELEPATTAMBI, PIN: 679306",
       images: [
         branchImages[0],
         branchImages[3],
         branchImages[1],
         branchImages[2],
       ],
+      mapLink: "https://maps.app.goo.gl/H59tekDgwaPuH7g1A",
       map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31353.084645389008!2d76.20390064382384!3d10.800926368340356!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7c5b1fffb3d95%3A0xdc9534c4da305878!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%20%2C%20Pattambi!5e0!3m2!1sen!2sin!4v1769601158584!5m2!1sen!2sin",
     },
   };
@@ -220,7 +254,7 @@ export default function Branches() {
                 <Button
                   key={item.name}
                   variant={
-                    selectedBranch.name === item.name ? "default" : "outline"
+                    selectedBranch.name === item.name ? "ghost" : "outline"
                   }
                   className={`w-full justify-start font-semibold py-4 cursor-pointer sm:py-6 ${
                     selectedBranch.name === item.name
@@ -253,36 +287,59 @@ export default function Branches() {
                 {selectedBranch?.Description}
               </p>
 
-              <div className="flex gap-5 items-center mb-3 text-sm sm:text-base">
-                <div className="flex items-center">
-                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                  <div className="flex flex-wrap items-center gap-2">
-                    {selectedBranch.Phone.split(",").map((num, index, arr) => {
-                      const cleanNumber = num.replace(/\s/g, "");
-                      return (
-                        <span key={index} className="flex items-center gap-2">
-                          <a
-                            href={`tel:${cleanNumber}`}
-                            className="text-gray-700 hover:text-blue-600"
-                          >
-                            {num.trim()}
-                          </a>
+              <div className="inline-flex flex-col">
+                <div className="flex gap-5 items-center mb-3 text-sm sm:text-base">
+                  <div className="flex items-center">
+                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      {selectedBranch.Phone.split(",").map(
+                        (num, index, arr) => {
+                          const cleanNumber = num.replace(/\s/g, "");
+                          return (
+                            <span
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              <a
+                                href={`tel:${cleanNumber}`}
+                                className="text-gray-700 hover:text-blue-600"
+                              >
+                                {num.trim()}
+                              </a>
 
-                          {/* Separator | */}
-                          {index < arr.length - 1 && (
-                            <span className="text-gray-400 font-semibold">|</span>
-                          )}
-                        </span>
-                      );
-                    })}
+                              {/* Separator | */}
+                              {index < arr.length - 1 && (
+                                <span className="text-gray-400 font-semibold">
+                                  |
+                                </span>
+                              )}
+                            </span>
+                          );
+                        },
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                    <a
+                      href={`mailto:${selectedBranch.email}`}
+                      className="text-gray-700 hover:text-blue-600"
+                    >
+                      {selectedBranch?.email}
+                    </a>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+
+                <div className="flex items-start gap-1.5 mb-1.5 text-sm font-semibold sm:text-sm">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                   <a
-                  href={`tel:${selectedBranch?.Phone.replace(/\s|,/g, "")}`}
-                  className="text-gray-700 hover:text-blue-600"
-                  >{selectedBranch?.email}</a>
+                    href={branchInfo[selectedBranch.name]?.mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 leading-tight hover:text-blue-600"
+                  >
+                    {branchInfo[selectedBranch.name]?.address}
+                  </a>
                 </div>
               </div>
 
