@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getEventById } from "@/lib/api/events";
-import { Home } from "lucide-react";
+import { Home, MapPin } from "lucide-react";
 import Loader from "@/components/loader";
 
 export default function EventDetailsPage() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -34,7 +34,7 @@ export default function EventDetailsPage() {
 
   return (
     <section className="bg-[#f7fbff] min-h-screen py-10 px-6 md:px-12">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto md:px-16">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 mb-6">
           <ol className="flex items-center space-x-2">
@@ -56,9 +56,7 @@ export default function EventDetailsPage() {
           </ol>
         </nav>
 
-        {loading && (
-          <Loader />
-        )}
+        {loading && <Loader />}
 
         {!loading && event && (
           <>
@@ -66,39 +64,94 @@ export default function EventDetailsPage() {
               <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">
                 {event.event_title}
               </h1>
-              <p className="text-cyan-600 font-medium">
-                {new Date(event.date_time).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-              {event.event_location && (
-                <p className="text-gray-600 text-sm mt-1">
-                  📍 {event.event_location}
+              <div className="flex items-center gap-5">
+                {event.event_location && (
+                  <div className="text-gray-600 flex items-center text-sm">
+                    <MapPin className="w-4 h-4 inline mr-1" />{" "}
+                    <span>{event.event_location}</span>
+                  </div>
+                )}
+                <p className="text-cyan-600 font-medium">
+                  {new Date(event.date_time).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </p>
-              )}
+              </div>
             </div>
 
-            {event.event_image && (
-              <div className="rounded-xl overflow-hidden border border-cyan-200 mb-8">
-                <img
-                  src={server_url + event.event_image}
-                  alt={event.event_title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+            {/* Main Content with Sidebar Images */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 mb-8">
+              {/* Main Content */}
+              <div className="md:col-span-2">
+                {event.event_image && (
+                  <div className="rounded-xl overflow-hidden border border-cyan-200 mb-8">
+                    <img
+                      src={server_url + event.event_image}
+                      alt={event.event_title}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                )}
 
-            <div className="text-gray-700 leading-relaxed space-y-4 text-[15px] md:text-base">
-              <p>{event.event_description}</p>
+                <div className="text-gray-700 leading-relaxed space-y-4 text-[15px] md:text-base">
+                  <p>{event.event_description}</p>
+                </div>
+              </div>
+
+              {/* Right Sidebar - Other Images */}
+              {(() => {
+                let otherImages: string[] = [];
+                if (event.other_images) {
+                  try {
+                    otherImages =
+                      typeof event.other_images === "string"
+                        ? JSON.parse(event.other_images)
+                        : Array.isArray(event.other_images)
+                          ? event.other_images
+                          : [];
+                  } catch (err) {
+                    console.error("Failed to parse other_images:", err);
+                    otherImages = [];
+                  }
+                }
+
+                return otherImages.length > 0 ? (
+                  <div className="md:col-span-1">
+                    <div className=" rounded-xl sticky top-4">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        Event Gallery
+                      </h3>
+                      <div className="grid grid-cols-1 gap-3">
+                        {otherImages.map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="group relative rounded-lg overflow-hidden border border-cyan-100 hover:border-cyan-400 transition-all cursor-pointer"
+                          >
+                            <img
+                              src={server_url + img}
+                              alt={`Gallery ${idx + 1}`}
+                              className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                          </div>
+                        ))}
+                      </div>
+                      {/* <p className="text-xs text-gray-500 mt-3 text-center">
+                        {otherImages.length} more image{otherImages.length > 1 ? 's' : ''}
+                      </p> */}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
             </div>
           </>
         )}
 
         {/* No Data */}
         {!loading && !event && (
-         <div className="flex justify-center items-center min-h-[70vh] md:min-h-auto">
+          <div className="flex justify-center items-center min-h-[70vh] md:min-h-auto">
             <img src="../../no_data.png" alt="no data" className="opacity-30" />
           </div>
         )}
