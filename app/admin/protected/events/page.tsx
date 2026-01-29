@@ -56,6 +56,21 @@ export default function EventsPage() {
       const res = await getEventById(row.event_id);
       const e = res?.data || res;
 
+      // Parse other_images if it's a JSON string
+      let otherImages: string[] = [];
+      if (e.other_images) {
+        try {
+          otherImages = typeof e.other_images === 'string' 
+            ? JSON.parse(e.other_images) 
+            : Array.isArray(e.other_images) 
+            ? e.other_images 
+            : [];
+        } catch (err) {
+          console.error("Failed to parse other_images:", err);
+          otherImages = [];
+        }
+      }
+
       const formatted = {
         "Event Title": e.event_title || "—",
         Description: (
@@ -86,6 +101,20 @@ export default function EventsPage() {
               alt="Event"
               className="w-20 h-20 object-cover rounded-lg"
             />
+          </div>
+        ) : (
+          "—"
+        ),
+        "Other Images": otherImages.length > 0 ? (
+          <div className="flex flex-wrap gap-2 justify-end">
+            {otherImages.map((img, idx) => (
+              <img
+                key={idx}
+                src={server_url + img}
+                alt={`Other ${idx + 1}`}
+                className="w-20 h-20 object-cover rounded-lg"
+              />
+            ))}
           </div>
         ) : (
           "—"
@@ -141,6 +170,7 @@ export default function EventsPage() {
       required: true,
     },
     { name: "event_image", label: "Event Image - (Ratio 3:2)", type: "file", required: false },
+    { name: "other_images", label: "Other Images (Multiple)", type: "file", required: false, multiple: true },
   ];
 
   return (
@@ -248,6 +278,21 @@ export default function EventsPage() {
         setPage={setPage}
         setSearch={setSearch}
         onEdit={(row) => {
+          // Parse other_images if it's a JSON string
+          let otherImages: string[] = [];
+          if (row.other_images) {
+            try {
+              otherImages = typeof row.other_images === 'string' 
+                ? JSON.parse(row.other_images) 
+                : Array.isArray(row.other_images) 
+                ? row.other_images 
+                : [];
+            } catch (err) {
+              console.error("Failed to parse other_images:", err);
+              otherImages = [];
+            }
+          }
+
           setSelected({
             ...row,
             status: String(row.status),
@@ -255,6 +300,7 @@ export default function EventsPage() {
             date_time: row.date_time
               ? new Date(row.date_time).toISOString().slice(0, 16)
               : "",
+            other_images: otherImages,
           });
           setOpenForm(true);
         }}
