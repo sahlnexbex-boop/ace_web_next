@@ -278,7 +278,7 @@ export default function Branches() {
 
           {/* Branch Info */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-lg">
+            <div className="bg-white md:rounded-3xl rounded-xl p-4 sm:p-6 shadow-lg">
               <h3 className="text-xl sm:text-2xl font-bold mb-3 text-gray-900">
                 {selectedBranch.name}
               </h3>
@@ -288,9 +288,9 @@ export default function Branches() {
               </p>
 
               <div className="inline-flex flex-col">
-                <div className="flex gap-5 items-center mb-3 text-sm sm:text-base">
+                <div className="flex md:gap-5 gap-2 items-center mb-3 text-sm sm:text-base flex-wrap">
                   <div className="flex items-center">
-                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-cyan-600" />
                     <div className="flex flex-wrap items-center gap-2">
                       {selectedBranch.Phone.split(",").map(
                         (num, index, arr) => {
@@ -302,7 +302,7 @@ export default function Branches() {
                             >
                               <a
                                 href={`tel:${cleanNumber}`}
-                                className="text-gray-700 hover:text-blue-600"
+                                className="text-gray-700 hover:text-cyan-600"
                               >
                                 {num.trim()}
                               </a>
@@ -320,23 +320,23 @@ export default function Branches() {
                     </div>
                   </div>
                   <div className="flex items-center">
-                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 mr-2 text-cyan-600" />
                     <a
                       href={`mailto:${selectedBranch.email}`}
-                      className="text-gray-700 hover:text-blue-600"
+                      className="text-gray-700 hover:text-cyan-600"
                     >
                       {selectedBranch?.email}
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-1.5 mb-1.5 text-sm font-semibold sm:text-sm">
-                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                <div className="flex items-start gap-1.5 mb-3 text-xs font-semibold sm:text-sm">
+                  <MapPin className="min-w-3 h-3 sm:w-4 sm:h-4 text-cyan-600" />
                   <a
                     href={branchInfo[selectedBranch.name]?.mapLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-700 leading-tight hover:text-blue-600"
+                    className="text-gray-700 leading-tight hover:text-cyan-600"
                   >
                     {branchInfo[selectedBranch.name]?.address}
                   </a>

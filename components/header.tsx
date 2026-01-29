@@ -203,7 +203,7 @@ export default function Header() {
           <X className="h-6 w-6" />
         </button>
 
-        <nav className="flex flex-col gap-3">
+        <nav className="flex flex-col gap-3 flex-1">
           {menuLinks.map(({ label, href, icon: Icon, dropdown }) => (
             <div key={label} className="mobile-link">
               <button
@@ -253,6 +253,15 @@ export default function Header() {
             </div>
           ))}
         </nav>
+
+        {/* MOBILE LOGIN BUTTON */}
+        <Link 
+          href="/user-portal/login" 
+          className="mt-4 w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2 rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all duration-500 ease-in-out text-center font-medium"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Login
+        </Link>
       </div>
     </header>
   );
