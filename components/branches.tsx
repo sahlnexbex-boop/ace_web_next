@@ -220,7 +220,7 @@ export default function Branches() {
                 <Button
                   key={item.name}
                   variant={
-                    selectedBranch.name === item.name ? "default" : "outline"
+                    selectedBranch.name === item.name ? "ghost" : "outline"
                   }
                   className={`w-full justify-start font-semibold py-4 cursor-pointer sm:py-6 ${
                     selectedBranch.name === item.name
