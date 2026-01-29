@@ -10,7 +10,7 @@ export default function Branches() {
     name: "Calicut",
     Description:
       "Our Calicut branch is located in the centre of the city, has easy accessibility, friendly staff, and a comfortable learning atmosphere.",
-    Phone: "04954850321",
+    Phone: "7593 002 221",
     email: "acepsccalicut@gmail.com",
   });
 
@@ -19,63 +19,63 @@ export default function Branches() {
       name: "Calicut",
       Description:
         "Our Calicut branch is located in the centre of the city, has easy accessibility, friendly staff, and a comfortable learning atmosphere.",
-      Phone: "04954850321",
+      Phone: "7593 002 221",
       email: "acepsccalicut@gmail.com",
     },
     {
       name: "Balussery",
       Description:
         "The Balussery branch is a peaceful and quiet area for students to receive direct help and constant academic support.",
-      Phone: "04962640404",
+      Phone: "7034 030 306",
       email: "acepscbalussery@gmail.com",
     },
     {
       name: "Malappuram",
       Description:
         "Malappuram branch has a lively atmosphere and committed teachers who help the students to keep their motivation up until the end of the exam preparation",
-      Phone: "04832733455",
+      Phone: "9846 925 678",
       email: "acemalapuram@gmail.com",
     },
     {
       name: "Nilambur",
       Description:
         "ilambur branch has a junior-friendly environment where the skilled teachers will make the hard-to-understand topics seem simple.",
-      Phone: "04931220221",
+      Phone: "8893 324 004, 04931 220 221",
       email: "acenilambur@gmail.com",
     },
     {
       name: "Perinthalmanna",
       Description:
         "Perinthalmanna branch has a combination of excellent teaching and a friendly atmosphere that keeps students' morale up and gets them ready for their exams.",
-      Phone: "8943058888",
-      email: "aceperinthalmanna@gmail.com",
+      Phone: "8943 058 888",
+      email: "aceperinthalmanna729@gmail.com",
     },
     {
       name: "Edappal",
       Description:
         "Our Edappal branch is a learning centre where students with the commitment of the instructors embrace education and build a strong foundation necessary to crack examinations.",
-      Phone: "04942685555",
+      Phone: "7593 002 223, 0494 268 5555",
       email: "aceedappal@gmail.com",
     },
     {
       name: "Tirur",
       Description:
         "The Tirur branch is a place where learning is encouraged and the students will not only get the attention but also the clarity they need to pass the competitive exams.",
-      Phone: "04942420005",
+      Phone: "8129 049 049",
       email: "acethirur@gmail.com",
     },
     {
       name: "Palakkad",
       Description:
         "Palakkad branch has skilled faculty and a calm academic environment which together help the students to stay focused on their goals.",
-      Phone: "9072330044",
-      email: "acepalakkad@gmail.com",
+      Phone: "9072 330 044",
+      email: "acepalakkad44@gmail.com",
     },
     {
       name: "Pattambi",
       Description:
         "Our Pattambi branch is characterized by a very nice and inspiring atmosphere where the students not only receive dependable guidance but also enjoy constant progress in their studies.",
-      Phone: "04662214111",
+      Phone: "7510 239 575",
       email: "acepscpattambi@gmail.com",
     },
   ];
@@ -94,105 +94,105 @@ export default function Branches() {
     Calicut: {
       description:
         "Our Calicut branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 1234 567 890",
+      phone: "+91 7593 002 221",
       images: [...branchImages],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125218.54684735388!2d75.72841332197618!3d11.255555506749628!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba65938563d4747%3A0x32150641ca32ecab!2sKozhikode%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758428599483!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3913.0354897015527!2d75.78191267481233!3d11.258799588920853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba6593f52be59a5%3A0xcf8150daaf9ed65a!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Center%20CALICUT!5e0!3m2!1sen!2sin!4v1769602908316!5m2!1sen!2sin",
     },
     Balussery: {
       description:
         "Our Balussery branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 9876 543 210",
+      phone: "+91 7034 030 306",
       images: [
         branchImages[1],
         branchImages[0],
         branchImages[3],
         branchImages[2],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31284.39497582074!2d75.79794269446599!3d11.440217780096903!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba6669e3d419681%3A0x919ce065b5707e10!2sBalussery%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434064569!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3910.47719408982!2d75.83236387481537!3d11.445442388746958!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba66785d2a6c8c7%3A0xfe7213941bad58c7!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Balussery!5e0!3m2!1sen!2sin!4v1769603000982!5m2!1sen!2sin",
     },
     Malappuram: {
       description:
         "Our Malappuram branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 9999 888 777",
+      phone: "+91 9846 925 678",
       images: [
         branchImages[2],
         branchImages[3],
         branchImages[1],
         branchImages[0],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62651.038623147404!2d76.0271918551829!3d11.061858910676044!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba64a9be29b058f%3A0x23e371e0d4c30d8e!2sMalappuram%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434158044!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3915.9274966531484!2d76.07811937480899!3d11.044062789121444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba64a9ec5b4ec07%3A0xfd07f2690735e4fb!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Malappuram!5e0!3m2!1sen!2sin!4v1769603096903!5m2!1sen!2sin",
     },
     Nilambur: {
       description:
         "Our Nilambur branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 8888 777 666",
+      phone: "+91 8893 324 004, 04931 220 221",
       images: [
         branchImages[3],
         branchImages[2],
         branchImages[0],
         branchImages[1],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31301.901305222298!2d76.21317344430236!3d11.280684539607611!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba63b7644696f47%3A0x855ba2b7d1add177!2sNilambur%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434210887!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3912.649623194259!2d76.23831187481282!3d11.287145888894377!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba63b63c0fce0c1%3A0xf7742856e2495642!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Nilambur!5e0!3m2!1sen!2sin!4v1769603200290!5m2!1sen!2sin",
     },
     Perinthalmanna: {
       description:
         "Our Perinthalmanna branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 7777 666 555",
+      phone: "+91 8943 058 888",
       images: [
         branchImages[0],
         branchImages[2],
         branchImages[1],
         branchImages[3],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62668.973051159184!2d76.15231159977982!3d10.977647939438771!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7cc529833b09b%3A0x1635a9815f140cc2!2sPerinthalmanna%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434243988!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.834048088797!2d76.22414957480787!3d10.97589578918524!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7cd37f9e16807%3A0x52ac5ecd0e69c37d!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Perinthalmanna!5e0!3m2!1sen!2sin!4v1769603290522!5m2!1sen!2sin",
     },
     Edappal: {
       description:
         "Our Edappal branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 6666 555 444",
+      phone: "+91 7593 002 223, 0494 268 5555",
       images: [
         branchImages[1],
         branchImages[3],
         branchImages[0],
         branchImages[2],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62668.973051159184!2d76.15231159977982!3d10.977647939438771!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b976d4bc9669%3A0x6081e9175757a3a1!2sEdappal%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434273591!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.337469542276!2d76.00533477480504!3d10.785444389363851!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b933313d3d19%3A0xda6f876430b8b163!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%20%7C%20Edappal!5e0!3m2!1sen!2sin!4v1769601247710!5m2!1sen!2sin",
     },
     Tirur: {
       description:
         "Our Tirur branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 5555 444 333",
+      phone: "+91 8129 049 049",
       images: [
         branchImages[2],
         branchImages[0],
         branchImages[3],
         branchImages[1],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62682.5114560296!2d75.87637945458923!3d10.913653396208133!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b18ce2f8645d%3A0x460f5865302bbabc!2sTirur%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434310543!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.6395937620946!2d75.923258974807!3d10.914970989242342!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b1ba980b9e11%3A0x4f426035006d3aa1!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Tirur!5e0!3m2!1sen!2sin!4v1769600828288!5m2!1sen!2sin",
     },
     Palakkad: {
       description:
         "Our Palakkad branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 4444 333 222",
+      phone: "+91 9072 330 044",
       images: [
         branchImages[3],
         branchImages[1],
         branchImages[2],
         branchImages[0],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62708.83233527156!2d76.61270740409273!3d10.788164376351634!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba86dfa087d31ad%3A0xf542d6eb7a870a56!2sPalakkad%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434342729!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.531764495445!2d76.64884607480485!3d10.770523989377905!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba86d002800a31d%3A0xbde50ea8f58a5104!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%2C%20Palakkad!5e0!3m2!1sen!2sin!4v1769601047662!5m2!1sen!2sin",
     },
     Pattambi: {
       description:
         "Our Pattambi branch is located in the heart of the city, providing excellent customer service and its friendly staff and wide product selection.",
-      phone: "+91 3333 222 111",
+      phone: "+91 7510 239 575",
       images: [
         branchImages[0],
         branchImages[3],
         branchImages[1],
         branchImages[2],
       ],
-      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15676.295792694857!2d76.17976779469916!3d10.805648329516565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7c5d32fa26e1b%3A0x42cdd17f5e236751!2sPattambi%2C%20Kerala!5e0!3m2!1sen!2sin!4v1758434368912!5m2!1sen!2sin",
+      map: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31353.084645389008!2d76.20390064382384!3d10.800926368340356!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7c5b1fffb3d95%3A0xdc9534c4da305878!2sACE%20Institutions%20%7C%20PSC%20Coaching%20Centre%20%2C%20Pattambi!5e0!3m2!1sen!2sin!4v1769601158584!5m2!1sen!2sin",
     },
   };
 
@@ -256,11 +256,33 @@ export default function Branches() {
               <div className="flex gap-5 items-center mb-3 text-sm sm:text-base">
                 <div className="flex items-center">
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                  <span className="text-gray-700">{selectedBranch?.Phone}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {selectedBranch.Phone.split(",").map((num, index, arr) => {
+                      const cleanNumber = num.replace(/\s/g, "");
+                      return (
+                        <span key={index} className="flex items-center gap-2">
+                          <a
+                            href={`tel:${cleanNumber}`}
+                            className="text-gray-700 hover:text-blue-600"
+                          >
+                            {num.trim()}
+                          </a>
+
+                          {/* Separator | */}
+                          {index < arr.length - 1 && (
+                            <span className="text-gray-400 font-semibold">|</span>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="flex items-center">
                   <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                  <span className="text-gray-700">{selectedBranch?.email}</span>
+                  <a
+                  href={`tel:${selectedBranch?.Phone.replace(/\s|,/g, "")}`}
+                  className="text-gray-700 hover:text-blue-600"
+                  >{selectedBranch?.email}</a>
                 </div>
               </div>
 
