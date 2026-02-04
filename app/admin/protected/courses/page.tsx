@@ -164,6 +164,17 @@ export default function CoursesPage() {
       options: categoryOptions,
       required: true,
     },
+    {
+      name: "course_type",
+      label: "Course Type",
+      type: "multi-select",
+      multiple: true,
+      options: [
+        { label: "Offline", value: "1" },
+        { label: "Online", value: "2" },
+      ],
+      required: false,
+    },
     { name: "course_rating", label: "Rating", type: "text", required: false },
     { name: "course_duration", label: "Duration (Hours)", type: "text", required: false },
     { name: "course_fee", label: "Fee", type: "number", required: false },
@@ -264,6 +275,41 @@ export default function CoursesPage() {
             label: "Category",
             render: (r) => r.category?.category_name || "—",
           },
+          {
+            key: "course_type",
+            label: "Course Type",
+            render: (r) => {
+              const raw = (r as any).course_type;
+
+              let values: number[] = [];
+              if (Array.isArray(raw)) {
+                values = raw.map((v) => Number(v));
+              } else if (typeof raw === "string") {
+                try {
+                  const parsed = JSON.parse(raw);
+                  if (Array.isArray(parsed)) {
+                    values = parsed.map((v) => Number(v));
+                  }
+                } catch {
+                  // ignore parse error
+                }
+              } else if (typeof raw === "number") {
+                values = [raw];
+              }
+
+              if (!values.length) return "—";
+
+              const labels = values
+                .map((v) => {
+                  if (v === 1) return "Offline";
+                  if (v === 2) return "Online";
+                  return null;
+                })
+                .filter(Boolean);
+
+              return labels.length ? labels.join(", ") : "—";
+            },
+          },
           { key: "course_rating", label: "Rating" },
           { key: "course_fee", label: "Fee" },
           { key: "course_duration", label: "Duration" },
@@ -307,6 +353,22 @@ export default function CoursesPage() {
             ...row,
             course_category_id: String(row.course_category_id),
             status: String(row.status),
+            // Normalize course_type for multi-select:
+            // accept array, JSON string, or single value
+            course_type: (() => {
+              const ct = (row as any).course_type;
+              if (Array.isArray(ct)) return ct;
+              if (typeof ct === "string") {
+                try {
+                  const parsed = JSON.parse(ct);
+                  return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                  return [];
+                }
+              }
+              if (typeof ct === "number") return [ct];
+              return [];
+            })(),
           });
           setOpenForm(true);
         }}

@@ -4,6 +4,7 @@ import { X, RotateCw, Check, ZoomIn, ZoomOut, Edit2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import Cropper from "react-easy-crop";
 import CKEditorField from "@/components/CKEditorField";
+import Select from "react-select";
 
 interface Point {
   x: number;
@@ -239,7 +240,11 @@ export default function DynamicFormModal({
       for (const [k, v] of Object.entries(defaultValues)) {
         const field = fields.find((f) => f.name === k);
 
-        if (field?.multiple && field?.type === "select") {
+        // Normalize multi-select style fields (including react-select multi)
+        if (
+          field?.multiple &&
+          (field?.type === "select" || field?.type === "multi-select")
+        ) {
           if (Array.isArray(v)) {
             normalized[k] = v;
           } else if (typeof v === "string") {
@@ -304,7 +309,7 @@ export default function DynamicFormModal({
 
   const handleMultiSelectChange = (name: string, selectedOptions: any) => {
     const values = selectedOptions
-      ? selectedOptions.map((opt: any) => opt.value)
+      ? selectedOptions.map((opt: any) => Number(opt.value))
       : [];
     setFormState((prev) => ({ ...prev, [name]: values }));
 
@@ -792,6 +797,38 @@ export default function DynamicFormModal({
                           }
                         });
                       }}
+                    />
+                  </div>
+                );
+              }
+
+              // React-select multi-select field
+              if (field.type === "multi-select") {
+                const currentValue = Array.isArray(value) ? value : [];
+                const selectedOptions =
+                  field.options?.filter((opt) => {
+                    const optVal =
+                      typeof opt.value === "string"
+                        ? Number(opt.value)
+                        : opt.value;
+                    return currentValue.includes(optVal);
+                  }) || [];
+
+                return (
+                  <div key={field.name}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {field.label}
+                    </label>
+                    <Select
+                      isMulti
+                      options={field.options}
+                      value={selectedOptions}
+                      onChange={(selected) =>
+                        handleMultiSelectChange(field.name, selected || [])
+                      }
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      placeholder={field.placeholder || "Select..."}
                     />
                   </div>
                 );
