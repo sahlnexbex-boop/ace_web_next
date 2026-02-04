@@ -13,6 +13,7 @@ interface Course {
   course_description: string;
   course_image: string;
   course_rating?: number;
+  course_type?: string;
 }
 
 interface Category {
@@ -55,15 +56,10 @@ export default function CourseCategoryPage({
 
         //  Fetch courses using category_id from slug result
         if (cat?.category_id) {
-          const courseRes = await getCourses(
-            1,
-            20,
-            "",
-            {
-              status: "1",
-              category_id: String(cat.category_id),
-            }
-          );
+          const courseRes = await getCourses(1, 20, "", {
+            status: "1",
+            category_id: String(cat.category_id),
+          });
           setCourses(courseRes?.data || courseRes?.rows || []);
         }
       } catch (error) {
@@ -137,6 +133,10 @@ export default function CourseCategoryPage({
                   alt={course.course_name}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                 />
+                {/* badge  */}
+                {/* <div className="absolute top-2 right-2 bg-white/80 text-sm text-gray-900 px-2 py-1 rounded-full">
+                  {course?.course_type === "1" ? "Offline" : "Online"}
+                </div> */}
               </div>
 
               <div className="flex flex-col justify-between flex-grow p-5">
@@ -148,9 +148,33 @@ export default function CourseCategoryPage({
                 </p>
 
                 <div className="flex justify-between items-center mt-auto pt-5 text-[#1b6dac]">
-                  <span className="text-sm">
-                    ⭐ {course.course_rating ?? 4.5}
+                  <span className="bg-blue-100 px-2 py-1 rounded-full text-sm">
+                    {(() => {
+                      let types: number[] = [];
+
+                      if (Array.isArray(course?.course_type)) {
+                        // Already array
+                        types = course.course_type;
+                      } else if (typeof course?.course_type === "string") {
+                        // String like "[1,2]" or "[]"
+                        try {
+                          types = JSON.parse(course.course_type);
+                        } catch {
+                          types = [];
+                        }
+                      }
+
+                      if (!types.length) return "N/A";
+
+                      return types
+                        .map((type) =>
+                          type === 1 ? "Offline" : type === 2 ? "Online" : null
+                        )
+                        .filter(Boolean)
+                        .join(" | ");
+                    })()}
                   </span>
+
                   <span className="hover:underline">View Details</span>
                 </div>
               </div>

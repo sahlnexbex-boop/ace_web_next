@@ -20,6 +20,7 @@ interface Course {
   course_syllabus_file?: string | null;
   course_questions_file?: string | null;
   course_image?: string;
+  course_type?: string;
   category?: {
     category_id: number;
     category_name: string;
@@ -29,14 +30,13 @@ interface Course {
 export default function CourseDetailsPage({
   params,
 }: {
-  params: { categorySlug: string; courseSlug: string; };
+  params: { categorySlug: string; courseSlug: string };
 }) {
   const router = useRouter();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
-
 
   useEffect(() => {
     (async () => {
@@ -92,7 +92,7 @@ export default function CourseDetailsPage({
         className="relative text-white md:py-16 py-8 px-6 md:px-12 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: course.course_image
-            ? `url(${server_url +course.course_image})`
+            ? `url(${server_url + course.course_image})`
             : "url('/course_details_background.png')",
         }}
       >
@@ -145,32 +145,42 @@ export default function CourseDetailsPage({
               <span className="font-semibold">{course.course_name}</span>
             </div>
 
-            <div className="flex items-center gap-2 my-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-yellow-200"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
-              </svg>
-              <p className="text-yellow-200">{course.course_rating ?? "N/A"}</p>
-            </div>
-
             <h1 className="text-2xl md:text-4xl font-bold md:mb-2 mb-4">
               {course.course_name}
             </h1>
 
-            <p className="text-white/90 md:mb-6 mb-10 ">
+            <p className="text-white/90 md:mb-6 ">
               {course.course_description}
             </p>
+
+            <div className="flex items-center gap-2 mb-7">
+              <span className="bg-blue-100 px-2 py-1 rounded-full text-sm text-sky-700">
+                {(() => {
+                  let types: number[] = [];
+
+                  if (Array.isArray(course?.course_type)) {
+                    // Already array
+                    types = course.course_type;
+                  } else if (typeof course?.course_type === "string") {
+                    // String like "[1,2]" or "[]"
+                    try {
+                      types = JSON.parse(course.course_type);
+                    } catch {
+                      types = [];
+                    }
+                  }
+
+                  if (!types.length) return "N/A";
+
+                  return types
+                    .map((type) =>
+                      type === 1 ? "Offline" : type === 2 ? "Online" : null
+                    )
+                    .filter(Boolean)
+                    .join(" | ");
+                })()}
+              </span>
+            </div>
 
             <div className="md:w-[60%] w-full bg-white rounded-3xl px-10 py-5 flex flex-col gap-3 items-start">
               <div className="flex flex-wrap md:gap-10 gap-5 mb-3">
@@ -262,7 +272,7 @@ export default function CourseDetailsPage({
 
             {course.course_questions_file && (
               <a
-                href={ server_url + course.course_questions_file}
+                href={server_url + course.course_questions_file}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between w-full bg-blue-100 text-blue-600 px-4 py-3 rounded-lg hover:bg-blue-200 transition cursor-pointer"
