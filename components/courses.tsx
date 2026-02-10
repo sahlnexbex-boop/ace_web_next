@@ -42,8 +42,8 @@ export default function Courses() {
           courseMode === "offline"
             ? "1"
             : courseMode === "online"
-            ? "2"
-            : undefined;
+              ? "2"
+              : undefined;
 
         const [typeRes, categoryRes] = await Promise.all([
           getCourseTypes(1, "", 100, { status: 1 }),
@@ -78,8 +78,8 @@ export default function Courses() {
     activeType === "all"
       ? categories
       : categories.filter(
-          (cat) => String(cat.course_type_id) === String(activeType)
-        );
+        (cat) => String(cat.course_type_id) === String(activeType)
+      );
 
   /* -------------------- GSAP ANIMATION -------------------- */
   useEffect(() => {
@@ -117,13 +117,13 @@ export default function Courses() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {lastPathRef.current === "/public/home" && (
-          <h2 className="text-3xl md:text-4xl font-bold text-center md:mb-12 mb-6 text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-900">
             Courses
           </h2>
         )}
 
         {/* ---------------- MODE + SLIDER ---------------- */}
-        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-10 md:mb-12 mb-6">
+        <div className="flex flex-col items-center gap-4 md:gap-10 md:mb-12 mb-6">
           {/* MODE TABS */}
           <div className="flex bg-white  p-1 shadow-lg border border-gray-300 md:w-auto h-full px-3 py-1.5 rounded-md justify-between">
             {[
@@ -138,11 +138,10 @@ export default function Courses() {
                   setCourseMode(mode.key as any);
                   setActiveType("all");
                 }}
-                className={`px-4 py-1.5 text-sm rounded-md transition-colors cursor-pointer w-full ${
-                  courseMode === mode.key
-                    ? "bg-sky-800 text-white shadow"
-                    : "text-gray-700"
-                }`}
+                className={`px-4 py-1.5 text-sm rounded-md transition-colors cursor-pointer w-full ${courseMode === mode.key
+                  ? "bg-sky-800 text-white shadow"
+                  : "text-gray-700"
+                  }`}
               >
                 {mode.label}
               </button>
@@ -153,7 +152,7 @@ export default function Courses() {
           <div
             ref={sliderRef}
             className="
-                flex-1 min-w-0 flex
+                w-full flex
                 overflow-x-auto scrollbar-hide
                 justify-start gap-3 sm:gap-4
                 pb-2 pl-1
@@ -187,11 +186,10 @@ export default function Courses() {
                   hasAnimatedRef.current = false;
                   setActiveType(type.type_id);
                 }}
-                className={`rounded-full px-4 sm:px-6 py-2 flex-shrink-0 transition-all whitespace-nowrap ${
-                  activeType === type.type_id
-                    ? "bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] text-white"
-                    : "text-blue-600 bg-blue-100 hover:bg-blue-200"
-                }`}
+                className={`rounded-full px-4 sm:px-6 py-2 flex-shrink-0 transition-all whitespace-nowrap ${activeType === type.type_id
+                  ? "bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] text-white"
+                  : "text-blue-600 bg-blue-100 hover:bg-blue-200"
+                  }`}
               >
                 {type.type_name}
               </button>
