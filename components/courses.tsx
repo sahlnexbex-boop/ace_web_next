@@ -152,7 +152,7 @@ export default function Courses() {
           <div
             ref={sliderRef}
             className="
-                w-full flex
+                w-full md:w-auto md:max-w-full flex
                 overflow-x-auto scrollbar-hide
                 justify-start gap-3 sm:gap-4
                 pb-2 pl-1
