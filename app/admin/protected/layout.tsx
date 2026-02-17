@@ -70,7 +70,7 @@ const menuItems = [
     ],
   },
   {
-    name: "Exams & Tuitions",
+    name: "Events & Exams",
     icon: ClipboardList,
     children: [
       {
@@ -82,6 +82,11 @@ const menuItems = [
         name: "Tuitions",
         icon: BookOpen,
         path: "/admin/protected/tutions",
+      },
+      {
+        name: "Dynamic Events",
+        icon: BookOpen,
+        path: "/admin/protected/dynamic-events",
       },
     ],
   },
@@ -174,6 +179,11 @@ const menuItems = [
         path: "/admin/protected/enquiry",
       },
       {
+        name: "Events Enquiry's",
+        icon: Trophy,
+        path: "/admin/protected/event-enquiry",
+      },
+      {
         name: "Online Registartions",
         icon: GraduationCap,
         path: "/admin/protected/online-registration",
@@ -188,6 +198,7 @@ const menuItems = [
         icon: Trophy,
         path: "/admin/protected/tution-registration",
       },
+
     ],
   },
 ];
@@ -228,20 +239,19 @@ const Sidebar = memo(
         <aside
           className={`fixed lg:static top-0 left-0 z-40 bg-cyan-800 text-white transition-all duration-300 flex flex-col 
             ${isCollapsed ? "w-20" : "w-64"} 
-            ${
-              mobileOpen ? "translate-x-0" : "-translate-x-full"
+            ${mobileOpen ? "translate-x-0" : "-translate-x-full"
             } lg:translate-x-0`}
           style={{ height: "100vh" }}
         >
           {/* Logo */}
           <div className="flex items-center justify-between p-4 border-b border-cyan-700 flex-shrink-0">
             <img
-              src="../../ace_landscape.png"
+              src="/ace_landscape.png"
               alt=""
               className={`h-12 ps-8 ${isCollapsed ? "hidden" : "block"}`}
             />
             <img
-              src="../../logo_full.png"
+              src="/logo_full.png"
               alt=""
               className={`h-8 w-10 ${isCollapsed ? "block" : "hidden"}`}
             />
@@ -287,21 +297,19 @@ const Sidebar = memo(
                   </button>
 
                   <div
-                    className={`ml-8 mt-1 space-y-1 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
-                      openDropdown === item.name && !isCollapsed
-                        ? "max-h-60 opacity-100"
-                        : "max-h-0 opacity-0"
-                    }`}
+                    className={`ml-8 mt-1 space-y-1 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${openDropdown === item.name && !isCollapsed
+                      ? "max-h-60 opacity-100"
+                      : "max-h-0 opacity-0"
+                      }`}
                   >
                     {item.children.map((child) => (
                       <Link
                         href={child.path}
                         key={child.name}
-                        className={`block px-3 py-2 rounded-s-lg text-sm transition ${
-                          pathname === child.path
-                            ? "bg-cyan-600 text-white"
-                            : "hover:bg-cyan-700"
-                        }`}
+                        className={`block px-3 py-2 rounded-s-lg text-sm transition ${pathname === child.path
+                          ? "bg-cyan-600 text-white"
+                          : "hover:bg-cyan-700"
+                          }`}
                       >
                         {child.name}
                       </Link>
@@ -313,10 +321,9 @@ const Sidebar = memo(
                   key={item.name}
                   href={item.path}
                   className={`flex items-center px-4 py-3 text-sm font-medium transition 
-                    ${
-                      pathname === item.path
-                        ? "bg-cyan-600"
-                        : "hover:bg-cyan-700"
+                    ${pathname === item.path
+                      ? "bg-cyan-600"
+                      : "hover:bg-cyan-700"
                     }`}
                 >
                   <item.icon size={20} className="mr-3" />
