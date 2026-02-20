@@ -37,7 +37,12 @@ export default function ToppersPage() {
   // Load categories only
   const loadCategories = async () => {
     try {
-      const res = await getCourseCategories();
+      const res = await getCourseCategories(
+          1, // page
+          100, // limit
+          "", // search
+          { status: "1" } // only active categories
+      );
       const arr = Array.isArray(res)
         ? res
         : Array.isArray(res?.data)

@@ -41,6 +41,31 @@ export default function CarouselPage() {
 
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+  // helper to detect video files (only mp4 right now)
+  const isVideoFile = (path?: string) =>
+    !!path && path.toLowerCase().endsWith(".mp4");
+
+  // open media in a new tab; videos are wrapped in a simple player so they don't download
+  const openMedia = (url: string, isVideo: boolean) => {
+    if (isVideo) {
+      const newWin = window.open("", "_blank");
+      if (newWin) {
+        newWin.document.write(`
+          <!doctype html>
+          <html>
+            <head><title>Video preview</title></head>
+            <body style="margin:0;background:#000;">
+              <video src="${url}" controls autoplay style="width:100%;height:100%;" />
+            </body>
+          </html>
+        `);
+        newWin.document.close();
+      }
+    } else {
+      window.open(url, "_blank");
+    }
+  };
+
   const debouncedSearch = useDebounce(search, 500);
 
   const loadCarousels = async () => {
@@ -106,31 +131,54 @@ export default function CarouselPage() {
               Inactive
             </span>
           ),
-        "Carousel File": c.carousel_file ? (
-          <a
-            href={server_url + c.carousel_file}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-cyan-700 underline flex justify-end"
-          >
-            <img src={server_url +c.carousel_file} className="w-32 h-16 object-cover" />
-          </a>
-        ) : (
+        "Carousel File": c.carousel_file ? (() => {
+          const url = server_url + c.carousel_file;
+          const video = isVideoFile(c.carousel_file);
+          return (
+            <div
+              className="flex justify-end max-w-32"
+              onClick={() => openMedia(url, video)}
+              style={{ cursor: "pointer" }}
+            >
+              {video ? (
+                <div className="w-32 h-16 bg-gray-200 flex items-center justify-center text-xs text-gray-600">
+                  video file, click
+                </div>
+              ) : (
+                <img
+                  src={url}
+                  className="w-32 h-16 object-cover"
+                  alt="carousel"
+                />
+              )}
+            </div>
+          );
+        })() : (
           "—"
         ),
-        "Carousel Mobile File": c.carousel_mobile_file ? (
-          <a
-            href={server_url +c.carousel_mobile_file}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-cyan-700 underline flex justify-end"
-          >
-            <img
-              src={server_url + c.carousel_mobile_file}
-              className="w-12 h-20 object-cover"
-            />
-          </a>
-        ) : (
+        "Carousel Mobile File": c.carousel_mobile_file ? (() => {
+          const url = server_url + c.carousel_mobile_file;
+          const video = isVideoFile(c.carousel_mobile_file);
+          return (
+            <div
+              className="flex justify-end max-w-12"
+              onClick={() => openMedia(url, video)}
+              style={{ cursor: "pointer" }}
+            >
+              {video ? (
+                <div className="w-12 h-20 bg-gray-200 flex items-center justify-center text-xs text-gray-600">
+                  video file, click
+                </div>
+              ) : (
+                <img
+                  src={url}
+                  className="w-12 h-20 object-cover"
+                  alt="carousel"
+                />
+              )}
+            </div>
+          );
+        })() : (
           "—"
         ),
         "Created At": c.created_at
@@ -356,50 +404,66 @@ export default function CarouselPage() {
           {
             key: "carousel_file",
             label: "PC File",
-            render: (r) =>
-              r.carousel_file ? (
-                <a
-                  href={server_url + r.carousel_file}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
+            render: (r) => {
+              if (!r.carousel_file) return "—";
+              const url = server_url + r.carousel_file;
+              const video = isVideoFile(r.carousel_file);
+
+              return (
+                <div
+                  className="max-w-32 h-10 rounded-sm overflow-hidden"
                   onClick={(e) => {
                     e.stopPropagation();
+                    openMedia(url, video);
                   }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img
-                    src={ server_url + r.carousel_file}
-                    className="max-w-32 h-10 object-cover rounded-sm"
-                    alt="file"
-                  />
-                </a>
-              ) : (
-                "—"
-              ),
+                  {video ? (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-600">
+                      video file, click
+                    </div>
+                  ) : (
+                    <img
+                      src={url}
+                      className="w-full h-full object-cover"
+                      alt="file"
+                    />
+                  )}
+                </div>
+              );
+            },
           },
           {
             key: "carousel_mobile_file",
             label: "Mobile File",
-            render: (r) =>
-              r.carousel_mobile_file ? (
-                <a
-                  href={server_url + r.carousel_mobile_file}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
+            render: (r) => {
+              if (!r.carousel_mobile_file) return "—";
+              const url = server_url + r.carousel_mobile_file;
+              const video = isVideoFile(r.carousel_mobile_file);
+
+              return (
+                <div
+                  className="max-w-20 h-12 rounded-sm overflow-hidden"
                   onClick={(e) => {
                     e.stopPropagation();
+                    openMedia(url, video);
                   }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img
-                    src={server_url + r.carousel_mobile_file}
-                    className="max-w-20 h-12 object-cover rounded-sm"
-                    alt="file"
-                  />
-                </a>
-              ) : (
-                "—"
-              ),
+                  {video ? (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-600">
+                      video file, click
+                    </div>
+                  ) : (
+                    <img
+                      src={url}
+                      className="w-full h-full object-cover"
+                      alt="file"
+                    />
+                  )}
+                </div>
+              );
+            },
           },
           {
             key: "status",

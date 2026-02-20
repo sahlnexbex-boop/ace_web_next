@@ -15,6 +15,7 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const [currentVideoEl, setCurrentVideoEl] = useState<HTMLVideoElement | null>(null);
   const [openEnquiry, setOpenEnquiry] = useState(false);
   const [openAdmission, setOpenAdmission] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -94,20 +95,41 @@ export default function Hero() {
     };
   }, [currentSlide]);
 
-  const startAutoPlay = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 10000);
+  const advanceSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
+  // when the current slide changes we schedule the next advance.
+  //
+  // - images automatically advance after 10 seconds
+  // - videos rely on a dedicated `currentVideoEl` effect to move when they
+  //   emit `ended` (this is set via the ref callback below).  no timer is
+  //   needed for actual video playback, avoiding race conditions.
   useEffect(() => {
+    if (intervalRef.current) {
+      clearTimeout(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     if (slides.length === 0) return;
-    startAutoPlay();
+
+    const slide = slides[currentSlide];
+    const displayFile = isMobile
+      ? slide.carousel_mobile_file || slide.carousel_file
+      : slide.carousel_file;
+    const isVideo = displayFile?.toLowerCase().endsWith(".mp4");
+
+    if (!isVideo) {
+      intervalRef.current = setTimeout(advanceSlide, 10000);
+    }
+
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current) {
+        clearTimeout(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }, [slides]);
+  }, [slides, currentSlide, isMobile]);
 
   useEffect(() => {
     const currentVideo = videoRefs.current[currentSlide];
@@ -121,10 +143,26 @@ export default function Hero() {
     }
   }, [currentSlide]);
 
+  // whenever we get a new active video element, listen for its `ended` event
+  useEffect(() => {
+    if (!currentVideoEl) return;
+    const handler = () => advanceSlide();
+    currentVideoEl.addEventListener("ended", handler);
+    return () => {
+      currentVideoEl.removeEventListener("ended", handler);
+    };
+  }, [currentVideoEl]);
+
   const handleDotClick = (index: number) => {
     setCurrentSlide(index);
-    startAutoPlay();
+    // effect above will handle scheduling
   };
+
+  // reset the stored video element whenever slide changes; the ref callback
+  // will repopulate it if the new slide is a video.
+  useEffect(() => {
+    setCurrentVideoEl(null);
+  }, [currentSlide]);
 
   if (loading) {
     return (
@@ -175,17 +213,20 @@ export default function Hero() {
                 <video
                   ref={(el: HTMLVideoElement | null) => {
                     videoRefs.current[index] = el;
+                    if (el && index === currentSlide) {
+                      setCurrentVideoEl(el);
+                    }
                   }}
                   src={server_url + displayFile}
                   autoPlay
-                  loop
                   muted
                   playsInline
                   preload="auto"
                   className="w-full h-full object-cover"
-                  onLoadedMetadata={(e) =>
-                    e.currentTarget.play().catch(() => {})
-                  }
+                  onLoadedMetadata={(e) => {
+                    e.currentTarget.play().catch(() => {});
+                    // scheduling handled by effect; no further action needed
+                  }}
                 />
               ) : (
                 <img
