@@ -45,17 +45,29 @@ export default function CarouselPage() {
   const isVideoFile = (path?: string) =>
     !!path && path.toLowerCase().endsWith(".mp4");
 
-  // open media in a new tab; videos are wrapped in a simple player so they don't download
+  // open media in a new tab; videos are wrapped in a fullscreen-friendly
+  // player so they don't download and they fit the viewport without causing
+  // vertical scrolling on mobile.
   const openMedia = (url: string, isVideo: boolean) => {
     if (isVideo) {
       const newWin = window.open("", "_blank");
       if (newWin) {
         newWin.document.write(`
           <!doctype html>
-          <html>
-            <head><title>Video preview</title></head>
-            <body style="margin:0;background:#000;">
-              <video src="${url}" controls autoplay style="width:100%;height:100%;" />
+          <html lang="en">
+            <head>
+              <meta name="viewport" content="width=device-width,initial-scale=1" />
+              <title>Video preview</title>
+              <style>
+                html,body{height:100%;margin:0;background:#000;}
+                .wrap{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+                video{max-width:100%;max-height:100vh;object-fit:contain;background:#000;}
+              </style>
+            </head>
+            <body>
+              <div class="wrap">
+                <video src="${url}" controls autoplay playsinline></video>
+              </div>
             </body>
           </html>
         `);

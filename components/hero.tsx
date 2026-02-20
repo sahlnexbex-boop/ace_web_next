@@ -16,6 +16,7 @@ export default function Hero() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [currentVideoEl, setCurrentVideoEl] = useState<HTMLVideoElement | null>(null);
+  const videoTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [openEnquiry, setOpenEnquiry] = useState(false);
   const [openAdmission, setOpenAdmission] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -146,10 +147,44 @@ export default function Hero() {
   // whenever we get a new active video element, listen for its `ended` event
   useEffect(() => {
     if (!currentVideoEl) return;
-    const handler = () => advanceSlide();
-    currentVideoEl.addEventListener("ended", handler);
+
+    const onEnded = () => {
+      if (videoTimerRef.current) {
+        clearTimeout(videoTimerRef.current);
+        videoTimerRef.current = null;
+      }
+      advanceSlide();
+    };
+
+    const onError = () => {
+      if (videoTimerRef.current) {
+        clearTimeout(videoTimerRef.current);
+        videoTimerRef.current = null;
+      }
+      advanceSlide();
+    };
+
+    currentVideoEl.addEventListener("ended", onEnded);
+    currentVideoEl.addEventListener("error", onError);
+
+    try {
+      const dur = currentVideoEl.duration;
+      const timeout = dur && !isNaN(dur) && isFinite(dur) ? Math.max(2000 + dur * 1000, 10000) : 60000;
+      videoTimerRef.current = setTimeout(() => {
+        try { if (currentVideoEl && !currentVideoEl.paused) currentVideoEl.pause(); } catch (e) {}
+        advanceSlide();
+      }, timeout) as unknown as NodeJS.Timeout;
+    } catch (e) {
+      videoTimerRef.current = setTimeout(advanceSlide, 60000) as unknown as NodeJS.Timeout;
+    }
+
     return () => {
-      currentVideoEl.removeEventListener("ended", handler);
+      currentVideoEl.removeEventListener("ended", onEnded);
+      currentVideoEl.removeEventListener("error", onError);
+      if (videoTimerRef.current) {
+        clearTimeout(videoTimerRef.current);
+        videoTimerRef.current = null;
+      }
     };
   }, [currentVideoEl]);
 
@@ -158,10 +193,11 @@ export default function Hero() {
     // effect above will handle scheduling
   };
 
-  // reset the stored video element whenever slide changes; the ref callback
-  // will repopulate it if the new slide is a video.
+  // on slide change, prefer any already-mounted element from refs; this
+  // ensures we attach listeners as soon as possible and avoid races.
   useEffect(() => {
-    setCurrentVideoEl(null);
+    const el = videoRefs.current[currentSlide] || null;
+    setCurrentVideoEl(el);
   }, [currentSlide]);
 
   if (loading) {
