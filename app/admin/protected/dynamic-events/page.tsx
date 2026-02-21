@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IconPlus, IconTrash, IconArrowLeft } from "@tabler/icons-react";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
+import TableFilter from "@/components/filter_button";
 import DataTable from "@/components/dynamicTable";
 import ConfirmDeleteModal from "@/components/deleteModal";
 import DynamicViewModal from "@/components/dynamicViewModal";
@@ -34,6 +35,7 @@ export default function DynamicEventsPage() {
     const [viewData, setViewData] = useState<any>(null);
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
+    const [filters, setFilters] = useState<{ status?: string }>({});
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -57,7 +59,8 @@ export default function DynamicEventsPage() {
 
     const loadDynamicEvents = async () => {
         try {
-            const res = await getDynamicEvents(page, 10, debouncedSearch);
+            // filters.status holds the status or undefined
+            const res = await getDynamicEvents(page, 10, debouncedSearch, filters.status);
             setData(res?.data || []);
             setTotalPages(res?.totalPages || 1);
         } catch (err) {
@@ -67,7 +70,7 @@ export default function DynamicEventsPage() {
 
     useEffect(() => {
         loadDynamicEvents();
-    }, [page, debouncedSearch]);
+    }, [page, debouncedSearch, filters]);
 
     const handleView = async (row: any) => {
         try {
@@ -381,6 +384,23 @@ export default function DynamicEventsPage() {
                 <h1 className="text-2xl font-semibold text-cyan-700">Dynamic Events</h1>
 
                 <div className="flex items-center gap-3">
+                    <TableFilter
+                        fields={[
+                            {
+                                key: "status",
+                                label: "Status",
+                                options: [
+                                    { label: "Active", value: "1" },
+                                    { label: "Inactive", value: "0" },
+                                ],
+                            },
+                        ]}
+                        onChange={(f) => {
+                            setFilters(f);
+                            setPage(1);
+                        }}
+                    />
+
                     <button
                         onClick={handleOpenCreate}
                         className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
@@ -777,26 +797,26 @@ export default function DynamicEventsPage() {
                                     )}
                                 </div>
 
-                                    {/* Submit Buttons */}
-                                    <div className="flex items-center gap-3 justify-end pt-4 border-t">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setOpenForm(false);
-                                                resetForm();
-                                            }}
-                                            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={loading}
-                                            className="bg-cyan-700 text-white px-6 py-2 rounded-md hover:bg-cyan-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                        >
-                                            {loading ? "Saving..." : selected ? "Update Event" : "Create Event"}
-                                        </button>
-                                    </div>
+                                {/* Submit Buttons */}
+                                <div className="flex items-center gap-3 justify-end pt-4 border-t">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setOpenForm(false);
+                                            resetForm();
+                                        }}
+                                        className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="bg-cyan-700 text-white px-6 py-2 rounded-md hover:bg-cyan-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    >
+                                        {loading ? "Saving..." : selected ? "Update Event" : "Create Event"}
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>

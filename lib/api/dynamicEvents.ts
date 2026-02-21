@@ -3,7 +3,8 @@ import { apiRequest } from "./apiClients";
 export const getDynamicEvents = async (
   page = 1,
   limit = 10,
-  search = ""
+  search = "",
+  status?: string | number
 ) => {
   const params = new URLSearchParams({
     page: String(page),
@@ -11,6 +12,7 @@ export const getDynamicEvents = async (
   });
 
   if (search) params.append("search", search);
+  if (status !== undefined && status !== "") params.append("status", String(status));
 
   return apiRequest(`/api/dynamic-events?${params.toString()}`, "GET");
 };
