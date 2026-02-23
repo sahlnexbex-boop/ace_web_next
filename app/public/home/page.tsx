@@ -12,6 +12,7 @@ import SocialService from "@/components/social-service"
 import Branches from "@/components/branches"
 import SuccessStories from "@/components/success-stories"
 import ScholarshipExam from "@/components/scholarshipExam"
+import ServiceCarousel from "@/components/ServiceCarousel"
 
 export default function Home() {
   return (
@@ -19,10 +20,11 @@ export default function Home() {
       <Hero />
       <AboutUs />
       <Courses />
-      <ScholarshipExam/>
+      <ServiceCarousel />
+      <ScholarshipExam />
       <RankHolders />
       <RankHoldersForum />
-      <SuccessStories/>
+      <SuccessStories />
       <Publications />
       <HybridLearning />
       <AceShorts />

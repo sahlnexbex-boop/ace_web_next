@@ -11,6 +11,7 @@ import VideoModal from "@/components/videoModal";
 import { Play } from "lucide-react";
 import EnquiryModal from "@/components/enquiryModal";
 import { getRankHolders } from "@/lib/api/rankHolders";
+import { getServiceCarousels } from "@/lib/api/serviceCarousel";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +40,7 @@ export default function BlogDetails() {
   const shortWrapperRef = useRef<HTMLDivElement | null>(null);
   const shortImageRef = useRef<HTMLImageElement | null>(null);
   const [rankHolders, setRankHolders] = useState<any[]>([]);
+  const [governanceItems, setGovernanceItems] = useState<any[]>([]);
 
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -113,13 +115,27 @@ export default function BlogDetails() {
     fetchShorts();
   }, []);
 
-  // Load Rank Holders
+  // Load governance items (service carousel limit 4)
+  useEffect(() => {
+    const fetchGovernance = async () => {
+      try {
+        const res = await getServiceCarousels(1, 4, "", 1);
+        setGovernanceItems(res?.data || []);
+      } catch (err) {
+        console.error("Error fetching governance items:", err);
+      }
+    };
+
+    fetchGovernance();
+  }, []);
+
+  // Load Rank Holders (limit 4)
   useEffect(() => {
     const fetchRankHolders = async () => {
       try {
         const res = await getRankHolders(
           1,
-          6,
+          4,
           "",
           1,
           undefined,
@@ -419,37 +435,68 @@ export default function BlogDetails() {
 
             {/* rank holders */}
             <div className="mt-10">
-              <h3 className="font-semibold text-lg mb-4 text-gray-900">
-                Rank Holders
-              </h3>
+              {/* Aces in Governance */}
+              <div className="mt-10">
+                <h3 className="font-semibold text-lg mb-4 text-gray-900">
+                  Aces in Governance
+                </h3>
 
-              {rankHolders.length === 0 ? (
-                <p className="text-sm text-gray-500">No rank holders found.</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {rankHolders.map((r) => (
-                    <div
-                      key={r.rank_id}
-                      className="rank-holder-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition group"
-                    >
-                      <img
-                        src={server_url + r.student_photo}
-                        alt={r.student_name}
-                        className=" object-cover rounded-md group-hover:scale-105 transition-transform duration-500 ease-in-out"
-                      />
+                {governanceItems.length === 0 ? (
+                  <p className="text-sm text-gray-500">No data available.</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {governanceItems.map((item) => (
+                      <div
+                        key={item.service_carousel_id}
+                        className="governance-card flex items-center justify-center p-2"
+                      >
+                        <img
+                          src={
+                            server_url + item.image_url
+                          }
+                          alt="Governance"
+                          className="object-cover cursor-pointer rounded-md hover:scale-105 transition-transform duration-500 ease-in-out"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* rank holders */}
+              <div className="mt-10">
+                <h3 className="font-semibold text-lg mb-4 text-gray-900">
+                  Rank Holders
+                </h3>
+
+                {rankHolders.length === 0 ? (
+                  <p className="text-sm text-gray-500">No rank holders found.</p>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      {rankHolders.map((r) => (
+                        <div
+                          key={r.rank_id}
+                          className="rank-holder-card flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition group"
+                        >
+                          <img
+                            src={server_url + r.student_photo}
+                            alt={r.student_name}
+                            className=" object-cover rounded-md group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* view full rank holders */}
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => router.push("/public/exams")}
-                  className="text-cyan-600 hover:underline text-sm cursor-pointer"
-                >
-                  View All Rank Holders →
-                </button>
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => router.push("/public/exams")}
+                        className="text-cyan-600 hover:underline text-sm cursor-pointer"
+                      >
+                        View All Rank Holders →
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -45,6 +45,7 @@ const menuItems = [
       { name: "Users", icon: Users, path: "/admin/protected/users" },
       { name: "Carousel", icon: Fan, path: "/admin/protected/carousel" },
       { name: "Shorts", icon: Fan, path: "/admin/protected/shorts" },
+      { name: "Service Carousel", icon: Fan, path: "/admin/protected/service-carousel" },
     ],
   },
   {
