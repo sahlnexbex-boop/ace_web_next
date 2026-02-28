@@ -26,8 +26,81 @@
     overflow: hidden;
   }
 }
+
 .input {
   @apply w-full border rounded px-3 py-2 focus:ring-2 focus:ring-cyan-500 outline-none;
+}
+
+.custom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition-duration: .3s;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+  /* background-color: skyblue; */
+}
+
+/* plus sign */
+.sign {
+  width: 100%;
+  transition-duration: .3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sign svg {
+  width: 24px;
+}
+
+/* 
+.sign svg path {
+  fill: white;
+} */
+
+/* text */
+.btn-text {
+  position: absolute;
+  right: 0%;
+  width: 0%;
+  opacity: 0;
+  color: white;
+  font-size: 1;
+  font-weight: 400;
+  transition-duration: .3s;
+}
+
+/* hover effect on button width */
+.custom-btn:hover {
+  width: 100px;
+  border-radius: 40px;
+  transition-duration: .3s;
+}
+
+.custom-btn:hover .sign {
+  width: 30%;
+  transition-duration: .3s;
+  padding-left: 10px;
+}
+
+/* hover effect button's text */
+.custom-btn:hover .btn-text {
+  opacity: 1;
+  width: 70%;
+  transition-duration: .3s;
+  /* padding-right: 10px; */
+}
+
+/* button click effect*/
+.custom-btn:active {
+  transform: translate(2px, 2px);
 }
 
 /* CKEditor table styles */
@@ -38,13 +111,15 @@
 
 .ck-content table td,
 .ck-content table th {
-  border: 1px solid #d1d5db; /* gray-300 */
+  border: 1px solid #d1d5db;
+  /* gray-300 */
   padding: 8px;
   vertical-align: top;
 }
 
 .ck-content table th {
-  background-color: #f3f4f6; /* gray-100 */
+  background-color: #f3f4f6;
+  /* gray-100 */
   font-weight: 600;
 }
 
@@ -65,8 +140,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .reactEasyCrop_Container {
@@ -209,18 +291,22 @@
 }
 
 .no-scrollbar {
-  -ms-overflow-style: none; /* Internet Explorer and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, and Opera */
+  display: none;
+  /* Chrome, Safari, and Opera */
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

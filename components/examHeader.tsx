@@ -7,8 +7,8 @@ export default function ExamHeader() {
 
   return (
     <div className="bg-blue-100 w-full overflow-hidden px-6 sm:px-10 py-10 md:h-96 grid grid-cols-1 md:grid-cols-2 items-center">
-        
-      <div className="flex flex-col justify-center md:px-10 text-center md:text-left">
+
+      <div className="flex flex-col justify-center md:px-10 text-center md:text-left max-w-7xl mx-auto">
         {/* Breadcrumb */}
         <div className="text-sm text-gray-900 mb-6 lg:mb-20 flex justify-start items-center flex-wrap gap-1">
           <span

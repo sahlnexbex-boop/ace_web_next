@@ -266,14 +266,14 @@ export default function BlogDetails() {
         </span>
         <span>/</span>
         <span
-        onClick={() => {
-          if (blog.course?.course_name) {
-            router.push(`/public/courses/${slugify(blog.course?.category?.category_name)}/${slugify(blog.course.course_name)}`);
-          } else {
-            router.push("/public/courses");
-          }
-        }}
-        className="text-gray-800 cursor-pointer">
+          onClick={() => {
+            if (blog.course?.course_name) {
+              router.push(`/public/courses/${slugify(blog.course?.category?.category_name)}/${slugify(blog.course.course_name)}`);
+            } else {
+              router.push("/public/courses");
+            }
+          }}
+          className="text-gray-800 cursor-pointer">
           {blog.course?.course_name ?? "General Blog"}
         </span>
       </div>
@@ -435,10 +435,10 @@ export default function BlogDetails() {
 
             {/* rank holders */}
             <div className="mt-10">
-              {/* Aces in Governance */}
+              {/* Ace's in Governance */}
               <div className="mt-10">
                 <h3 className="font-semibold text-lg mb-4 text-gray-900">
-                  Aces in Governance
+                  Ace's in Governance
                 </h3>
 
                 {governanceItems.length === 0 ? (

@@ -67,13 +67,24 @@ export default function ExamListing() {
               className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center md:items-start justify-center px-5 py-7 border border-gray-100 cursor-pointer hover:-translate-y-1"
             >
               <img
-                src="/cup_small.png"
+                src="https://images.vexels.com/media/users/3/276662/isolated/preview/45480a3100a9edc6bf3b0ce03b3830e4-blue-folder-rounded.png"
                 alt="Trophy"
-                className="w-10 h-10 mb-3 object-contain"
+                className="w-12 h-12 mb-3 object-contain"
               />
-              <p className="text-sm text-gray-800 font-medium text-center leading-snug">
-                {cat.category_name}
-              </p>
+              <div className="w-full flex justify-between items-center">
+                <p className="text-sm text-gray-800 font-medium text-center leading-snug">
+                  {cat.category_name}
+                </p>
+                <button
+                  onClick={() => handleItemClick(cat.category_id)}
+                  className="custom-btn bg-gradient-to-r from-cyan-400 to-blue-400">
+
+                  <div className="sign"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l14 0" /><path d="M13 18l6 -6" /><path d="M13 6l6 6" /></svg></div>
+
+                  <div className="btn-text">View</div>
+                </button>
+
+              </div>
             </div>
           ))}
         </div>

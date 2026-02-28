@@ -70,7 +70,7 @@ export default function Header() {
       dropdown: courseList, //  dynamic categories here
     },
     { label: "Learners Portal", href: "/public/learners", icon: GraduationCap },
-    { label: "Exam & Results", href: "/public/exams", icon: FileText },
+    { label: "Rank Holders", href: "/public/exams", icon: FileText },
     { label: "Highlights", href: "/public/highlights", icon: Star },
     { label: "Insights", href: "#", icon: Lightbulb, dropdown: insightList },
     { label: "About", href: "/public/about", icon: Info },
@@ -138,18 +138,16 @@ export default function Header() {
               >
                 <Link
                   href={href}
-                  className={`flex items-center gap-1 transition-colors font-medium ${
-                    isActive(href, label)
-                      ? "text-cyan-600 pb-1"
-                      : "text-gray-700 hover:text-cyan-500"
-                  }`}
+                  className={`flex items-center gap-1 transition-colors font-medium ${isActive(href, label)
+                    ? "text-cyan-600 pb-1"
+                    : "text-gray-700 hover:text-cyan-500"
+                    }`}
                 >
                   {label}
                   {dropdown && (
                     <ChevronDown
-                      className={`w-4 h-4 ml-1 transition-transform ${
-                        hoveredMenu === label ? "rotate-180" : ""
-                      }`}
+                      className={`w-4 h-4 ml-1 transition-transform ${hoveredMenu === label ? "rotate-180" : ""
+                        }`}
                     />
                   )}
                 </Link>
@@ -211,14 +209,13 @@ export default function Header() {
                   // if (dropdown) {
                   //   setOpenAccordion((prev) => (prev === label ? null : label));
                   // } else {
-                    handleNavigate(href);
+                  handleNavigate(href);
                   // }
                 }}
-                className={`flex justify-between items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium shadow-sm w-full ${
-                  isActive(href, label)
-                    ? "bg-cyan-600 text-white"
-                    : "bg-blue-100/70 text-gray-800 hover:bg-blue-600 hover:text-white"
-                }`}
+                className={`flex justify-between items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium shadow-sm w-full ${isActive(href, label)
+                  ? "bg-cyan-600 text-white"
+                  : "bg-blue-100/70 text-gray-800 hover:bg-blue-600 hover:text-white"
+                  }`}
               >
                 <span className="flex items-center gap-3">
                   <Icon className="h-4 w-4" />
@@ -226,13 +223,12 @@ export default function Header() {
                 </span>
                 {dropdown && (
                   <ChevronDown
-                    onClick={(e)=>{
+                    onClick={(e) => {
                       e.stopPropagation();
                       setOpenAccordion((prev) => (prev === label ? null : label));
                     }}
-                    className={`w-4 h-4 transition-transform ${
-                      openAccordion === label ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${openAccordion === label ? "rotate-180" : ""
+                      }`}
                   />
                 )}
               </button>
@@ -255,8 +251,8 @@ export default function Header() {
         </nav>
 
         {/* MOBILE LOGIN BUTTON */}
-        <Link 
-          href="/user-portal/login" 
+        <Link
+          href="/user-portal/login"
           className="mt-4 w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-2 rounded-full hover:from-cyan-600 hover:to-blue-600 transition-all duration-500 ease-in-out text-center font-medium"
           onClick={() => setIsMenuOpen(false)}
         >
