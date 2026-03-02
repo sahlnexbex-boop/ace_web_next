@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getCourseCategories } from "@/lib/api/courseCategory";
+import { getTopperCategories } from "@/lib/api/topper";
 
 export default function ExamListing() {
   const router = useRouter();
+  const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +14,7 @@ export default function ExamListing() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const catRes = await getCourseCategories(1, 50, "", { status: "1" });
+        const catRes = await getTopperCategories(1, 100);
         const catData = catRes?.data || [];
         setCategories(catData);
       } catch (err) {
@@ -59,31 +60,46 @@ export default function ExamListing() {
       </div>
 
       {categories.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xxl:grid-cols-5 gap-5 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xxl:grid-cols-5 space-y-8 space-x-3">
           {categories.map((cat) => (
             <div
               key={`category-${cat.category_id}`}
               onClick={() => handleItemClick(cat.category_id)}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center md:items-start justify-center px-5 py-7 border border-gray-100 cursor-pointer hover:-translate-y-1"
+              className="group cursor-pointer relative"
             >
-              <img
-                src="https://images.vexels.com/media/users/3/276662/isolated/preview/45480a3100a9edc6bf3b0ce03b3830e4-blue-folder-rounded.png"
-                alt="Trophy"
-                className="w-12 h-12 mb-3 object-contain"
-              />
-              <div className="w-full flex justify-between items-center">
-                <p className="text-sm text-gray-800 font-medium text-center leading-snug">
-                  {cat.category_name}
-                </p>
+              {/* folder section */}
+              <div className="flex justify-center items-center relative">
+                <img src={server_url + cat.first_topper.topper_image} alt="folder" className="rounded-md md:h-40 md:w-40 h-28 w-28 blur-[1px]" />
+                <img src={server_url + cat.first_topper.topper_image} alt="folder" className="absolute md:top-2 md:left-12 left-7 top-1 h-28 w-28 md:h-40 md:w-40 blur-[1px] rounded-md border border-white" />
+                {/* <img src={server_url + cat.first_topper.topper_image} alt="folder" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md  h-28 w-28 blur-[1px]" /> */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-md z-40 h-fit w-fit">
+                  <p className="text-blue-900 py-1 md:py-1.5 md:px-4 px-2 font-extrabold text-xs md:text-sm tracking-tight text-center">
+                    {cat.category_name}
+                  </p>
+                </div>
+              </div>
+
+              <div className="absolute -top-3 md:-top-5 md:left-6">
+                <img src="/File.png" alt="file_image" className="md:w-56 md:h-52 w-40 h-36" />
+              </div>
+
+
+              {/* Bottom Info Area */}
+              <div className="md:mt-6 mt-2 flex flex-col items-center">
                 <button
-                  onClick={() => handleItemClick(cat.category_id)}
-                  className="custom-btn bg-gradient-to-r from-cyan-400 to-blue-400">
-
-                  <div className="sign"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l14 0" /><path d="M13 18l6 -6" /><path d="M13 6l6 6" /></svg></div>
-
-                  <div className="btn-text">View</div>
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleItemClick(cat.category_id);
+                  }}
+                  className="py-2 bg-gray-50 group-hover:bg-cyan-50 text-gray-600 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 border border-gray-100 cursor-pointer w-fit px-6 mt-4 text-xs md:text-sm"
+                >
+                  View Toppers
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" className="transform group-hover:translate-x-1 transition-transform">
+                    <path d="M5 12l14 0" />
+                    <path d="M13 18l6 -6" />
+                    <path d="M13 6l6 6" />
+                  </svg>
                 </button>
-
               </div>
             </div>
           ))}

@@ -18,7 +18,7 @@ export default function ExamDetails() {
       try {
         const category_id = Number(examId);
 
-        const response = await getToppers(1, 100, "", 1, category_id);
+        const response = await getToppers(1, 100, "", 1, category_id, undefined, true);
 
         setToppers(response?.data || []);
       } catch (err) {
@@ -36,26 +36,23 @@ export default function ExamDetails() {
     if (!toppers.length) return;
 
     const cards = document.querySelectorAll(".rank-card");
-    gsap.set(cards, { opacity: 1 });
+    // Ensure they are hidden initially
+    gsap.set(cards, { opacity: 0, y: 40 });
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          gsap.fromTo(
-            cards,
-            { opacity: 0, y: 40 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              stagger: 0.12,
-              ease: "power3.out",
-            }
-          );
+          gsap.to(cards, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.12,
+            ease: "power3.out",
+          });
           observer.disconnect();
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.1 }
     );
 
     if (gridRef.current) observer.observe(gridRef.current);
@@ -117,6 +114,7 @@ export default function ExamDetails() {
         relative 
         cursor-pointer 
         bg-white
+        opacity-0
 
         rounded-2xl 
         overflow-hidden
@@ -139,6 +137,10 @@ export default function ExamDetails() {
                    transition-transform duration-500 
                    group-hover:scale-110"
                 />
+                {/* year badge */}
+                <div className="absolute top-2 right-2 bg-white rounded-md px-2 py-1">
+                  <p className="text-blue-900 font-bold text-xs">{holder.year}</p>
+                </div>
               </div>
             ))}
           </div>
