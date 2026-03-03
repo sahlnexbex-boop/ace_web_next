@@ -72,7 +72,7 @@ export default function ExamListing() {
                 <img src={server_url + cat.first_topper.topper_image} alt="folder" className="rounded-md md:h-40 md:w-40 h-28 w-28 blur-[1px]" />
                 <img src={server_url + cat.first_topper.topper_image} alt="folder" className="absolute md:top-2 md:left-12 left-7 top-1 h-28 w-28 md:h-40 md:w-40 blur-[1px] rounded-md border border-white" />
                 {/* <img src={server_url + cat.first_topper.topper_image} alt="folder" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md  h-28 w-28 blur-[1px]" /> */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-md z-40 h-fit w-fit">
+                <div className="absolute top-5/6 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-md z-40 h-fit w-fit">
                   <p className="text-blue-900 py-1 md:py-1.5 md:px-4 px-2 font-extrabold text-xs md:text-sm tracking-tight text-center">
                     {cat.category_name}
                   </p>
