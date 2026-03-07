@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
   title: "Ace Institutions",
   description:
-    "Tutorial offering exam assistance for exams like CTET, IAS, IBPS and tutoring subjects such as Civil Services",
+    "Join Ace Institutions - Kerala's leading PSC coaching center since 2003. Expert guidance for Kerala PSC, SSC, Banking, RRB & Teaching exams. 25,000+ successful students. Online & Offline courses available.",
 
   openGraph: {
     title: "Ace Institutions - #1 Kerala PSC Coaching Center | 22+ Years of Excellence",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "Ace Institutions",
     images: [
       {
-        url: "https://aceinstitutions.com/meta.png",
+        url: "https://aceinstitutions.com/meta.jpeg",
         width: 1200,
         height: 630,
         alt: "Ace Institutions",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "Ace Institutions",
     description:
       "Join Ace Institutions - Kerala's leading PSC coaching center since 2003. Expert guidance for Kerala PSC, SSC, Banking, RRB & Teaching exams. 25,000+ successful students. Online & Offline courses available.",
-    images: ["https://aceinstitutions.com/meta.png"],
+    images: ["https://aceinstitutions.com/meta.jpeg"],
   },
 
   icons: {
