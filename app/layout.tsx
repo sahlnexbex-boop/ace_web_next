@@ -15,9 +15,9 @@ export const metadata: Metadata = {
     "Join Ace Institutions - Kerala's leading PSC coaching center since 2003. Expert guidance for Kerala PSC, SSC, Banking, RRB & Teaching exams. 25,000+ successful students. Online & Offline courses available.",
 
   openGraph: {
-    title: "Ace Institutions - #1 Kerala PSC Coaching Center | 22+ Years of Excellence",
+    title: "Ace Institutions - Kerala PSC Coaching Since 2003",
     description:
-      "Join Ace Institutions - Kerala's leading PSC coaching center since 2003. Expert guidance for Kerala PSC, SSC, Banking, RRB & Teaching exams. 25,000+ successful students. Online & Offline courses available.",
+      "Kerala's leading PSC coaching since 2003. 25,000+ successful students. Expert training for Kerala PSC, SSC, Banking exams. Online & offline courses.",
     url: "https://aceinstitutions.com",
     siteName: "Ace Institutions",
     images: [
