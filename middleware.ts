@@ -7,7 +7,8 @@ export function middleware(request: NextRequest) {
 
     if (pathname === '/') {
         return NextResponse.redirect(
-            new URL('/public/home', request.url)
+            new URL('/public/home', request.url),
+            { status: 301 }
         )
     }
 
