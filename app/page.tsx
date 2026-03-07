@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-
-export default function HomeRedirect() {
-  redirect('/public/home')
+export default function Home() {
+  return null;
 }
