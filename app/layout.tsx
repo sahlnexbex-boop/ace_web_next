@@ -15,14 +15,14 @@ export const metadata: Metadata = {
     "Tutorial offering exam assistance for exams like CTET, IAS, IBPS and tutoring subjects such as Civil Services",
 
   openGraph: {
-    title: "Ace Institutions",
+    title: "Ace Institutions - #1 Kerala PSC Coaching Center | 22+ Years of Excellence",
     description:
-      "Tutorial offering exam assistance for exams like CTET, IAS, IBPS and tutoring subjects such as Civil Services",
+      "Join Ace Institutions - Kerala's leading PSC coaching center since 2003. Expert guidance for Kerala PSC, SSC, Banking, RRB & Teaching exams. 25,000+ successful students. Online & Offline courses available.",
     url: "https://aceinstitutions.com",
     siteName: "Ace Institutions",
     images: [
       {
-        url: "https://aceinstitutions.com/ace_text.png",
+        url: "https://aceinstitutions.com/meta.png",
         width: 1200,
         height: 630,
         alt: "Ace Institutions",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ace Institutions",
     description:
-      "Tutorial offering exam assistance for exams like CTET, IAS, IBPS and tutoring subjects such as Civil Services",
-    images: ["https://aceinstitutions.com/ace_text.png"],
+      "Join Ace Institutions - Kerala's leading PSC coaching center since 2003. Expert guidance for Kerala PSC, SSC, Banking, RRB & Teaching exams. 25,000+ successful students. Online & Offline courses available.",
+    images: ["https://aceinstitutions.com/meta.png"],
   },
 
   icons: {
@@ -46,6 +46,9 @@ export const metadata: Metadata = {
   },
 
   manifest: "/site.webmanifest",
+  alternates: {
+    canonical: "https://aceinstitutions.com",
+  },
 };
 
 const nunito = Nunito_Sans({
