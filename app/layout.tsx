@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { Nunito_Sans } from "next/font/google";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://aceinstitutions.com"),
@@ -75,6 +76,19 @@ export default function RootLayout({
       `}
     >
       <body className="font-nunito">
+        <Script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=G-YRNGZYPFDN`}
+        />
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-YRNGZYPFDN');
+          `}
+        </Script>
         <ToastProvider>{children}</ToastProvider>
         <Analytics />
       </body>
