@@ -9,15 +9,25 @@ function AnalyticsContent({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_ID: string }) 
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        if (!pathname) return;
+        const url = (pathname || '') + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
 
-        const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '');
+        const handlePageView = () => {
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                // We use 'config' here because it also updates the current page state for other events
+                (window as any).gtag('config', GA_MEASUREMENT_ID, {
+                    page_path: url,
+                    page_location: window.location.href,
+                    page_title: document.title,
+                    // Ensure we actually send the page_view
+                    send_page_view: true
+                });
+            }
+        };
 
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-            (window as any).gtag('config', GA_MEASUREMENT_ID, {
-                page_path: url,
-            });
-        }
+        // Small delay to ensure document.title and other meta tags are correctly updated by Next.js
+        const timeoutId = setTimeout(handlePageView, 150);
+
+        return () => clearTimeout(timeoutId);
     }, [pathname, searchParams, GA_MEASUREMENT_ID]);
 
     return null;
@@ -40,7 +50,7 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_
             gtag('js', new Date());
 
             gtag('config', '${GA_MEASUREMENT_ID}', {
-              page_path: window.location.pathname,
+              send_page_view: false
             });
           `,
                 }}
