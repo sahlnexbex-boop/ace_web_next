@@ -30,6 +30,7 @@ import {
   ChevronDown,
   Fan,
   Home,
+  Briefcase,
 } from "lucide-react";
 
 const menuItems = [
@@ -128,6 +129,7 @@ const menuItems = [
         path: "/admin/protected/social-service",
       },
       { name: "Results", icon: Award, path: "/admin/protected/results" },
+      { name: "Careers / Jobs", icon: Briefcase, path: "/admin/protected/jobs" },
     ],
   },
   {
@@ -198,6 +200,11 @@ const menuItems = [
         name: "Tuitions Enquiry's",
         icon: Trophy,
         path: "/admin/protected/tution-registration",
+      },
+      {
+        name: "Job Applications",
+        icon: Trophy,
+        path: "/admin/protected/job-applications",
       },
 
     ],

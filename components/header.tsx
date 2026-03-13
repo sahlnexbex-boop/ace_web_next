@@ -58,6 +58,7 @@ export default function Header() {
     { name: "Blogs", href: "/public/blog" },
     { name: "Notifications", href: "/public/notification" },
     { name: "Publications", href: "/public/publication" },
+    { name: "Careers", href: "/public/careers" },
   ];
 
   /*  MENU STRUCTURE */

@@ -171,7 +171,7 @@ export default function Hero() {
       const dur = currentVideoEl.duration;
       const timeout = dur && !isNaN(dur) && isFinite(dur) ? Math.max(2000 + dur * 1000, 10000) : 60000;
       videoTimerRef.current = setTimeout(() => {
-        try { if (currentVideoEl && !currentVideoEl.paused) currentVideoEl.pause(); } catch (e) {}
+        try { if (currentVideoEl && !currentVideoEl.paused) currentVideoEl.pause(); } catch (e) { }
         advanceSlide();
       }, timeout) as unknown as NodeJS.Timeout;
     } catch (e) {
@@ -206,10 +206,10 @@ export default function Hero() {
         <div className="w-full h-full flex items-center justify-center">
           <div className="animate-pulse w-full h-full flex flex-col items-center justify-center space-y-4">
             <div className="bg-gray-300 h-full w-full" />
-            <div className="absolute bottom-10 flex space-x-3">
-              <div className="w-3 h-3 bg-gray-400 rounded-full" />
-              <div className="w-3 h-3 bg-gray-400 rounded-full" />
-              <div className="w-3 h-3 bg-gray-400 rounded-full" />
+            <div className="absolute bottom-6 md:-bottom-10 flex space-x-3">
+              <div className="w-6 h-3 bg-cyan-700 rounded-full" />
+              <div className="w-3 h-3 bg-cyan-200 rounded-full" />
+              <div className="w-3 h-3 bg-cyan-200 rounded-full" />
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative flex items-center overflow-hidden z-10 md:min-h-[600px] min-h-[92vh]">
+    <section className="relative flex items-center md:overflow-visible overflow-hidden z-10 md:min-h-[600px] min-h-[92vh]">
       {slides.map((slide, index) => {
         const displayFile = isMobile
           ? slide.carousel_mobile_file || slide.carousel_file
@@ -238,11 +238,10 @@ export default function Hero() {
           <div
             key={slide.carousel_id}
             aria-hidden={index !== currentSlide}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              index === currentSlide
-                ? "opacity-100 z-10"
-                : "opacity-0 z-0 pointer-events-none"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${index === currentSlide
+              ? "opacity-100 z-10"
+              : "opacity-0 z-0 pointer-events-none"
+              }`}
           >
             <div className="absolute inset-0 flex justify-center items-center z-0">
               {isVideo ? (
@@ -260,13 +259,13 @@ export default function Hero() {
                   preload="auto"
                   className="w-full h-full object-cover"
                   onLoadedMetadata={(e) => {
-                    e.currentTarget.play().catch(() => {});
+                    e.currentTarget.play().catch(() => { });
                     // scheduling handled by effect; no further action needed
                   }}
                 />
               ) : (
                 <img
-                  src={server_url +displayFile}
+                  src={server_url + displayFile}
                   alt={slide.carousel_title}
                   className="w-full h-full object-cover"
                 />
@@ -354,30 +353,29 @@ export default function Hero() {
         );
       })}
 
-      <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
+      <div className="absolute bottom-6 md:-bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => handleDotClick(i)}
             aria-label={`Go to slide ${i + 1}`}
-            className={`w-3 h-3 rounded-full transition-all duration-200 cursor-pointer ${
-              i === currentSlide
-                ? "bg-white scale-110 w-6"
-                : "bg-white/50 hover:bg-white/70"
-            }`}
+            className={`w-3 h-3 rounded-full transition-all duration-200 cursor-pointer ${i === currentSlide
+              ? "bg-cyan-700 scale-110 w-6"
+              : "bg-cyan-200 hover:bg-cyan-400"
+              }`}
           />
         ))}
       </div>
 
-      <EnquiryModal 
-        isOpen={openEnquiry} 
-        onClose={() => setOpenEnquiry(false)} 
+      <EnquiryModal
+        isOpen={openEnquiry}
+        onClose={() => setOpenEnquiry(false)}
         enquiryType={1}
       />
-      
-      <ApplyOnlineModal 
-        open={openAdmission} 
-        onClose={() => setOpenAdmission(false)} 
+
+      <ApplyOnlineModal
+        open={openAdmission}
+        onClose={() => setOpenAdmission(false)}
       />
     </section>
   );
