@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import CourseHeader from "@/components/courseHeader";
-import { getJobs, createJobApplication } from "@/lib/api/job";
-import DynamicFormModal from "@/components/dynamicModal";
+import { useRouter } from "next/navigation";
+import { getJobs } from "@/lib/api/job";
 import {
     IconMapPin,
     IconBriefcase,
@@ -17,9 +17,8 @@ import { useToast } from "@/contexts/ToastContext";
 export default function Careers() {
     const [jobs, setJobs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedJob, setSelectedJob] = useState<any>(null);
-    const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-    const { showSuccess, showError } = useToast();
+    const router = useRouter();
+    const { showError } = useToast();
 
     const data = {
         header: "Careers",
@@ -44,24 +43,7 @@ export default function Careers() {
         fetchJobs();
     }, []);
 
-    const handleApply = (job: any) => {
-        setSelectedJob(job);
-        setIsApplyModalOpen(true);
-    };
-
-    const handleSubmitApplication = async (formData: FormData) => {
-        try {
-            if (selectedJob) {
-                formData.append("job_id", String(selectedJob.job_id));
-            }
-            await createJobApplication(formData);
-            // Removed manual toast as DynamicFormModal handles it
-            setIsApplyModalOpen(false);
-        } catch (err: any) {
-            console.error("Error submitting application:", err);
-            showError(err?.message || "Failed to submit application");
-        }
-    };
+    // Removed handleApply and handleSubmitApplication as they move to the details page
 
     return (
         <main className="min-h-screen bg-gray-50 pb-20">
@@ -147,10 +129,10 @@ export default function Careers() {
                                 </div>
                                 <div className="flex w-full justify-end">
                                     <button
-                                        onClick={() => handleApply(job)}
-                                        className="mt-auto py-2 px-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm hover:shadow-md cursor-pointer w-fit"
+                                        onClick={() => router.push(`/public/careers/${job.job_id}`)}
+                                        className="mt-auto py-2 px-6 bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-md cursor-pointer w-fit text-sm"
                                     >
-                                        Apply now
+                                        View Details
                                     </button>
                                 </div>
 
@@ -168,51 +150,6 @@ export default function Careers() {
                 )}
             </div>
 
-            {/* Application Modal */}
-            <DynamicFormModal
-                isOpen={isApplyModalOpen}
-                onClose={() => setIsApplyModalOpen(false)}
-                title={`Apply for ${selectedJob?.job_title}`}
-                fields={[
-                    {
-                        name: "candidate_name",
-                        label: "Full Name",
-                        type: "text",
-                        required: true,
-                    },
-                    {
-                        name: "candidate_email",
-                        label: "Email Address",
-                        type: "email",
-                        required: true,
-                    },
-                    {
-                        name: "candidate_phone",
-                        label: "Phone Number",
-                        type: "text",
-                        required: true,
-                    },
-                    {
-                        name: "candidate_address",
-                        label: "Address",
-                        type: "textarea",
-                        required: true,
-                    },
-                    {
-                        name: "cover_letter",
-                        label: "Cover Letter / Why should we hire you?",
-                        type: "textarea",
-                        required: true,
-                    },
-                    {
-                        name: "resume_file",
-                        label: "Resume (PDF)",
-                        type: "file",
-                        required: true,
-                    },
-                ]}
-                onSubmit={handleSubmitApplication}
-            />
         </main >
     );
 }
