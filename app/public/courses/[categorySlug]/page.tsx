@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { getCourses } from "@/lib/api/course";
 import { getCourseCategoryBySlug } from "@/lib/api/courseCategory";
+import { notFound, useRouter } from "next/navigation";
 import { CourseCategorySkeleton } from "@/components/skeltons/skelton";
 import { slugify } from "@/lib/slugify";
 
@@ -77,11 +77,7 @@ export default function CourseCategoryPage({
   if (loading) return <CourseCategorySkeleton />;
 
   if (!category) {
-    return (
-      <div className="flex justify-center items-center min-h-[70vh]">
-        <p className="text-gray-500">Category not found</p>
-      </div>
-    );
+    notFound();
   }
 
   return (

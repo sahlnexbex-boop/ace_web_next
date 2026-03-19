@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { setToken, getToken } from "@/lib/auth";
 import { sendOtp, verifyOtp, resetPassword, loginUser } from "@/lib/api/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,9 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [stage, setStage] = useState("login");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -146,14 +150,24 @@ export default function AdminLoginPage() {
               placeholder="Your Username"
               required
             />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-2 text-white placeholder-gray-100"
-              placeholder="Password"
-              required
-            />
+            <div className="relative mb-2">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-transparent border border-gray-300/30 rounded p-2 text-white placeholder-gray-100 pr-10"
+                placeholder="Password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             <div className="text-right mb-4">
               <button
                 type="button"
@@ -230,22 +244,40 @@ export default function AdminLoginPage() {
 
         {stage === "reset" && (
           <form onSubmit={handleResetSubmit}>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-4 text-white placeholder-gray-300"
-              placeholder="New Password"
-              required
-            />
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-transparent border border-gray-300/30 rounded p-2 mb-4 text-white placeholder-gray-300"
-              placeholder="Confirm Password"
-              required
-            />
+            <div className="relative mb-4">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full bg-transparent border border-gray-300/30 rounded p-2 text-white placeholder-gray-300 pr-10"
+                placeholder="New Password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition-colors"
+              >
+                {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            <div className="relative mb-4">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full bg-transparent border border-gray-300/30 rounded p-2 text-white placeholder-gray-300 pr-10"
+                placeholder="Confirm Password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             <button
               type="submit"
               disabled={loading}

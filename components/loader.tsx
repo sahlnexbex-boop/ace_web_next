@@ -5,7 +5,9 @@ import React from "react";
 const Loader: React.FC = () => {
   return (
     <>
-      <span className="loader"></span>
+      <div className="min-h-dvh flex items-center justify-center">
+        <span className="loader"></span>
+      </div>
       <style jsx>{`
         .loader {
           width: 12px;
@@ -14,7 +16,7 @@ const Loader: React.FC = () => {
           display: block;
           margin: 15px auto;
           position: relative;
-          color: cyan;
+          color: #007595;
           box-sizing: border-box;
           animation: animloader 1s linear infinite alternate;
         }

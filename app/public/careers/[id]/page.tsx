@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { getJobById, createJobApplication } from "@/lib/api/job";
 import {
     IconMapPin,
@@ -110,17 +110,7 @@ export default function JobDetailsPage() {
     }
 
     if (!job) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-                <h2 className="text-2xl font-bold text-gray-800">Job not found</h2>
-                <button
-                    onClick={() => router.push("/public/careers")}
-                    className="mt-4 text-cyan-600 hover:underline flex items-center gap-1"
-                >
-                    <IconChevronLeft size={20} /> Back to Careers
-                </button>
-            </div>
-        );
+        notFound();
     }
 
     return (

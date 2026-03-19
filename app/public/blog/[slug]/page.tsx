@@ -1,6 +1,6 @@
 "use client";
 import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { getBlogBySlug, getBlogs } from "@/lib/api/blogs";
@@ -225,20 +225,9 @@ export default function BlogDetails() {
 
   if (loading) return <BlogDetailsSkeleton />;
 
-  if (error || !blog)
-    return (
-      <div className="text-center py-20">
-        <p className="text-gray-500 text-sm mb-4">
-          {error || "Blog not found."}
-        </p>
-        <button
-          onClick={() => router.push("/public/blog")}
-          className="text-cyan-600 hover:underline text-sm"
-        >
-          ← Back to Blogs
-        </button>
-      </div>
-    );
+  if (error || !blog) {
+    notFound();
+  }
 
   return (
     <div

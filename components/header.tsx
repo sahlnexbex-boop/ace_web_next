@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { gsap } from "gsap";
 import { getCourseCategories } from "@/lib/api/courseCategory";
+import { slugify } from "@/lib/slugify";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,7 +42,7 @@ export default function Header() {
         if (response?.data) {
           const formatted = response.data.map((cat: any) => ({
             name: cat.category_name,
-            href: `/public/courses/${cat.category_id}`,
+            href: `/public/courses/${slugify(cat.category_name)}`,
           }));
           setCourseList(formatted);
         }

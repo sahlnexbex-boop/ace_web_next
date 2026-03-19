@@ -11,7 +11,7 @@ import {
 } from "@/lib/api/studentAuth";
 import { setToken, getToken } from "@/lib/auth";
 import { storeStudentIdFromToken } from "@/lib/studentAuthHelper";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 const BG_IMAGE = "/login_background_02.png";
@@ -34,6 +34,9 @@ export default function StudentAuthPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // ── Handlers ────────────────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
@@ -166,8 +169,8 @@ export default function StudentAuthPage() {
             {isForgotFlow
               ? "Reset Password"
               : mode === "signup"
-              ? "Create Account"
-              : "Welcome Back"}
+                ? "Create Account"
+                : "Welcome Back"}
           </h1>
 
           <p className="text-center text-gray-800 md:text-gray-500 mb-8 text-sm md:text-base">
@@ -200,18 +203,25 @@ export default function StudentAuthPage() {
                   />
                 </div>
 
-                <div>
+                <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Password
                   </label>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3.5 border bg-gray-100 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all"
+                    className="w-full px-4 py-3.5 border bg-gray-100 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition-all pr-12"
                     placeholder="••••••••"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-[44px] text-gray-500 hover:text-cyan-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
               </div>
 
@@ -276,18 +286,25 @@ export default function StudentAuthPage() {
                   />
                 </div>
 
-                <div>
+                <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Password
                   </label>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3.5 border bg-gray-100 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none"
+                    className="w-full px-4 py-3.5 border bg-gray-100 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none pr-12"
                     placeholder="••••••••"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-[44px] text-gray-500 hover:text-cyan-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
               </div>
 
@@ -390,32 +407,46 @@ export default function StudentAuthPage() {
 
               {stage === "reset" && (
                 <form onSubmit={handleResetPassword} className="space-y-6">
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       New Password
                     </label>
                     <input
-                      type="password"
+                      type={showNewPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-4 py-3.5 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none"
+                      className="w-full px-4 py-3.5 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none pr-12"
                       placeholder="••••••••"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-4 top-[44px] text-gray-500 hover:text-cyan-600 transition-colors"
+                    >
+                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
 
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       Confirm Password
                     </label>
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-3.5 border bg-gray-100 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none"
+                      className="w-full px-4 py-3.5 border bg-gray-100 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none pr-12"
                       placeholder="••••••••"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-[44px] text-gray-500 hover:text-cyan-600 transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
 
                   <button
