@@ -102,7 +102,7 @@ export default function SuccessStories() {
         <div className="text-center mb-12">
           <h2
             className="text-3xl md:text-4xl font-bold text-gray-900 cursor-pointer"
-            onClick={() => router.push("/public/highlights")}
+            onClick={() => router.push("/highlights")}
           >
             Success Stories
           </h2>

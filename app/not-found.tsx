@@ -32,7 +32,7 @@ export default function NotFound() {
         {/* Navigation Button */}
         <div className="mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
           <Link
-            href="/public/home"
+            href="/"
             className="inline-flex items-center justify-center rounded-xl bg-[#087FC2] px-10 py-3.5 text-sm font-semibold text-white shadow-xl hover:bg-[#1F67A5] hover:scale-105 active:scale-95 transition-all duration-300 ease-spring"
           >
             Got to home

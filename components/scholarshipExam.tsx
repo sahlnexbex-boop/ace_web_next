@@ -477,7 +477,7 @@ function CombinedCard({
             {event.dynmc_event_form_available === 1 && (
               <button
                 onClick={() =>
-                  router.push(`/public/event-reg/${event.dynmc_event_id}`)
+                  router.push(`/event-reg/${event.dynmc_event_id}`)
                 }
                 className="inline-flex items-center bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] text-white md:px-5 px-3 md:py-1.5 py-1 rounded-lg font-medium hover:from-blue-600 hover:to-cyan-600 cursor-pointer"
               >
@@ -596,7 +596,7 @@ function SingleEventHero({
         {event.dynmc_event_form_available === 1 && (
           <button
             onClick={() =>
-              router.push(`/public/event-reg/${event.dynmc_event_id}`)
+              router.push(`/event-reg/${event.dynmc_event_id}`)
             }
             className="mt-4 inline-flex items-center bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-2.5 rounded-lg font-medium cursor-pointer"
           >

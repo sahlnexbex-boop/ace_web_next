@@ -23,35 +23,35 @@ export default function AboutUs() {
       textColor: "text-purple-600",
       bg: "bg-purple-300/10",
       hover: "hover:bg-purple-50",
-      link: "/public/exams",
+      link: "/exams",
     },
     {
       text: "Exam & Ans Keys",
       textColor: "text-blue-600",
       bg: "bg-blue-300/10",
       hover: "hover:bg-blue-50",
-      link: "/public/learners?type=answer",
+      link: "/learners?type=answer",
     },
     {
       text: "Rank Holder List",
       textColor: "text-red-500",
       bg: "bg-red-300/10",
       hover: "hover:bg-red-50",
-      link: "/public/exams",
+      link: "/exams",
     },
     {
       text: "Publications",
       textColor: "text-gray-600",
       bg: "bg-gray-300/10",
       hover: "hover:bg-gray-50",
-      link: "/public/publication",
+      link: "/publication",
     },
     {
       text: "Blogs",
       textColor: "text-pink-600",
       bg: "bg-pink-300/10",
       hover: "hover:bg-pink-50",
-      link: "/public/blog",
+      link: "/blog",
     },
   ];
 
@@ -194,7 +194,7 @@ export default function AboutUs() {
               <div className="flex items-center justify-between mb-6">
                 <h3
                   className="text-lg cursor-pointer font-bold text-gray-900"
-                  onClick={() => router.push("/public/notification")}
+                  onClick={() => router.push("/notification")}
                 >
                   Notifications
                 </h3>
@@ -326,7 +326,7 @@ export default function AboutUs() {
             <Button
               size="lg"
               className="about-button cursor-pointer bg-gradient-to-r from-[#1F67A5] to-[#00A0E3] hover:from-[#176090] hover:to-[#0088c7] text-white px-8 py-3"
-              onClick={() => router.push("/public/about")}
+              onClick={() => router.push("/about")}
             >
               Explore More
             </Button>

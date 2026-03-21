@@ -75,7 +75,7 @@ export default function Publications() {
         <div className="relative mb-12 flex justify-center">
           <h2
             className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer"
-            onClick={() => router.push("/public/publication")}
+            onClick={() => router.push("/publication")}
           >
             Publications or Book
           </h2>
@@ -95,7 +95,7 @@ export default function Publications() {
             <Card
               key={book.book_id}
               className="pub-card bg-white hover:shadow-2xl shadow-lg transition-shadow rounded-xl pt-3 sm:pt-10 cursor-pointer opacity-0"
-              onClick={() => router.push(`/public/publication/${book.book_id}`)}
+              onClick={() => router.push(`/publication/${book.book_id}`)}
             >
               <CardContent className="pb-3 sm:pb-6 text-center px-3">
                 <div className="mb-4 sm:mb-6">

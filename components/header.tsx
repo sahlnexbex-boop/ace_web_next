@@ -42,7 +42,7 @@ export default function Header() {
         if (response?.data) {
           const formatted = response.data.map((cat: any) => ({
             name: cat.category_name,
-            href: `/public/courses/${slugify(cat.category_name)}`,
+            href: `/courses/${slugify(cat.category_name)}`,
           }));
           setCourseList(formatted);
         }
@@ -56,27 +56,27 @@ export default function Header() {
 
   /*  INSIGHTS LIST - unchanged */
   const insightList = [
-    { name: "Blogs", href: "/public/blog" },
-    { name: "Notifications", href: "/public/notification" },
-    { name: "Publications", href: "/public/publication" },
-    { name: "Careers", href: "/public/careers" },
+    { name: "Blogs", href: "/blog" },
+    { name: "Notifications", href: "/notification" },
+    { name: "Publications", href: "/publication" },
+    { name: "Careers", href: "/careers" },
   ];
 
   /*  MENU STRUCTURE */
   const menuLinks = [
-    // { label: "Home", href: "/public/home", icon: Home },
+    // { label: "Home", href: "/", icon: Home },
     {
       label: "Courses",
-      href: "/public/courses",
+      href: "/courses",
       icon: BookOpen,
       dropdown: courseList, //  dynamic categories here
     },
-    { label: "Learners Portal", href: "/public/learners", icon: GraduationCap },
-    { label: "Rank Holders", href: "/public/exams", icon: FileText },
-    { label: "Highlights", href: "/public/highlights", icon: Star },
+    { label: "Learners Portal", href: "/learners", icon: GraduationCap },
+    { label: "Rank Holders", href: "/exams", icon: FileText },
+    { label: "Highlights", href: "/highlights", icon: Star },
     { label: "Insights", href: "#", icon: Lightbulb, dropdown: insightList },
-    { label: "About", href: "/public/about", icon: Info },
-    { label: "Contact Us", href: "/public/contact", icon: Phone },
+    { label: "About", href: "/about", icon: Info },
+    { label: "Contact Us", href: "/contact", icon: Phone },
   ];
 
   /*  GSAP for mobile menu animation */
@@ -107,7 +107,7 @@ export default function Header() {
 
     if (
       label === "Insights" &&
-      ["/public/blog", "/public/notification", "/public/publication"].some((path) =>
+      ["/blog", "/notification", "/publication"].some((path) =>
         cleanPath.startsWith(path)
       )
     ) {
@@ -124,7 +124,7 @@ export default function Header() {
           {/*  LOGO */}
           <div
             className="flex items-center space-x-2 cursor-pointer"
-            onClick={() => router.push("/public/home")}
+            onClick={() => router.push("/")}
           >
             <img src="/logo_blue.png" alt="logo" className="h-10 min-w-24 md:h-auto" />
           </div>

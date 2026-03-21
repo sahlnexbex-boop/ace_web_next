@@ -117,7 +117,7 @@ export default function NewsUpdates() {
                   <div
                     key={n.news_id}
                     onClick={() =>
-                      router.push(`/public/highlights/news/${n.news_id}`)
+                      router.push(`/highlights/news/${n.news_id}`)
                     }
                     className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-500 cursor-pointer hover:-translate-y-1"
                   >

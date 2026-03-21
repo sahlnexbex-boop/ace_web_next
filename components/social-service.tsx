@@ -90,7 +90,7 @@ export default function SocialService() {
                   key={programme.service_id}
                   variant="outline"
                   onClick={() =>
-                    router.push(`/public/social-service/${programme.service_id}`)
+                    router.push(`/social-service/${programme.service_id}`)
                   }
                   className={`flex flex-col items-start justify-between text-left shadow-md rounded-3xl px-4 sm:px-6 py-4 sm:py-6 
                     transition-all duration-300 cursor-pointer h-full bg-white text-gray-800 

@@ -5,12 +5,7 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
 
-    if (pathname === '/') {
-        return NextResponse.redirect(
-            new URL('/public/home', request.url),
-            { status: 301 }
-        )
-    }
+    // Root path '/' is now served by app/(public)/page.tsx directly.
 
     return NextResponse.next()
 }

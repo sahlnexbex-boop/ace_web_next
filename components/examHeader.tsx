@@ -13,7 +13,7 @@ export default function ExamHeader() {
         <div className="text-sm text-gray-900 mb-6 lg:mb-20 flex justify-start items-center flex-wrap gap-1">
           <span
             className="hover:text-blue-600 cursor-pointer"
-            onClick={() => router.push("/public/home")}
+            onClick={() => router.push("/")}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -36,7 +36,7 @@ export default function ExamHeader() {
           <span>/</span>
           <span
             className="cursor-pointer hover:underline"
-            onClick={() => router.push("/public/courses")}
+            onClick={() => router.push("/courses")}
           >
             Exams & Results
           </span>

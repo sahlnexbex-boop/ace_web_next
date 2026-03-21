@@ -28,7 +28,7 @@ export default function ExamListing() {
   }, []);
 
   const handleItemClick = (id: number) => {
-    router.push(`/public/exams/${id}`);
+    router.push(`/exams/${id}`);
   };
 
   if (loading) {

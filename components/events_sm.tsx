@@ -53,7 +53,7 @@ export default function Events() {
               <div
                 key={ev.event_id}
                 onClick={() =>
-                  router.push(`/public/highlights/events/${ev.event_id}`)
+                  router.push(`/highlights/events/${ev.event_id}`)
                 }
                 className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-lg"
               >

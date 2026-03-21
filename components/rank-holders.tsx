@@ -12,7 +12,7 @@ export default function RankHolders() {
   const router = useRouter();
   const pathname = usePathname();
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const isExamsPage = pathname === "/public/exams";
+  const isExamsPage = pathname === "/exams";
 
   useEffect(() => {
     const fetchRankHolders = async () => {
@@ -57,7 +57,7 @@ export default function RankHolders() {
           <div className="relative flex-1 flex justify-center">
             <h2
               className="text-3xl md:text-4xl font-bold text-center text-gray-900 cursor-pointer"
-              onClick={() => router.push("/public/exams")}
+              onClick={() => router.push("/exams")}
             >
               Rank Holders
             </h2>
@@ -69,7 +69,7 @@ export default function RankHolders() {
           </div>
           {!isExamsPage && (
             <button
-              onClick={() => router.push("/public/exams")}
+              onClick={() => router.push("/exams")}
               className="flex items-center gap-1.5 text-sm font-semibold text-cyan-600 hover:text-cyan-800 cursor-pointer transition-colors whitespace-nowrap ml-4 shrink-0"
             >
               View All

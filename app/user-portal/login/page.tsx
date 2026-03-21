@@ -139,7 +139,7 @@ export default function StudentAuthPage() {
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white relative">
       {/* absolute back button */}
 
-      <Link href="/public/home" className="absolute top-4 left-4 cursor-pointer z-10 hidden md:block">
+      <Link href="/" className="absolute top-4 left-4 cursor-pointer z-10 hidden md:block">
         <button className=" bg-gradient-to-r from-cyan-600 to-sky-700 hover:from-cyan-700 hover:to-sky-800 flex gap-3 items-center cursor-pointer text-white py-1 px-4 rounded-lg">
           <ArrowLeft size={20} />
           Back

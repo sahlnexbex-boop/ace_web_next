@@ -89,7 +89,7 @@ export default function LatestNews() {
             {news.map((item) => (
               <Card
                 onClick={() =>
-                  router.push(`/public/highlights/news/${item.news_id}`)
+                  router.push(`/highlights/news/${item.news_id}`)
                 }
                 key={item.news_id}
                 className="news-card opacity-0 overflow-hidden hover:shadow-lg transition-shadow rounded-xl cursor-pointer"

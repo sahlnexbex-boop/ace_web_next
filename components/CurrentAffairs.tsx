@@ -90,7 +90,7 @@ export default function CurrentAffairs({
             <div className="w-full flex justify-end px-3">
               <button
                 onClick={() =>
-                  router.push(`/public/learners/affaires/${item.affair_id}`)
+                  router.push(`/learners/affaires/${item.affair_id}`)
                 }
                 className="border mt-5 rounded-full border-black px-2 py-1 hover:bg-gray-100 transition cursor-pointer"
               >

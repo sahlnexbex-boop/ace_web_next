@@ -101,7 +101,7 @@ export default function RootLayout({
               "url": "https://aceinstitutions.com",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://aceinstitutions.com/public/search?q={search_term_string}",
+                "target": "https://aceinstitutions.com/search?q={search_term_string}",
                 "query-input": "required name=search_term_string"
               }
             })
@@ -118,37 +118,37 @@ export default function RootLayout({
                   "@type": "SiteNavigationElement",
                   "position": 1,
                   "name": "Courses",
-                  "url": "https://aceinstitutions.com/public/courses"
+                  "url": "https://aceinstitutions.com/courses"
                 },
                 {
                   "@type": "SiteNavigationElement",
                   "position": 2,
                   "name": "Learners Portal",
-                  "url": "https://aceinstitutions.com/public/learners"
+                  "url": "https://aceinstitutions.com/learners"
                 },
                 {
                   "@type": "SiteNavigationElement",
                   "position": 3,
                   "name": "Rank Holders",
-                  "url": "https://aceinstitutions.com/public/exams"
+                  "url": "https://aceinstitutions.com/exams"
                 },
                 {
                   "@type": "SiteNavigationElement",
                   "position": 4,
                   "name": "Highlights",
-                  "url": "https://aceinstitutions.com/public/highlights"
+                  "url": "https://aceinstitutions.com/highlights"
                 },
                 {
                   "@type": "SiteNavigationElement",
                   "position": 5,
                   "name": "About Us",
-                  "url": "https://aceinstitutions.com/public/about"
+                  "url": "https://aceinstitutions.com/about"
                 },
                 {
                   "@type": "SiteNavigationElement",
                   "position": 6,
                   "name": "Contact Us",
-                  "url": "https://aceinstitutions.com/public/contact"
+                  "url": "https://aceinstitutions.com/contact"
                 }
               ]
             })

@@ -116,7 +116,7 @@ export default function Courses() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {lastPathRef.current === "/public/home" && (
+        {lastPathRef.current === "/" && (
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-900">
             Courses
           </h2>
@@ -208,7 +208,7 @@ export default function Courses() {
               <Card
                 key={cat.category_id}
                 onClick={() =>
-                  router.push(`/public/courses/${slugify(cat.category_name)}`)
+                  router.push(`/courses/${slugify(cat.category_name)}`)
                 }
                 className="group course-card bg-gray-50/80 border-0 rounded-2xl cursor-pointer z-10
           transition-all duration-700 ease-out

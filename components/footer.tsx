@@ -87,27 +87,27 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <a href="/public/learners" className="hover:text-cyan-400 transition-colors">
+                <a href="/learners" className="hover:text-cyan-400 transition-colors">
                   Learners portal
                 </a>
               </li>
               <li>
-                <a href="/public/exams" className="hover:text-cyan-400 transition-colors">
+                <a href="/exams" className="hover:text-cyan-400 transition-colors">
                   Exam & Results
                 </a>
               </li>
               <li>
-                <a href="/public/highlights" className="hover:text-cyan-400 transition-colors">
+                <a href="/highlights" className="hover:text-cyan-400 transition-colors">
                   Highlights
                 </a>
               </li>
               <li>
-                <a href="/public/about" className="hover:text-cyan-400 transition-colors">
+                <a href="/about" className="hover:text-cyan-400 transition-colors">
                   About
                 </a>
               </li>
               <li>
-                <a href="/public/contact" className="hover:text-cyan-400 transition-colors">
+                <a href="/contact" className="hover:text-cyan-400 transition-colors">
                   Contact us
                 </a>
               </li>
@@ -118,22 +118,22 @@ export default function Footer() {
           <div>
             <ul className="space-y-2 text-gray-300 mt-8 md:mt-0">
               <li>
-                <a href="/public/courses" className="hover:text-cyan-400 transition-colors">
+                <a href="/courses" className="hover:text-cyan-400 transition-colors">
                   Courses
                 </a>
               </li>
               <li>
-                <a href="/public/blog" className="hover:text-cyan-400 transition-colors">
+                <a href="/blog" className="hover:text-cyan-400 transition-colors">
                   Blogs
                 </a>
               </li>
               <li>
-                <a href="/public/notification" className="hover:text-cyan-400 transition-colors">
+                <a href="/notification" className="hover:text-cyan-400 transition-colors">
                   Notifications
                 </a>
               </li>
               <li>
-                <a href="/public/publication" className="hover:text-cyan-400 transition-colors">
+                <a href="/publication" className="hover:text-cyan-400 transition-colors">
                   Publications
                 </a>
               </li>
