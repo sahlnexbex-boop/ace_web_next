@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, ChevronDown, Lock, Play, PlayCircle, Eye } from "lucide-react";
 import { getCourseBySlug } from "@/lib/api/course";
 import EnquiryModal from "@/components/enquiryModal";
+import VideoModal from "@/components/videoModal";
 import { CourseDetailsSkeleton } from "@/components/skeltons/skelton";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface Course {
   course_id: number;
@@ -25,6 +32,16 @@ interface Course {
     category_id: number;
     category_name: string;
   };
+  modules?: Array<{
+    module_id: number;
+    module_name: string;
+    chapters?: Array<{
+      chapter_id: number;
+      chapter_name: string;
+      is_preview: number;
+      preview_url?: string;
+    }>;
+  }>;
 }
 
 export default function CourseDetailsClient({
@@ -38,10 +55,12 @@ export default function CourseDetailsClient({
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+  const [openVideo, setOpenVideo] = useState<{ id: string } | null>(null);
+
   useEffect(() => {
     (async () => {
       try {
-        const res = await getCourseBySlug(params.courseSlug);
+        const res = await getCourseBySlug(params.courseSlug, true, true);
         setCourse(res?.data || null);
       } catch (error) {
         console.error("Error loading course:", error);
@@ -204,12 +223,87 @@ export default function CourseDetailsClient({
           <h2 className="text-2xl font-semibold text-[#1F67A5] mb-4">
             Syllabus
           </h2>
-          <p className="text-gray-700 whitespace-pre-line">
+          <p className="text-gray-700 whitespace-pre-line mb-10 overflow-hidden text-ellipsis">
             {course.course_syllabus || "No syllabus available."}
           </p>
+
+          <h2 className="text-2xl font-semibold text-[#1F67A5] mb-6">
+            Curriculum
+          </h2>
+          <Accordion type="multiple" className="space-y-4" defaultValue={["item-0"]}>
+            {course.modules?.map((mod, mIdx) => (
+              <AccordionItem key={mIdx} value={`item-${mIdx}`} className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm bg-white transition-all duration-300 hover:shadow-md border-b-0 space-y-0">
+                <AccordionTrigger
+                  className="w-full flex items-center justify-between p-3.5 md:p-5 text-left transition-all cursor-pointer hover:no-underline [&[data-state=open]]:bg-cyan-50/50 [&[data-state=open]_svg.acc-icon]:rotate-180"
+                  hideChevron
+                >
+                  <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2">
+                    <h3 className="font-bold text-gray-700 transition-colors text-sm md:text-base leading-tight">
+                      {mod.module_name || `Module ${mIdx + 1}`}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                    <span className="text-[9px] md:text-xs font-bold text-gray-700 uppercase tracking-widest bg-gray-50 px-2 md:px-3 py-1 rounded-full border border-gray-100 flex items-center gap-1">
+                      {mod.chapters?.length || 0} <span className="md:inline">Chapters</span>
+                    </span>
+                    <ChevronDown className="text-gray-400 size-4 md:size-5 shrink-0 transition-transform duration-300 acc-icon" />
+                  </div>
+                </AccordionTrigger>
+
+                <AccordionContent className="px-3 md:px-5 pb-5 pt-1 space-y-2">
+                  {mod.chapters?.map((chap, cIdx) => (
+                    <div key={cIdx} className="flex items-center justify-between p-2.5 md:p-3.5 border-b border-gray-50 last:border-0 hover:bg-gray-50/80 rounded-xl group transition-all">
+                      <div className="flex items-center gap-2.5 md:gap-3.5 flex-1 min-w-0 pr-2 md:pr-4">
+                        {chap.is_preview === 1 ? (
+                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition shadow-sm">
+                            <PlayCircle size={14} fill="currentColor" className="text-cyan-600/20 md:text-lg" />
+                          </div>
+                        ) : (
+                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center flex-shrink-0">
+                            <Lock size={12} className="md:text-lg" />
+                          </div>
+                        )}
+                        <span className="text-xs md:text-[15px] font-medium text-gray-600 truncate group-hover:text-gray-900 leading-tight">
+                          {chap.chapter_name}
+                        </span>
+                      </div>
+
+                      {chap.is_preview === 1 && chap.preview_url ? (
+                        <button
+                          type="button"
+                          onClick={() => setOpenVideo({ id: chap.preview_url! })}
+                          className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-xs font-bold hover:shadow-lg active:scale-95 transition shadow-sm whitespace-nowrap cursor-pointer"
+                        >
+                          <Eye size={12} className="md:text-lg" /> <span className="hidden md:inline">Preview</span> <Play size={10} fill="currentColor" className="md:block hidden" />
+                          <Play size={10} fill="currentColor" className="md:hidden" />
+                        </button>
+                      ) : (
+                        <span className="text-[10px] md:text-[10px] font-bold text-gray-700 grayscale select-none opacity-60">Locked <span className="hidden md:inline">content</span></span>
+                      )}
+                    </div>
+                  ))}
+                  {(!mod.chapters || mod.chapters.length === 0) && (
+                    <div className="py-8 text-center bg-gray-50/50 rounded-xl border border-dashed text-sm text-gray-400 font-medium">
+                      Content coming soon to this module.
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+
+            {(!course.modules || course.modules.length === 0) && (
+              <div className="bg-gray-50/50 rounded-3xl p-16 text-center border-2 border-dashed border-gray-100 shadow-inner">
+                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 border shadow-sm text-gray-400">
+                  <FileText size={32} />
+                </div>
+                <p className="text-gray-500 font-medium">Curriculum is currently being finalized.</p>
+                <p className="text-xs text-gray-400 mt-1 italic">Stay tuned for the full roadmap updates!</p>
+              </div>
+            )}
+          </Accordion>
         </div>
 
-        <div className="bg-blue-50 rounded-2xl p-6 h-fit">
+        <div className="lg:sticky lg:top-24 h-fit">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             Study Materials
           </h3>
@@ -259,6 +353,11 @@ export default function CourseDetailsClient({
         onClose={() => setShowEnquiryModal(false)}
         enquiryType={2}
         courseId={course.course_id}
+      />
+      <VideoModal
+        isOpen={!!openVideo}
+        videoId={openVideo?.id || ""}
+        onClose={() => setOpenVideo(null)}
       />
     </div>
   );

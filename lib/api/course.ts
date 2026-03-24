@@ -18,12 +18,28 @@ export const getCourses = async (
   return apiRequest(`/api/courses?${params.toString()}`, "GET");
 };
 
-export const getCourseById = async (id: number) =>
-  apiRequest(`/api/courses/${id}`, "GET");
+export const getCourseById = async (id: number, modules = false, chapters = false) => {
+  const params = new URLSearchParams();
+  if (modules) params.append("modules", "true");
+  if (chapters) params.append("chapters", "true");
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return apiRequest(`/api/courses/${id}${query}`, "GET");
+};
 
 // get course by slug
-export const getCourseBySlug = async (slug: string) =>
-  apiRequest(`/api/courses/slug/${slug}`, "GET");
+export const getCourseBySlug = async (slug: string, modules = false, chapters = false) => {
+  const params = new URLSearchParams();
+  if (modules) params.append("modules", "true");
+  if (chapters) params.append("chapters", "true");
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return apiRequest(`/api/courses/slug/${slug}${query}`, "GET");
+};
+
+export const createFullCourse = (data: FormData) =>
+  apiRequest("/api/courses/full", "POST", data, true);
+
+export const updateFullCourse = (id: number, data: FormData) =>
+  apiRequest(`/api/courses/full/${id}`, "PUT", data, true);
 
 export const createCourse = (data: FormData) =>
   apiRequest("/api/courses", "POST", data, true);

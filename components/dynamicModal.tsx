@@ -5,6 +5,7 @@ import { useToast } from "@/contexts/ToastContext";
 import Cropper from "react-easy-crop";
 import CKEditorField from "@/components/CKEditorField";
 import Select from "react-select";
+import ModuleChapterEditor from "@/components/ModuleChapterEditor";
 
 interface Point {
   x: number;
@@ -797,6 +798,21 @@ export default function DynamicFormModal({
                           }
                         });
                       }}
+                    />
+                  </div>
+                );
+              }
+              if (field.type === "module-chapters") {
+                return (
+                  <div key={field.name} className="pt-4 border-t mt-4 border-gray-100">
+                    <ModuleChapterEditor
+                      value={formState[field.name]}
+                      onChange={(newVal) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          [field.name]: newVal,
+                        }))
+                      }
                     />
                   </div>
                 );

@@ -12,9 +12,9 @@ import { useDebounce } from "@/hooks/debounce";
 import {
   getCourses,
   getCourseById,
-  createCourse,
-  updateCourse,
   deleteCourse,
+  createFullCourse,
+  updateFullCourse,
 } from "@/lib/api/course";
 import { getCourseCategories } from "@/lib/api/courseCategory";
 
@@ -32,7 +32,6 @@ export default function CoursesPage() {
   const [filters, setFilters] = useState<{ status?: string; category_id?: string }>({});
   const debouncedSearch = useDebounce(search, 500);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
-
 
   const loadCategories = async () => {
     try {
@@ -70,7 +69,8 @@ export default function CoursesPage() {
 
   const handleView = async (row: any) => {
     try {
-      const res = await getCourseById(row.course_id);
+      // Fetch full details including modules and chapters for viewing
+      const res = await getCourseById(row.course_id, true, true);
       if (res?.data) {
         const c = res.data;
 
@@ -95,7 +95,7 @@ export default function CoursesPage() {
               rel="noopener noreferrer"
               className="text-cyan-700 underline"
             >
-             {server_url + c.course_syllabus_file}
+             View Syllabus
             </a>
           ) : (
             "—"
@@ -107,17 +107,17 @@ export default function CoursesPage() {
               rel="noopener noreferrer"
               className="text-cyan-700 underline"
             >
-              {server_url +c.course_questions_file}
+              View Questions
             </a>
           ) : (
             "—"
           ),
           "Course Image": c.course_image ? (
-            <div className="flex justify-end">
+            <div className="flex justify-start">
               <img
                 src={server_url + c.course_image}
                 alt="Course"
-                className="w-16 h-16 object-cover rounded"
+                className="w-24 h-16 object-cover rounded shadow-sm"
               />
             </div>
           ) : (
@@ -139,6 +139,33 @@ export default function CoursesPage() {
           "Updated At": c.updated_at
             ? new Date(c.updated_at).toLocaleString("en-IN")
             : "—",
+          "Course Content": (c.modules && c.modules.length > 0) ? (
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mt-2 border-t pt-4">
+               {c.modules.map((m: any, mIdx: number) => (
+                 <div key={mIdx} className="border border-cyan-100 rounded-lg bg-cyan-50/20 p-3 shadow-sm">
+                    <h5 className="font-bold text-cyan-800 flex items-center gap-2 mb-2">
+                      <span className="w-6 h-6 rounded-full bg-cyan-700 text-white flex items-center justify-center text-[10px] shadow-sm">{mIdx + 1}</span>
+                      {m.module_name}
+                    </h5>
+                    <div className="space-y-1 ml-8">
+                       {m.chapters?.map((ch: any, cIdx: number) => (
+                         <div key={cIdx} className="flex items-center justify-between text-sm py-1.5 border-b border-white/50 hover:bg-white/80 px-2 rounded transition bg-white/40">
+                            <span className="text-gray-700">{ch.chapter_name}</span>
+                            {ch.is_preview === 1 ? (
+                              <span className="text-[10px] bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded font-extrabold uppercase tracking-wide">Preview</span>
+                            ) : (
+                               <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-extrabold uppercase tracking-wide">Locked</span>
+                            )}
+                         </div>
+                       ))}
+                       {(!m.chapters || m.chapters.length === 0) && (
+                         <p className="text-xs italic text-gray-400">No chapters added.</p>
+                       )}
+                    </div>
+                 </div>
+               ))}
+            </div>
+          ) : "No course content added."
         };
 
         setViewData(formatted);
@@ -224,6 +251,12 @@ export default function CoursesPage() {
       ],
       required: true,
     },
+    {
+      name: "modules",
+      label: "Course Content",
+      type: "module-chapters",
+      required: false,
+    },
   ];
 
   return (
@@ -259,7 +292,7 @@ export default function CoursesPage() {
               setSelected(null);
               setOpenForm(true);
             }}
-            className="bg-cyan-700 flex items-center gap-2 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-cyan-800"
+            className="bg-cyan-700 flex items-center gap-2 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-cyan-800 transition shadow-md"
           >
             Create Course <IconPlus size={20} />
           </button>
@@ -278,9 +311,8 @@ export default function CoursesPage() {
           {
             key: "course_type",
             label: "Course Type",
-            render: (r) => {
-              const raw = (r as any).course_type;
-
+            render: (r: any) => {
+              const raw = r.course_type;
               let values: number[] = [];
               if (Array.isArray(raw)) {
                 values = raw.map((v) => Number(v));
@@ -291,7 +323,7 @@ export default function CoursesPage() {
                     values = parsed.map((v) => Number(v));
                   }
                 } catch {
-                  // ignore parse error
+                  // ignore
                 }
               } else if (typeof raw === "number") {
                 values = [raw];
@@ -320,7 +352,7 @@ export default function CoursesPage() {
               r.course_image ? (
                 <img
                   src={server_url + r.course_image}
-                  className="w-10 h-10 object-cover rounded-full"
+                  className="w-10 h-10 object-cover rounded-full border shadow-sm"
                   alt="Class"
                 />
               ) : (
@@ -330,13 +362,13 @@ export default function CoursesPage() {
           {
             key: "status",
             label: "Status",
-            render: (r) =>
+            render: (r: any) =>
               r.status == 1 || r.status === "1" ? (
-                <div className="bg-green-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <div className="bg-green-100 text-green-800 w-fit px-3 py-0.5 rounded-full text-xs font-semibold">
                   Active
                 </div>
               ) : (
-                <div className="bg-red-100 text-black w-fit px-3 py-0.5 rounded-full">
+                <div className="bg-red-100 text-red-800 w-fit px-3 py-0.5 rounded-full text-xs font-semibold">
                   Inactive
                 </div>
               ),
@@ -348,29 +380,37 @@ export default function CoursesPage() {
         search={search}
         setPage={setPage}
         setSearch={setSearch}
-        onEdit={(row) => {
-          setSelected({
-            ...row,
-            course_category_id: String(row.course_category_id),
-            status: String(row.status),
-            // Normalize course_type for multi-select:
-            // accept array, JSON string, or single value
-            course_type: (() => {
-              const ct = (row as any).course_type;
-              if (Array.isArray(ct)) return ct;
-              if (typeof ct === "string") {
-                try {
-                  const parsed = JSON.parse(ct);
-                  return Array.isArray(parsed) ? parsed : [];
-                } catch {
-                  return [];
+        onEdit={async (row: any) => {
+          try {
+            // Fetch the full course including modules/chapters for editing
+            const fullRes = await getCourseById(row.course_id, true, true);
+            const r = fullRes.data;
+
+            setSelected({
+              ...r,
+              course_category_id: String(r.course_category_id),
+              status: String(r.status),
+              course_type: (() => {
+                const ct = r.course_type;
+                if (Array.isArray(ct)) return ct;
+                if (typeof ct === "string") {
+                  try {
+                    const parsed = JSON.parse(ct);
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch {
+                    return [];
+                  }
                 }
-              }
-              if (typeof ct === "number") return [ct];
-              return [];
-            })(),
-          });
-          setOpenForm(true);
+                if (typeof ct === "number") return [ct];
+                return [];
+              })(),
+              // Ensure modules are loaded for the editor
+              modules: r.modules || [],
+            });
+            setOpenForm(true);
+          } catch (error) {
+            console.error("Error fetching full course for edit:", error);
+          }
         }}
         onDelete={(row) => {
           setSelected(row);
@@ -386,8 +426,8 @@ export default function CoursesPage() {
         fields={fields}
         defaultValues={selected}
         onSubmit={async (fd: FormData) => {
-          if (selected) await updateCourse(selected.course_id, fd);
-          else await createCourse(fd);
+          if (selected) await updateFullCourse(selected.course_id, fd);
+          else await createFullCourse(fd);
         }}
         onSuccess={loadCourses}
       />
