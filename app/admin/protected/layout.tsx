@@ -69,6 +69,7 @@ const menuItems = [
         path: "/admin/protected/course-category",
       },
       { name: "Courses", icon: BookOpen, path: "/admin/protected/courses" },
+      { name: "Reviews", icon: Star, path: "/admin/protected/reviews" },
     ],
   },
   {

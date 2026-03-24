@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
 import { Download, FileText, ChevronDown, Lock, Play, PlayCircle, Eye } from "lucide-react";
 import { getCourseBySlug } from "@/lib/api/course";
+import { getReviews } from "@/lib/api/review";
 import EnquiryModal from "@/components/enquiryModal";
 import VideoModal from "@/components/videoModal";
 import { CourseDetailsSkeleton } from "@/components/skeltons/skelton";
@@ -56,12 +57,20 @@ export default function CourseDetailsClient({
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [openVideo, setOpenVideo] = useState<{ id: string } | null>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await getCourseBySlug(params.courseSlug, true, true);
-        setCourse(res?.data || null);
+        if (res?.data) {
+          setCourse(res.data);
+          const reviewRes = await getReviews(1, 100, "", {
+            course_id: String(res.data.course_id),
+            status: "1"
+          });
+          setReviews(reviewRes?.data || []);
+        }
       } catch (error) {
         console.error("Error loading course:", error);
       } finally {
@@ -227,80 +236,143 @@ export default function CourseDetailsClient({
             {course.course_syllabus || "No syllabus available."}
           </p>
 
-          <h2 className="text-2xl font-semibold text-[#1F67A5] mb-6">
-            Curriculum
-          </h2>
-          <Accordion type="multiple" className="space-y-4" defaultValue={["item-0"]}>
-            {course.modules?.map((mod, mIdx) => (
-              <AccordionItem key={mIdx} value={`item-${mIdx}`} className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm bg-white transition-all duration-300 hover:shadow-md border-b-0 space-y-0">
-                <AccordionTrigger
-                  className="w-full flex items-center justify-between p-3.5 md:p-5 text-left transition-all cursor-pointer hover:no-underline [&[data-state=open]]:bg-cyan-50/50 [&[data-state=open]_svg.acc-icon]:rotate-180"
-                  hideChevron
-                >
-                  <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2">
-                    <h3 className="font-bold text-gray-700 transition-colors text-sm md:text-base leading-tight">
-                      {mod.module_name || `Module ${mIdx + 1}`}
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-2 md:gap-4 shrink-0">
-                    <span className="text-[9px] md:text-xs font-bold text-gray-700 uppercase tracking-widest bg-gray-50 px-2 md:px-3 py-1 rounded-full border border-gray-100 flex items-center gap-1">
-                      {mod.chapters?.length || 0} <span className="md:inline">Chapters</span>
-                    </span>
-                    <ChevronDown className="text-gray-400 size-4 md:size-5 shrink-0 transition-transform duration-300 acc-icon" />
-                  </div>
-                </AccordionTrigger>
-
-                <AccordionContent className="px-3 md:px-5 pb-5 pt-1 space-y-2">
-                  {mod.chapters?.map((chap, cIdx) => (
-                    <div key={cIdx} className="flex items-center justify-between p-2.5 md:p-3.5 border-b border-gray-50 last:border-0 hover:bg-gray-50/80 rounded-xl group transition-all">
-                      <div className="flex items-center gap-2.5 md:gap-3.5 flex-1 min-w-0 pr-2 md:pr-4">
-                        {chap.is_preview === 1 ? (
-                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition shadow-sm">
-                            <PlayCircle size={14} fill="currentColor" className="text-cyan-600/20 md:text-lg" />
-                          </div>
-                        ) : (
-                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center flex-shrink-0">
-                            <Lock size={12} className="md:text-lg" />
-                          </div>
-                        )}
-                        <span className="text-xs md:text-[15px] font-medium text-gray-600 truncate group-hover:text-gray-900 leading-tight">
-                          {chap.chapter_name}
-                        </span>
+          {course.modules && course.modules.length > 0 && (
+            <>
+              <h2 className="text-2xl font-semibold text-[#1F67A5] mb-6">
+                Curriculum
+              </h2>
+              <Accordion type="multiple" className="space-y-4" defaultValue={["item-0"]}>
+                {course.modules.map((mod, mIdx) => (
+                  <AccordionItem key={mIdx} value={`item-${mIdx}`} className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm bg-white transition-all duration-300 hover:shadow-md border-b-0 space-y-0">
+                    <AccordionTrigger
+                      className="w-full flex items-center justify-between p-3.5 md:p-5 text-left transition-all cursor-pointer hover:no-underline [&[data-state=open]]:bg-cyan-50/50 [&[data-state=open]_svg.acc-icon]:rotate-180"
+                      hideChevron
+                    >
+                      <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 pr-2">
+                        <h3 className="font-bold text-gray-700 transition-colors text-sm md:text-base leading-tight capitalize">
+                          {mod.module_name || `Module ${mIdx + 1}`}
+                        </h3>
                       </div>
+                      <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                        <span className="text-[9px] md:text-xs font-bold text-gray-700 uppercase tracking-widest bg-gray-50 px-2 md:px-3 py-1 rounded-full border border-gray-100 flex items-center gap-1">
+                          {mod.chapters?.length || 0} <span className="md:inline">Chapters</span>
+                        </span>
+                        <ChevronDown className="text-gray-400 size-4 md:size-5 shrink-0 transition-transform duration-300 acc-icon" />
+                      </div>
+                    </AccordionTrigger>
 
-                      {chap.is_preview === 1 && chap.preview_url ? (
-                        <button
-                          type="button"
-                          onClick={() => setOpenVideo({ id: chap.preview_url! })}
-                          className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-xs font-bold hover:shadow-lg active:scale-95 transition shadow-sm whitespace-nowrap cursor-pointer"
-                        >
-                          <Eye size={12} className="md:text-lg" /> <span className="hidden md:inline">Preview</span> <Play size={10} fill="currentColor" className="md:block hidden" />
-                          <Play size={10} fill="currentColor" className="md:hidden" />
-                        </button>
-                      ) : (
-                        <span className="text-[10px] md:text-[10px] font-bold text-gray-700 grayscale select-none opacity-60">Locked <span className="hidden md:inline">content</span></span>
+                    <AccordionContent className="px-3 md:px-5 pb-5 pt-1 space-y-2">
+                      {mod.chapters?.map((chap, cIdx) => (
+                        <div key={cIdx} className="flex items-center justify-between p-2.5 md:p-3.5 border-b border-gray-50 last:border-0 hover:bg-gray-50/80 rounded-xl group transition-all">
+                          <div className="flex items-center gap-2.5 md:gap-3.5 flex-1 min-w-0 pr-2 md:pr-4">
+                            {chap.is_preview === 1 ? (
+                              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition shadow-sm">
+                                <PlayCircle size={14} fill="currentColor" className="text-cyan-600/20 md:text-lg" />
+                              </div>
+                            ) : (
+                              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center flex-shrink-0">
+                                <Lock size={12} className="md:text-lg" />
+                              </div>
+                            )}
+                            <span className="text-xs md:text-[15px] font-medium text-gray-600 truncate group-hover:text-gray-900 leading-tight capitalize">
+                              {chap.chapter_name}
+                            </span>
+                          </div>
+
+                          {chap.is_preview === 1 && chap.preview_url ? (
+                            <button
+                              type="button"
+                              onClick={() => setOpenVideo({ id: chap.preview_url! })}
+                              className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-xs font-bold hover:shadow-lg active:scale-95 transition shadow-sm whitespace-nowrap cursor-pointer"
+                            >
+                              <Eye size={12} className="md:text-lg" /> <span className="hidden md:inline">Preview</span> <Play size={10} fill="currentColor" className="md:block hidden" />
+                              <Play size={10} fill="currentColor" className="md:hidden" />
+                            </button>
+                          ) : (
+                            <span className="text-[10px] md:text-[10px] font-bold text-gray-700 grayscale select-none opacity-60">Locked <span className="hidden md:inline">content</span></span>
+                          )}
+                        </div>
+                      ))}
+                      {(!mod.chapters || mod.chapters.length === 0) && (
+                        <div className="py-8 text-center bg-gray-50/50 rounded-xl border border-dashed text-sm text-gray-400 font-medium">
+                          Content coming soon to this module.
+                        </div>
                       )}
-                    </div>
-                  ))}
-                  {(!mod.chapters || mod.chapters.length === 0) && (
-                    <div className="py-8 text-center bg-gray-50/50 rounded-xl border border-dashed text-sm text-gray-400 font-medium">
-                      Content coming soon to this module.
-                    </div>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </>
+          )}
 
-            {(!course.modules || course.modules.length === 0) && (
-              <div className="bg-gray-50/50 rounded-3xl p-16 text-center border-2 border-dashed border-gray-100 shadow-inner">
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 border shadow-sm text-gray-400">
-                  <FileText size={32} />
-                </div>
-                <p className="text-gray-500 font-medium">Curriculum is currently being finalized.</p>
-                <p className="text-xs text-gray-400 mt-1 italic">Stay tuned for the full roadmap updates!</p>
+          {reviews && reviews.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold text-black mb-6">
+                Reviews
+              </h2>
+              
+              {(() => {
+                const totalReviews = reviews.length;
+                const avgRating = (reviews.reduce((acc, r) => acc + Number(r.rating || 0), 0) / totalReviews).toFixed(1);
+                
+                const ratingsBreakdown = [5, 4, 3, 2, 1].map(stars => {
+                  const count = reviews.filter(r => Math.round(Number(r.rating || 0)) === stars).length;
+                  const percentage = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
+                  return { stars, count, percentage };
+                });
+
+                return (
+                  <div className="flex flex-row gap-4 md:gap-8 mb-10 items-center md:items-start">
+                    <div className="w-1/3 md:w-1/3 flex flex-col items-start md:mt-0">
+                      <div className="text-5xl md:text-7xl font-extrabold text-[#111] leading-none mb-1 md:mb-2">{avgRating}</div>
+                      <div className="flex text-[#41ab34] mb-1 md:mb-2 gap-[1px] md:gap-1 text-sm md:text-2xl">
+                        {[...Array(5)].map((_, i) => (
+                           <span key={i} className={i < Math.round(Number(avgRating)) ? "text-[#41ab34]" : "text-gray-200"}>★</span>
+                        ))}
+                      </div>
+                      <div className="text-gray-600 font-medium text-[11px] md:text-lg whitespace-nowrap">{totalReviews} Reviews</div>
+                    </div>
+
+                    <div className="w-2/3 md:w-2/3 flex flex-col gap-2 md:gap-3">
+                       {ratingsBreakdown.map((item) => (
+                         <div key={item.stars} className="flex items-center gap-2 md:gap-4 text-xs md:text-sm font-medium text-gray-700">
+                           <span className="w-2">{item.stars}</span>
+                           <div className="flex-1 h-2 md:h-3 bg-gray-100 rounded-lg overflow-hidden border border-gray-200/50">
+                             <div 
+                               className="h-full bg-[#41ab34] rounded-lg" 
+                               style={{ width: `${item.percentage}%` }}
+                             ></div>
+                           </div>
+                           <span className="w-8 md:w-10 text-right text-gray-600">{item.percentage}%</span>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="space-y-0">
+                {reviews.slice(0, 3).map((rev, idx) => (
+                  <div key={idx} className="border-t border-gray-100 py-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-[#e9faec] text-[#41ab34] text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1 border border-[#41ab34]/20">
+                        {Number(rev.rating).toFixed(1)} <span className="text-[10px]">★</span>
+                      </div>
+                      <h4 className="font-bold text-gray-900 capitalize">{rev.candidate_name}</h4>
+                    </div>
+                    <p className="text-gray-800 md:text-[15px] leading-relaxed mb-4">
+                      {rev.description}
+                    </p>
+                    <div className="text-[13px] text-gray-400 font-medium capitalize">
+                      {rev.candidate_position ? `${rev.candidate_position}, ` : ""}
+                      {rev.place ? `${rev.place}, ` : ""}
+                      {new Date(rev.created_at).toISOString().split('T')[0]}
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </Accordion>
+            </div>
+          )}
         </div>
 
         <div className="lg:sticky lg:top-24 h-fit">
