@@ -176,7 +176,7 @@ export default function SuccessStories() {
       <VideoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        videoUrl={youtubeVideoId}
+        videoId={youtubeVideoId}
       />
     </>
   );

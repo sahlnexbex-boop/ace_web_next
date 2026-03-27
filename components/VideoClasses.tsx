@@ -21,6 +21,19 @@ export default function VideoClasses({
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+  const openVideo = (url?: string) => {
+    const normalizedUrl = url?.trim();
+    if (!normalizedUrl) return;
+
+    setVideoUrl(normalizedUrl);
+    setIsVideoOpen(true);
+  };
+
+  const closeVideo = () => {
+    setIsVideoOpen(false);
+    setVideoUrl("");
+  };
+
   const scrollPageToTop = () => {
     document.documentElement.scrollTo({
       top: 0,
@@ -82,10 +95,7 @@ export default function VideoClasses({
           <div
             key={v.class_id}
             className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden transition cursor-pointer"
-            onClick={() => {
-              setVideoUrl(v.video_url);
-              setIsVideoOpen(true);
-            }}
+            onClick={() => openVideo(v.video_url)}
           >
             <img
               src={server_url + v.class_image}
@@ -147,7 +157,7 @@ export default function VideoClasses({
       <VideoModal
         videoUrl={videoUrl}
         isOpen={isVideoOpen}
-        onClose={() => setIsVideoOpen(false)}
+        onClose={closeVideo}
       />
     </>
   );

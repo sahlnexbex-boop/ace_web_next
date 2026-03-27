@@ -213,7 +213,7 @@ export default function AboutHeader() {
       </section>
 
       <VideoModal
-        videoUrl={youtubeVideoId}
+        videoId={youtubeVideoId}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

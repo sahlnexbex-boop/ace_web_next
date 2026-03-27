@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { X, Youtube, ExternalLink, Loader2 } from "lucide-react";
+import React from "react";
 
 interface Props {
   isOpen: boolean;
@@ -8,94 +7,115 @@ interface Props {
   videoUrl: string;
 }
 
-// Convert any YouTube URL format to an embed URL + extract watch URL
-function parseYouTubeUrl(url: string): { embedUrl: string; watchUrl: string } | null {
-  if (!url) return null;
+const DIRECT_VIDEO_EXTENSIONS = ["mp4", "webm", "ogg", "mov"];
 
-  // Already an embed URL
-  if (url.includes("youtube.com/embed/")) {
-    const id = url.split("embed/")[1]?.split("?")[0];
-    return {
-      embedUrl: `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`,
-      watchUrl: `https://www.youtube.com/watch?v=${id}`,
-    };
+const hasProtocol = (value: string) => /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(value);
+
+const getWindowOrigin = () =>
+  typeof window !== "undefined" ? window.location.origin : "";
+
+const getParsableUrl = (value: string) => {
+  const trimmedValue = value.trim();
+  const candidates = [trimmedValue];
+
+  if (
+    trimmedValue &&
+    !hasProtocol(trimmedValue) &&
+    !trimmedValue.startsWith("/") &&
+    (trimmedValue.startsWith("www.") ||
+      trimmedValue.startsWith("youtu.be") ||
+      trimmedValue.includes("youtube.com") ||
+      trimmedValue.includes("youtube-nocookie.com") ||
+      trimmedValue.includes("vimeo.com"))
+  ) {
+    candidates.push(`https://${trimmedValue}`);
   }
 
-  // Plain 11-char video ID
-  if (url.length === 11 && !url.includes("/") && !url.includes(".")) {
-    return {
-      embedUrl: `https://www.youtube.com/embed/${url}?autoplay=1&rel=0`,
-      watchUrl: `https://www.youtube.com/watch?v=${url}`,
-    };
-  }
-
-  // youtu.be short link or full watch URL
-  const ytRegExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(ytRegExp);
-  if (match && match[2].length === 11) {
-    return {
-      embedUrl: `https://www.youtube.com/embed/${match[2]}?autoplay=1&rel=0`,
-      watchUrl: `https://www.youtube.com/watch?v=${match[2]}`,
-    };
+  for (const candidate of candidates) {
+    try {
+      return new URL(candidate);
+    } catch {
+      continue;
+    }
   }
 
   return null;
-}
+};
 
-export default function DynamicVideoModal({ isOpen, onClose, videoUrl }: Props) {
-  const [loading, setLoading] = useState(true);
-  const [embedError, setEmbedError] = useState(false);
+const isValidYouTubeId = (value: string | null | undefined) =>
+  Boolean(value && /^[A-Za-z0-9_-]{11}$/.test(value));
 
-  useEffect(() => {
-    if (isOpen) {
-      setLoading(true);
-      setEmbedError(false);
-    }
-  }, [isOpen, videoUrl]);
+const extractYouTubeVideoId = (value: string) => {
+  const trimmedValue = value.trim();
+  if (!trimmedValue) return null;
 
-  // YouTube postMessage error listener
-  useEffect(() => {
-    if (!isOpen) return;
+  if (isValidYouTubeId(trimmedValue)) {
+    return trimmedValue;
+  }
 
-    const handleMessage = (event: MessageEvent) => {
-      if (!event.origin.includes("youtube.com")) return;
-      try {
-        const data =
-          typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        // Error codes 101, 150, 153 = embed not allowed on this domain
-        if (
-          data?.event === "onError" &&
-          (data?.info === 101 || data?.info === 150 || data?.info === 153)
-        ) {
-          setLoading(false);
-          setEmbedError(true);
-        }
-      } catch {
-        // ignore parse errors
+  const parsedUrl = getParsableUrl(trimmedValue);
+
+  if (parsedUrl) {
+    const hostname = parsedUrl.hostname.replace(/^www\./, "");
+    const pathSegments = parsedUrl.pathname.split("/").filter(Boolean);
+
+    if (hostname === "youtu.be") {
+      const shortId = pathSegments[0];
+      if (isValidYouTubeId(shortId)) {
+        return shortId;
       }
-    };
+    }
 
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [isOpen]);
+    if (
+      hostname.endsWith("youtube.com") ||
+      hostname.endsWith("youtube-nocookie.com")
+    ) {
+      const watchId = parsedUrl.searchParams.get("v");
+      if (isValidYouTubeId(watchId)) {
+        return watchId;
+      }
 
-  if (!isOpen) return null;
-
-  const isYouTube = videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be");
-  const isVimeo = videoUrl.includes("vimeo.com");
-
-  let embedUrl = videoUrl;
-  let watchUrl = videoUrl;
-
-  if (isYouTube) {
-    const parsed = parseYouTubeUrl(videoUrl);
-    if (parsed) {
-      embedUrl = parsed.embedUrl;
-      watchUrl = parsed.watchUrl;
+      if (["embed", "shorts", "live", "v"].includes(pathSegments[0])) {
+        const pathId = pathSegments[1];
+        if (isValidYouTubeId(pathId)) {
+          return pathId;
+        }
+      }
     }
   }
 
-  const isIframe = isYouTube || isVimeo;
+  const fallbackMatch = trimmedValue.match(
+    /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed\/|shorts\/|watch\?.*v=|live\/|v\/))([A-Za-z0-9_-]{11})/
+  );
+
+  return fallbackMatch?.[1] || null;
+};
+
+const buildYouTubeEmbedUrl = (videoId: string) => {
+  const embedUrl = new URL(`https://www.youtube.com/embed/${videoId}`);
+  embedUrl.searchParams.set("autoplay", "1");
+  embedUrl.searchParams.set("rel", "0");
+  embedUrl.searchParams.set("playsinline", "1");
+  embedUrl.searchParams.set("modestbranding", "1");
+
+  const origin = getWindowOrigin();
+  if (origin) {
+    embedUrl.searchParams.set("origin", origin);
+  }
+
+  return embedUrl.toString();
+};
+
+export default function DynamicVideoModal({ isOpen, onClose, videoUrl }: Props) {
+  if (!isOpen) return null;
+
+  const youtubeVideoId = extractYouTubeVideoId(videoUrl);
+  const normalizedUrl = youtubeVideoId ? buildYouTubeEmbedUrl(youtubeVideoId) : videoUrl;
+  const normalizedVideoUrl = normalizedUrl.trim();
+  const extension =
+    normalizedVideoUrl.split("?")[0].split("#")[0].split(".").pop()?.toLowerCase() || "";
+  const isDirectVideo = DIRECT_VIDEO_EXTENSIONS.includes(extension);
+  const isIframe = !isDirectVideo;
 
   return (
     <div
@@ -108,68 +128,32 @@ export default function DynamicVideoModal({ isOpen, onClose, videoUrl }: Props) 
       >
         <button
           onClick={onClose}
-          className="absolute cursor-pointer top-2 right-2 text-white text-2xl z-50 p-1 bg-black/40 hover:bg-black/80 rounded-full transition-all"
+          className="absolute cursor-pointer top-2 right-2 text-white text-2xl z-50"
         >
-          <X size={20} />
+          ✕
         </button>
 
-        {/* Loading spinner */}
-        {loading && !embedError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black z-10 aspect-video">
-            <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
-          </div>
-        )}
-
-        {/* Embed error fallback */}
-        {embedError && (
-          <div className="flex flex-col items-center justify-center bg-[#1a1a1a] px-6 py-14 text-center aspect-video">
-            <Youtube className="w-14 h-14 text-red-500 mb-4" />
-            <h3 className="text-white text-lg font-semibold mb-2">
-              Video cannot be embedded
-            </h3>
-            <p className="text-gray-400 text-sm mb-6 max-w-xs">
-              This video is restricted from being embedded on external websites.
-              You can still watch it directly on YouTube.
-            </p>
-            <a
-              href={watchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-full transition-colors duration-200"
-            >
-              <Youtube size={18} />
-              Watch on YouTube
-              <ExternalLink size={15} />
-            </a>
-          </div>
-        )}
-
-        {!embedError && videoUrl ? (
+        {videoUrl ? (
           isIframe ? (
             <iframe
-              src={embedUrl}
+              src={normalizedVideoUrl}
               title="Video"
-              className={`w-full aspect-video rounded-lg transition-opacity duration-500 ${
-                loading ? "opacity-0" : "opacity-100"
-              }`}
+              className="w-full aspect-video rounded-lg"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
-              onLoad={() => setLoading(false)}
             />
           ) : (
             <video
-              src={videoUrl}
+              src={normalizedVideoUrl}
               controls
               autoPlay
               className="w-full aspect-video rounded-lg"
-              onCanPlayThrough={() => setLoading(false)}
             />
           )
-        ) : !embedError ? (
-          <div className="p-10 text-white text-center aspect-video flex items-center justify-center">
-            No video available
-          </div>
-        ) : null}
+        ) : (
+          <div className="p-10 text-white text-center">No video available</div>
+        )}
       </div>
     </div>
   );

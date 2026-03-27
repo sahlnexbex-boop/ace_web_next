@@ -35,13 +35,19 @@ export default function SuccessStories() {
 
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const openVideo = (url: string) => {
+  const openVideo = (url?: string) => {
+    const normalizedUrl = url?.trim();
+    if (!normalizedUrl) return;
+
     setIsTestimonialOpen(false);
-    setVideoUrl(url);
+    setVideoUrl(normalizedUrl);
     setModalOpen(true);
   };
 
-  const closeVideo = () => setModalOpen(false);
+  const closeVideo = () => {
+    setModalOpen(false);
+    setVideoUrl("");
+  };
 
   //  Open modal and fetch full data
   const openTestimonialModal = async (id: number) => {

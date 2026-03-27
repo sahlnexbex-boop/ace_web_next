@@ -64,11 +64,17 @@ export default function FeaturedSuccess() {
     }
   };
 
-  const openVideo = (url: string) => {
-    setVideoUrl(url);
+  const openVideo = (url?: string) => {
+    const normalizedUrl = url?.trim();
+    if (!normalizedUrl) return;
+
+    setVideoUrl(normalizedUrl);
     setModalOpen(true);
   };
-  const closeVideo = () => setModalOpen(false);
+  const closeVideo = () => {
+    setModalOpen(false);
+    setVideoUrl("");
+  };
 
   const getSlides = () => {
     const slides = [];

@@ -37,6 +37,15 @@ export default function AceShorts() {
     fetchShorts();
   }, []);
 
+  const openVideo = (url?: string) => {
+    const normalizedUrl = url?.trim();
+    if (!normalizedUrl) return;
+
+    setSelectedVideo(normalizedUrl);
+  };
+
+  const closeVideo = () => setSelectedVideo(null);
+
   return (
     <section className="md:py-16 py-10 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,7 +74,7 @@ export default function AceShorts() {
               <div
                 key={short.shorts_id}
                 className="relative group cursor-pointer"
-                onClick={() => setSelectedVideo(short.shorts_link)}
+                onClick={() => openVideo(short.shorts_link)}
               >
                 <div className="rounded-lg  overflow-hidden shadow-lg transform transition-transform group-hover:scale-105">
                   <img
@@ -104,7 +113,7 @@ export default function AceShorts() {
         {/* Video Modal */}
         <VideoModal
           isOpen={!!selectedVideo}
-          onClose={() => setSelectedVideo(null)}
+          onClose={closeVideo}
           videoUrl={selectedVideo || ""}
         />
       </div>

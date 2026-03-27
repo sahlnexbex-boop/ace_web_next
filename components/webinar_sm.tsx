@@ -98,11 +98,17 @@ export default function Webinars() {
     return date.toLocaleDateString("en-US", options);
   };
 
-  const openVideo = (url: string) => {
-    setVideoUrl(url);
+  const openVideo = (url?: string) => {
+    const normalizedUrl = url?.trim();
+    if (!normalizedUrl) return;
+
+    setVideoUrl(normalizedUrl);
     setModalOpen(true);
   };
-  const closeVideo = () => setModalOpen(false);
+  const closeVideo = () => {
+    setModalOpen(false);
+    setVideoUrl("");
+  };
 
   const formatTime = (isoDate: string) => {
     const date = new Date(isoDate);

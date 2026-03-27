@@ -37,6 +37,7 @@ export default function BlogDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [selectedShortVideo, setSelectedShortVideo] = useState("");
   const shortWrapperRef = useRef<HTMLDivElement | null>(null);
   const shortImageRef = useRef<HTMLImageElement | null>(null);
   const [rankHolders, setRankHolders] = useState<any[]>([]);
@@ -163,6 +164,19 @@ export default function BlogDetails() {
 
     return () => clearInterval(interval);
   }, [shorts]);
+
+  const openShortVideo = () => {
+    const normalizedUrl = shorts[activeShortIndex]?.shorts_link?.trim();
+    if (!normalizedUrl) return;
+
+    setSelectedShortVideo(normalizedUrl);
+    setIsVideoOpen(true);
+  };
+
+  const closeShortVideo = () => {
+    setIsVideoOpen(false);
+    setSelectedShortVideo("");
+  };
 
   // GSAP Animations
   useLayoutEffect(() => {
@@ -409,7 +423,7 @@ export default function BlogDetails() {
                   {/* Play button overlay */}
                   <div
                     className="absolute inset-0 md:top-52 flex items-center justify-center cursor-pointer"
-                    onClick={() => setIsVideoOpen(true)}
+                    onClick={openShortVideo}
                   >
                     <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
                       <Play
@@ -493,9 +507,9 @@ export default function BlogDetails() {
       </div>
 
       <VideoModal
-        videoUrl={shorts[activeShortIndex]?.shorts_link}
+        videoUrl={selectedShortVideo}
         isOpen={isVideoOpen}
-        onClose={() => setIsVideoOpen(false)}
+        onClose={closeShortVideo}
       />
 
       <EnquiryModal
