@@ -102,11 +102,6 @@ const buildYouTubeEmbedUrl = (videoId: string) => {
   embedUrl.searchParams.set("playsinline", "1");
   embedUrl.searchParams.set("modestbranding", "1");
 
-  const origin = getWindowOrigin();
-  if (origin) {
-    embedUrl.searchParams.set("origin", origin);
-  }
-
   return embedUrl.toString();
 };
 
