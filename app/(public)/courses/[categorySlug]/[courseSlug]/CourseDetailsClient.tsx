@@ -310,11 +310,11 @@ export default function CourseDetailsClient({
               <h2 className="text-2xl font-bold text-black mb-6">
                 Reviews
               </h2>
-              
+
               {(() => {
                 const totalReviews = reviews.length;
                 const avgRating = (reviews.reduce((acc, r) => acc + Number(r.rating || 0), 0) / totalReviews).toFixed(1);
-                
+
                 const ratingsBreakdown = [5, 4, 3, 2, 1].map(stars => {
                   const count = reviews.filter(r => Math.round(Number(r.rating || 0)) === stars).length;
                   const percentage = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
@@ -327,25 +327,25 @@ export default function CourseDetailsClient({
                       <div className="text-5xl md:text-7xl font-extrabold text-[#111] leading-none mb-1 md:mb-2">{avgRating}</div>
                       <div className="flex text-[#41ab34] mb-1 md:mb-2 gap-[1px] md:gap-1 text-sm md:text-2xl">
                         {[...Array(5)].map((_, i) => (
-                           <span key={i} className={i < Math.round(Number(avgRating)) ? "text-[#41ab34]" : "text-gray-200"}>★</span>
+                          <span key={i} className={i < Math.round(Number(avgRating)) ? "text-[#41ab34]" : "text-gray-200"}>★</span>
                         ))}
                       </div>
                       <div className="text-gray-600 font-medium text-[11px] md:text-lg whitespace-nowrap">{totalReviews} Reviews</div>
                     </div>
 
                     <div className="w-2/3 md:w-2/3 flex flex-col gap-2 md:gap-3">
-                       {ratingsBreakdown.map((item) => (
-                         <div key={item.stars} className="flex items-center gap-2 md:gap-4 text-xs md:text-sm font-medium text-gray-700">
-                           <span className="w-2">{item.stars}</span>
-                           <div className="flex-1 h-2 md:h-3 bg-gray-100 rounded-lg overflow-hidden border border-gray-200/50">
-                             <div 
-                               className="h-full bg-[#41ab34] rounded-lg" 
-                               style={{ width: `${item.percentage}%` }}
-                             ></div>
-                           </div>
-                           <span className="w-8 md:w-10 text-right text-gray-600">{item.percentage}%</span>
-                         </div>
-                       ))}
+                      {ratingsBreakdown.map((item) => (
+                        <div key={item.stars} className="flex items-center gap-2 md:gap-4 text-xs md:text-sm font-medium text-gray-700">
+                          <span className="w-2">{item.stars}</span>
+                          <div className="flex-1 h-2 md:h-3 bg-gray-100 rounded-lg overflow-hidden border border-gray-200/50">
+                            <div
+                              className="h-full bg-[#41ab34] rounded-lg"
+                              style={{ width: `${item.percentage}%` }}
+                            ></div>
+                          </div>
+                          <span className="w-8 md:w-10 text-right text-gray-600">{item.percentage}%</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 );
@@ -365,8 +365,8 @@ export default function CourseDetailsClient({
                     </p>
                     <div className="text-[13px] text-gray-400 font-medium capitalize">
                       {rev.candidate_position ? `${rev.candidate_position}, ` : ""}
-                      {rev.place ? `${rev.place}, ` : ""}
-                      {new Date(rev.created_at).toISOString().split('T')[0]}
+                      {rev.place ? `${rev.place}. ` : ""}
+                      {/* {new Date(rev.created_at).toISOString().split('T')[0]} */}
                     </div>
                   </div>
                 ))}
