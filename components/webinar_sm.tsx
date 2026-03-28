@@ -35,7 +35,7 @@ export default function Webinars() {
     const fetchWebinars = async () => {
       try {
         setLoading(true);
-        const res = await getWebinars(1, 10, "", 1);
+        const res = await getWebinars(1, 100, "", 1);
         const data = Array.isArray(res?.data)
           ? res.data
           : res?.data?.data || [];
@@ -141,9 +141,8 @@ export default function Webinars() {
               {getSlides().map((slide, slideIndex) => (
                 <div
                   key={slideIndex}
-                  className={`flex-shrink-0 w-full grid gap-8 ${
-                    itemsPerSlide === 2 ? "md:grid-cols-2" : "grid-cols-1"
-                  }`}
+                  className={`flex-shrink-0 w-full grid gap-8 ${itemsPerSlide === 2 ? "md:grid-cols-2" : "grid-cols-1"
+                    }`}
                 >
                   {slide.map((web) => (
                     <div
@@ -249,11 +248,10 @@ export default function Webinars() {
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className={`w-3 h-3 cursor-pointer rounded-full transition-all ${
-                    currentSlide === index
+                  className={`w-3 h-3 cursor-pointer rounded-full transition-all ${currentSlide === index
                       ? "bg-cyan-600 w-6"
                       : "bg-gray-300 hover:bg-cyan-400"
-                  }`}
+                    }`}
                 ></button>
               ))}
             </div>

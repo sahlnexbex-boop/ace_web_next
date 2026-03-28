@@ -18,7 +18,7 @@ export default function FeaturedSuccess() {
   useEffect(() => {
     const fetchStories = async () => {
       try {
-        const response = await getSuccessStories(1, 10, "", "", 1);
+        const response = await getSuccessStories(1, 100, "", "", 1);
         const storyList = response?.data || [];
         setStories(storyList);
       } catch (err) {
@@ -124,9 +124,8 @@ export default function FeaturedSuccess() {
             {getSlides().map((slide, slideIndex) => (
               <div
                 key={slideIndex}
-                className={`flex-shrink-0 w-full grid gap-8 lg:gap-12 md:py-3 md:px-3 ${
-                  itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
-                }`}
+                className={`flex-shrink-0 w-full grid gap-8 lg:gap-12 md:py-3 md:px-3 ${itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
+                  }`}
               >
                 {slide.map((s: any, i: number) => (
                   <div
@@ -161,11 +160,10 @@ export default function FeaturedSuccess() {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 cursor-pointer rounded-full transition-all ${
-                  currentSlide === index
-                    ? "bg-cyan-600 w-6"
-                    : "bg-gray-300 hover:bg-cyan-400"
-                }`}
+                className={`w-3 h-3 cursor-pointer rounded-full transition-all ${currentSlide === index
+                  ? "bg-cyan-600 w-6"
+                  : "bg-gray-300 hover:bg-cyan-400"
+                  }`}
               ></button>
             ))}
           </div>

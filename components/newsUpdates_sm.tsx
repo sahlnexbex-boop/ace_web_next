@@ -16,7 +16,7 @@ export default function NewsUpdates() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await getNews(1, 20, "", 1);
+        const res = await getNews(1, 100, "", 1);
         setNewsList(res?.data || []);
       } catch (error) {
         console.error("Error fetching news:", error);
@@ -109,9 +109,8 @@ export default function NewsUpdates() {
             {getSlides().map((slide, slideIndex) => (
               <div
                 key={slideIndex}
-                className={`flex-shrink-0 w-full grid gap-8 ${
-                  itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
-                }`}
+                className={`flex-shrink-0 w-full grid gap-8 ${itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
+                  }`}
               >
                 {slide.map((n) => (
                   <div
@@ -152,11 +151,10 @@ export default function NewsUpdates() {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 cursor-pointer rounded-full transition-all ${
-                  currentSlide === index
-                    ? "bg-cyan-600 w-6"
-                    : "bg-gray-300 hover:bg-cyan-400"
-                }`}
+                className={`w-3 h-3 cursor-pointer rounded-full transition-all ${currentSlide === index
+                  ? "bg-cyan-600 w-6"
+                  : "bg-gray-300 hover:bg-cyan-400"
+                  }`}
               ></button>
             ))}
           </div>

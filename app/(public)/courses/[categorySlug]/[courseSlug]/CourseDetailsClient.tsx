@@ -20,7 +20,7 @@ interface Course {
   course_name: string;
   course_description: string;
   course_rating?: number;
-  course_duration?: number;
+  course_chapters?: number;
   course_fee?: number;
   course_overview?: string;
   course_syllabus?: string;
@@ -194,10 +194,10 @@ export default function CourseDetailsClient({
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-900">Course Duration</p>
+                  <p className="text-sm text-gray-900">Chapters</p>
                   <p className="font-semibold text-[#087fc2]">
-                    {course.course_duration
-                      ? `${course.course_duration} Hours`
+                    {course.course_chapters
+                      ? `${course.course_chapters} Chapters`
                       : "N/A"}
                   </p>
                 </div>

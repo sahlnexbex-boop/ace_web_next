@@ -31,7 +31,7 @@ export default function Testimonials() {
     const fetchTestimonials = async () => {
       try {
         setLoading(true);
-        const res = await getTestimonials(1, 10, "", { status: "1" });
+        const res = await getTestimonials(1, 100, "", { status: "1" });
         const data = Array.isArray(res?.data)
           ? res.data
           : res?.data?.data || [];
@@ -140,9 +140,8 @@ export default function Testimonials() {
                 {getSlides().map((slide, slideIndex) => (
                   <div
                     key={slideIndex}
-                    className={`flex-shrink-0 w-full grid gap-8 p-3 ${
-                      itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
-                    }`}
+                    className={`flex-shrink-0 w-full grid gap-8 p-3 ${itemsPerSlide === 3 ? "md:grid-cols-3" : "grid-cols-1"
+                      }`}
                   >
                     {slide.map((t) => (
                       <div
@@ -185,11 +184,10 @@ export default function Testimonials() {
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`w-3 h-3 cursor-pointer rounded-full transition-all ${
-                      currentSlide === index
+                    className={`w-3 h-3 cursor-pointer rounded-full transition-all ${currentSlide === index
                         ? "bg-cyan-600 w-6"
                         : "bg-gray-300 hover:bg-cyan-400"
-                    }`}
+                      }`}
                   ></button>
                 ))}
               </div>

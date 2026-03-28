@@ -83,7 +83,7 @@ export default function CoursesPage() {
           ),
           Category: c.category?.category_name || "—",
           Rating: c.course_rating || "—",
-          Duration: c.course_duration || "—",
+          Chapters: c.course_chapters || "—",
           Fee: c.course_fee || "—",
           Overview: c.course_overview || "—",
           Syllabus: c.course_syllabus || "—",
@@ -203,7 +203,7 @@ export default function CoursesPage() {
       required: false,
     },
     { name: "course_rating", label: "Rating", type: "text", required: false },
-    { name: "course_duration", label: "Duration (Hours)", type: "text", required: false },
+    { name: "course_chapters", label: "Chapters count", type: "number", required: false },
     { name: "course_fee", label: "Fee", type: "number", required: false },
     {
       name: "course_overview",
@@ -344,7 +344,7 @@ export default function CoursesPage() {
           },
           { key: "course_rating", label: "Rating" },
           { key: "course_fee", label: "Fee" },
-          { key: "course_duration", label: "Duration" },
+          { key: "course_chapters", label: "Chapters count" },
           {
             key: "course_image",
             label: "Image",
