@@ -55,9 +55,14 @@ const menuItems = [
     path: "/admin/protected/students",
   },
   {
-    name: "Course Management",
+    name: "Branches & Courses",
     icon: GraduationCap,
     children: [
+      {
+        name: "Branches",
+        icon: ClipboardList,
+        path: "/admin/protected/branches",
+      },
       {
         name: "Course Types",
         icon: ClipboardList,

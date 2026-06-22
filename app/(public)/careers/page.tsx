@@ -113,7 +113,11 @@ export default function Careers() {
                                     </div>
                                     <div className="flex items-center gap-2 text-gray-600 text-sm">
                                         <IconMapPin size={18} className="text-cyan-500" />
-                                        <span className="truncate">{job.job_location}</span>
+                                        <span className="truncate">
+                                            {job.job_branches?.length === 1
+                                                ? job.job_branches[0]?.branch_name
+                                                : "Multiple Branches"}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="flex gap-8 mb-6">

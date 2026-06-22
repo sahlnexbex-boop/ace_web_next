@@ -2,6 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { IconFilter } from "@tabler/icons-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface FilterOption {
   label: string;
@@ -32,7 +39,12 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
   //  Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement;
+      if (filterRef.current && !filterRef.current.contains(target)) {
+        // Do not close if clicking inside Radix UI Select dropdown portals
+        if (target.closest('[data-slot="select-content"]') || target.closest('[data-radix-popper-content-wrapper]')) {
+          return;
+        }
         setOpen(false);
       }
     };
@@ -116,23 +128,27 @@ export default function TableFilter({ fields, onChange }: TableFilterProps) {
 
                   {/*  Select Dropdown */}
                   {(!field.type || field.type === "select") && (
-                    <select
-                      value={filters[field.key] ?? ""}
-                      onChange={(e) =>
+                    <Select
+                      value={filters[field.key] || "all"}
+                      onValueChange={(val) =>
                         setFilters((prev) => ({
                           ...prev,
-                          [field.key]: e.target.value,
+                          [field.key]: val === "all" ? "" : val,
                         }))
                       }
-                      className="mt-1 w-full border rounded-md p-2 text-sm"
                     >
-                      <option value="">All</option>
-                      {field.options?.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="mt-1 w-full border border-gray-200 rounded-md px-3 py-2 text-sm h-9 bg-white text-gray-700 font-normal focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500">
+                        <SelectValue placeholder="All" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-70 overflow-y-auto">
+                        <SelectItem value="all">All</SelectItem>
+                        {field.options?.map((opt) => (
+                          <SelectItem key={opt.value} value={String(opt.value)}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
               ))}

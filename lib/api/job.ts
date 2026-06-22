@@ -6,7 +6,7 @@ export const getJobs = async (
     search = "",
     status?: number,
     type?: string,
-    location?: string
+    branch?: string
 ) => {
     const params = new URLSearchParams({
         page: String(page),
@@ -16,7 +16,7 @@ export const getJobs = async (
     if (search) params.append("search", search);
     if (status !== undefined) params.append("status", String(status));
     if (type) params.append("type", type);
-    if (location) params.append("location", location);
+    if (branch) params.append("branch", branch);
 
     return apiRequest(`/api/jobs?${params.toString()}`, "GET");
 };
@@ -40,7 +40,8 @@ export const getJobApplications = async (
     search = "",
     status?: number,
     application_status?: number,
-    job_id?: number
+    job_id?: number,
+    branch?: string
 ) => {
     const params = new URLSearchParams({
         page: String(page),
@@ -51,6 +52,7 @@ export const getJobApplications = async (
     if (status !== undefined) params.append("status", String(status));
     if (application_status !== undefined) params.append("application_status", String(application_status));
     if (job_id !== undefined) params.append("job_id", String(job_id));
+    if (branch) params.append("branch", branch);
 
     return apiRequest(`/api/job-applications?${params.toString()}`, "GET");
 };
@@ -75,6 +77,7 @@ export const downloadJobApplicationsExcel = async (options?: {
     status?: number;
     application_status?: number;
     job_id?: number;
+    branch?: number;
 }) => {
     const params = new URLSearchParams();
 
@@ -90,6 +93,7 @@ export const downloadJobApplicationsExcel = async (options?: {
     if (options?.application_status !== undefined)
         params.append("application_status", String(options.application_status));
     if (options?.job_id !== undefined) params.append("job_id", String(options.job_id));
+    if (options?.branch !== undefined) params.append("branch", String(options.branch));
 
     const response = (await apiRequest(
         `/api/job-applications/download-excel?${params.toString()}`,

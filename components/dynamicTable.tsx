@@ -60,7 +60,7 @@ export default function DataTable({
               </th>
             ))}
             {(onEdit || onDelete) && (
-              <th className="px-4 py-2 text-right font-medium text-cyan-700">
+              <th className="px-4 py-2 text-right font-medium text-cyan-700 whitespace-nowrap">
                 Actions
               </th>
             )}
@@ -94,7 +94,7 @@ export default function DataTable({
 
                 {(onEdit || onDelete) && (
                   <td
-                    className="px-4 py-2 text-right space-x-5"
+                    className="px-4 py-2 text-right space-x-5 whitespace-nowrap"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {onEdit && (

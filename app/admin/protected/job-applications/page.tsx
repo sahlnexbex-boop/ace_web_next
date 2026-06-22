@@ -18,6 +18,7 @@ import {
     getJobs,
     downloadJobApplicationsExcel,
 } from "@/lib/api/job";
+import { getBranches } from "@/lib/api/branches";
 import { IconDownload } from "@tabler/icons-react";
 
 export default function JobApplicationsPage() {
@@ -33,6 +34,7 @@ export default function JobApplicationsPage() {
     const [openForm, setOpenForm] = useState(false);
     const [viewData, setViewData] = useState<any>(null);
     const [openDownload, setOpenDownload] = useState(false);
+    const [branches, setBranches] = useState<any[]>([]);
     const downloadRef = useRef<HTMLDivElement | null>(null);
     const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
     const debouncedSearch = useDebounce(search, 500);
@@ -40,10 +42,20 @@ export default function JobApplicationsPage() {
     // Fetch jobs for filter options
     const loadJobs = async () => {
         try {
-            const res = await getJobs(1, 10);
+            const res = await getJobs(1, 100);
             setJobs(res.data || []);
         } catch (err) {
             console.error("Error loading jobs:", err);
+        }
+    };
+
+    // Fetch branches for filter options
+    const loadBranches = async () => {
+        try {
+            const res = await getBranches(1, 100, "", 1);
+            setBranches(res.data || []);
+        } catch (err) {
+            console.error("Error loading branches:", err);
         }
     };
 
@@ -56,7 +68,8 @@ export default function JobApplicationsPage() {
                 debouncedSearch,
                 filters.status !== undefined && filters.status !== "" ? Number(filters.status) : undefined,
                 filters.application_status !== undefined && filters.application_status !== "" ? Number(filters.application_status) : undefined,
-                filters.job_id !== undefined && filters.job_id !== "" ? Number(filters.job_id) : undefined
+                filters.job_id !== undefined && filters.job_id !== "" ? Number(filters.job_id) : undefined,
+                filters.branch
             );
 
             setData(res.data || []);
@@ -68,6 +81,7 @@ export default function JobApplicationsPage() {
 
     useEffect(() => {
         loadJobs();
+        loadBranches();
     }, []);
 
     useEffect(() => {
@@ -97,7 +111,8 @@ export default function JobApplicationsPage() {
                 search: debouncedSearch,
                 status: filters.status !== undefined && filters.status !== "" ? Number(filters.status) : undefined,
                 application_status: filters.application_status !== undefined && filters.application_status !== "" ? Number(filters.application_status) : undefined,
-                job_id: filters.job_id !== undefined && filters.job_id !== "" ? Number(filters.job_id) : undefined
+                job_id: filters.job_id !== undefined && filters.job_id !== "" ? Number(filters.job_id) : undefined,
+                branch: filters.branch !== undefined && filters.branch !== "" ? Number(filters.branch) : undefined
             });
         } catch (err) {
             console.error("Excel download failed", err);
@@ -122,6 +137,15 @@ export default function JobApplicationsPage() {
                                 label: "Filter by Job",
                                 type: "select",
                                 options: jobOptions,
+                            },
+                            {
+                                key: "branch",
+                                label: "Filter by Branch",
+                                type: "select",
+                                options: branches.map((b) => ({
+                                    label: b.branch_name,
+                                    value: String(b.branch_id),
+                                })),
                             },
                             {
                                 key: "status",
@@ -206,12 +230,46 @@ export default function JobApplicationsPage() {
                         render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
                     },
                     { key: "candidate_name", label: "Applicant Name" },
-                    { key: "candidate_email", label: "Email" },
                     { key: "candidate_phone", label: "Phone" },
                     {
                         key: "job",
                         label: "Applied For",
-                        render: (r) => r.Job?.job_title || "—",
+                        render: (r) => (
+                            <div className="max-w-50 truncate" title={r.Job?.job_title || ""}>
+                                {r.Job?.job_title || "—"}
+                            </div>
+                        ),
+                    },
+                    {
+                        key: "applied_branches",
+                        label: "Applied Branches",
+                        render: (r) => {
+                            if (!r.applied_branches) return "—";
+                            let list = r.applied_branches;
+                            if (typeof list === "string") {
+                                try { list = JSON.parse(list); } catch { list = []; }
+                            }
+                            if (!Array.isArray(list)) return "—";
+                            const names = list
+                                .map((item: any) => {
+                                    if (item && typeof item === "object") {
+                                        return item.branch_name;
+                                    }
+                                    const b = branches.find((br) => br.branch_id === Number(item));
+                                    return b ? b.branch_name : null;
+                                })
+                                .filter(Boolean);
+                            if (names.length === 0) return "—";
+                            if (names.length === 1) return names[0];
+                            return (
+                                <span className="flex items-center gap-1.5">
+                                    {names[0]}
+                                    <span className="bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                                        +{names.length - 1}
+                                    </span>
+                                </span>
+                            );
+                        }
                     },
                     {
                         key: "application_date",
@@ -247,6 +305,9 @@ export default function JobApplicationsPage() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-cyan-600 hover:underline flex items-center gap-1"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                    }}
                                 >
                                     <IconFileDownload size={16} /> View Resume
                                 </a>
@@ -267,6 +328,9 @@ export default function JobApplicationsPage() {
                         job_id: String(row.job_id),
                         application_status: String(row.application_status),
                         status: String(row.status),
+                        applied_branches: Array.isArray(row.applied_branches)
+                            ? row.applied_branches.map((b: any) => typeof b === "object" ? b.branch_id : b)
+                            : [],
                     });
                     setOpenForm(true);
                 }}
@@ -283,6 +347,24 @@ export default function JobApplicationsPage() {
                         Email: a.candidate_email,
                         Phone: a.candidate_phone,
                         "Applied For": a.Job?.job_title || "—",
+                        Branches: (() => {
+                            if (!a.applied_branches) return "—";
+                            let list = a.applied_branches;
+                            if (typeof list === "string") {
+                                try { list = JSON.parse(list); } catch { list = []; }
+                            }
+                            if (!Array.isArray(list)) return "—";
+                            const names = list
+                                .map((item: any) => {
+                                    if (item && typeof item === "object") {
+                                        return item.branch_name;
+                                    }
+                                    const b = branches.find((br) => br.branch_id === Number(item));
+                                    return b ? b.branch_name : null;
+                                })
+                                .filter(Boolean);
+                            return names.join(", ") || "—";
+                        })(),
                         "Cover Letter": (
                             <div className="whitespace-pre-wrap text-gray-700">
                                 {a.cover_letter || "No cover letter provided."}
@@ -348,6 +430,17 @@ export default function JobApplicationsPage() {
                         type: "select",
                         options: jobOptions,
                         required: true,
+                    },
+                    {
+                        name: "applied_branches",
+                        label: "Applied Branches",
+                        type: "multi-select",
+                        options: branches.map((b) => ({
+                            label: b.branch_name,
+                            value: String(b.branch_id),
+                        })),
+                        required: true,
+                        multiple: true,
                     },
                     {
                         name: "cover_letter",

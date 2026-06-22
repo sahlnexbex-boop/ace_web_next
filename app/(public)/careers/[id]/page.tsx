@@ -16,9 +16,11 @@ import {
     IconPhone,
     IconUser,
     IconHome,
+    IconBuilding,
 } from "@tabler/icons-react";
 import { useToast } from "@/contexts/ToastContext";
 import CourseHeader from "@/components/courseHeader";
+import Select from "react-select";
 
 export default function JobDetailsPage() {
     const { id } = useParams();
@@ -35,6 +37,17 @@ export default function JobDetailsPage() {
         cover_letter: "",
     });
     const [resumeFile, setResumeFile] = useState<File | null>(null);
+    const [selectedBranches, setSelectedBranches] = useState<number[]>([]);
+
+    useEffect(() => {
+        if (job && job.job_branches) {
+            if (job.job_branches.length === 1) {
+                setSelectedBranches([Number(job.job_branches[0].branch_id)]);
+            } else {
+                setSelectedBranches([]);
+            }
+        }
+    }, [job]);
 
     const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -71,6 +84,11 @@ export default function JobDetailsPage() {
             return;
         }
 
+        if (selectedBranches.length === 0) {
+            showError("Please select at least one branch");
+            return;
+        }
+
         setSubmitting(true);
         try {
             const formData = new FormData();
@@ -80,6 +98,7 @@ export default function JobDetailsPage() {
             formData.append("candidate_phone", formState.candidate_phone);
             formData.append("candidate_address", formState.candidate_address);
             formData.append("cover_letter", formState.cover_letter);
+            formData.append("applied_branches", JSON.stringify(selectedBranches));
             formData.append("resume_file", resumeFile);
 
             await createJobApplication(formData);
@@ -93,6 +112,11 @@ export default function JobDetailsPage() {
                 cover_letter: "",
             });
             setResumeFile(null);
+            if (job && job.job_branches && job.job_branches.length === 1) {
+                setSelectedBranches([Number(job.job_branches[0].branch_id)]);
+            } else {
+                setSelectedBranches([]);
+            }
         } catch (err: any) {
             console.error("Error submitting application:", err);
             showError(err?.message || "Failed to submit application");
@@ -132,26 +156,23 @@ export default function JobDetailsPage() {
                     <div className="space-y-8">
                         <div className="rounded-3xl md:p-8 ">
                             <div className="mb-10">
-                                <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
+                                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
                                     {job.job_title}
                                 </h1>
                                 <div className="flex items-center gap-2 mt-4">
                                     <div className="h-1 w-12 bg-cyan-600 rounded-full"></div>
                                     <p className="text-cyan-600 font-bold uppercase tracking-widest text-[10px]">
-                                        Open Position in {job.job_location || "Manjeri"}
+                                        Open Position
                                     </p>
                                 </div>
                             </div>
 
                             <div className="flex flex-wrap gap-6 mb-8 pb-8 border-b border-gray-300">
                                 <div className="flex items-center gap-2 text-gray-700">
-                                    <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-600">
+                                    {/* <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-600">
                                         <IconMapPin size={22} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Location</p>
-                                        <p className="font-semibold">{job.job_location}</p>
-                                    </div>
+                                    </div> */}
+
                                 </div>
                                 <div className="flex items-center gap-2 text-gray-700">
                                     <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-600">
@@ -180,6 +201,17 @@ export default function JobDetailsPage() {
                                         <p className="font-semibold">{job.opening_seats || "Multiple"}</p>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="my-5">
+                                <p className="text-xs flex justify-start items-center gap-2 text-gray-800 font-bold uppercase tracking-wider mb-2"><span className="rounded-full p-1 bg-cyan-600 text-white"><IconMapPin size={18} /></span><span>Branches </span></p>
+                                <div className="flex gap-4">
+                                    {job.job_branches.map((item: any, index: number) => {
+                                        return (<div key={index} className="flex items-center gap-1 bg-gray-200 px-4 rounded-lg py-1 text-gray-800 font-bold">
+                                            <span className="pr-2"><IconBuilding size={14} stroke={2} /></span>{item?.branch_name}</div>)
+                                    })}
+                                </div>
+                                {/* <p className="font-semibold">{job.job_branches[0]?.branch_name}</p> */}
                             </div>
 
                             <div className="space-y-6">
@@ -256,6 +288,33 @@ export default function JobDetailsPage() {
                                             placeholder="+91 999 000 0000"
                                             required
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:bg-white transition-all outline-none"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-bold text-gray-700 mb-1.5 flex items-center gap-2">
+                                            <IconBuilding size={16} className="text-cyan-600" /> Apply Branch <span className="text-red-500">*</span>
+                                        </label>
+                                        <Select
+                                            isMulti
+                                            isDisabled={job.job_branches && job.job_branches.length === 1}
+                                            options={job.job_branches ? job.job_branches.map((b: any) => ({
+                                                label: b.branch_name,
+                                                value: Number(b.branch_id)
+                                            })) : []}
+                                            value={job.job_branches ? job.job_branches.map((b: any) => ({
+                                                label: b.branch_name,
+                                                value: Number(b.branch_id)
+                                            })).filter((opt: any) => selectedBranches.includes(opt.value)) : []}
+                                            onChange={(selected: any) => {
+                                                const values = selected
+                                                    ? selected.map((opt: any) => opt.value)
+                                                    : [];
+                                                setSelectedBranches(values);
+                                            }}
+                                            className="react-select-container"
+                                            classNamePrefix="react-select"
+                                            placeholder="Select branches..."
                                         />
                                     </div>
 

@@ -16,6 +16,7 @@ import {
     updateJob,
     deleteJob,
 } from "@/lib/api/job";
+import { getBranches } from "@/lib/api/branches";
 
 export default function JobsPage() {
     const [data, setData] = useState<any[]>([]);
@@ -28,8 +29,22 @@ export default function JobsPage() {
     const [openDelete, setOpenDelete] = useState(false);
     const [openView, setOpenView] = useState(false);
     const [viewData, setViewData] = useState<any>(null);
+    const [branches, setBranches] = useState<any[]>([]);
     const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
     const debouncedSearch = useDebounce(search, 500);
+
+    // Fetch branches
+    useEffect(() => {
+        const loadBranches = async () => {
+            try {
+                const res = await getBranches(1, 100, "", 1);
+                setBranches(res.data || []);
+            } catch (err) {
+                console.error("Error loading branches:", err);
+            }
+        };
+        loadBranches();
+    }, []);
 
     // Fetch jobs
     const loadData = async () => {
@@ -45,7 +60,7 @@ export default function JobsPage() {
                 debouncedSearch,
                 status,
                 filters.type,
-                filters.location
+                filters.branch
             );
 
             setData(res.data || []);
@@ -77,6 +92,15 @@ export default function JobsPage() {
                                     { label: "Contract", value: "Contract" },
                                     { label: "Internship", value: "Internship" },
                                 ],
+                            },
+                            {
+                                key: "branch",
+                                label: "Branch",
+                                type: "select",
+                                options: branches.map((b) => ({
+                                    label: b.branch_name,
+                                    value: String(b.branch_id),
+                                })),
                             },
                             {
                                 key: "status",
@@ -128,7 +152,37 @@ export default function JobsPage() {
                             ),
                     },
                     { key: "job_title", label: "Title" },
-                    { key: "job_location", label: "Location" },
+                    {
+                        key: "job_branches",
+                        label: "Branches",
+                        render: (r) => {
+                            if (!r.job_branches) return "—";
+                            let list = r.job_branches;
+                            if (typeof list === "string") {
+                                try { list = JSON.parse(list); } catch { list = []; }
+                            }
+                            if (!Array.isArray(list)) return "—";
+                            const names = list
+                                .map((item: any) => {
+                                    if (item && typeof item === "object") {
+                                        return item.branch_name;
+                                    }
+                                    const b = branches.find((br) => br.branch_id === Number(item));
+                                    return b ? b.branch_name : null;
+                                })
+                                .filter(Boolean);
+                            if (names.length === 0) return "—";
+                            if (names.length === 1) return names[0];
+                            return (
+                                <span className="flex items-center gap-1.5">
+                                    {names[0]}
+                                    <span className="bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                                        +{names.length - 1}
+                                    </span>
+                                </span>
+                            );
+                        }
+                    },
                     { key: "job_type", label: "Type" },
                     {
                         key: "apply_deadline",
@@ -162,6 +216,9 @@ export default function JobsPage() {
                 onEdit={(row) => {
                     setSelected({
                         ...row,
+                        job_branches: Array.isArray(row.job_branches)
+                            ? row.job_branches.map((b: any) => typeof b === "object" ? b.branch_id : b)
+                            : [],
                         apply_deadline: row.apply_deadline
                             ? row.apply_deadline.split("T")[0]
                             : "",
@@ -179,7 +236,24 @@ export default function JobsPage() {
 
                     const formatted = {
                         "Job Title": j.job_title,
-                        Location: j.job_location,
+                        Branches: (() => {
+                            if (!j.job_branches) return "—";
+                            let list = j.job_branches;
+                            if (typeof list === "string") {
+                                try { list = JSON.parse(list); } catch { list = []; }
+                            }
+                            if (!Array.isArray(list)) return "—";
+                            const names = list
+                                .map((item: any) => {
+                                    if (item && typeof item === "object") {
+                                        return item.branch_name;
+                                    }
+                                    const b = branches.find((br) => br.branch_id === Number(item));
+                                    return b ? b.branch_name : null;
+                                })
+                                .filter(Boolean);
+                            return names.join(", ") || "—";
+                        })(),
                         Type: j.job_type,
                         "Experience Level": j.experiance_level,
                         "Opening Seats": j.opening_seats || "N/A",
@@ -228,10 +302,15 @@ export default function JobsPage() {
                         required: true,
                     },
                     {
-                        name: "job_location",
-                        label: "Location",
-                        type: "text",
+                        name: "job_branches",
+                        label: "Branches",
+                        type: "multi-select",
+                        options: branches.map((b) => ({
+                            label: b.branch_name,
+                            value: String(b.branch_id),
+                        })),
                         required: true,
+                        multiple: true,
                     },
                     {
                         name: "job_type",
