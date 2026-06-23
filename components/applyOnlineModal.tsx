@@ -1,22 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState, useRef } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { IconX } from "@tabler/icons-react";
 import { createOnlineRegistration } from "@/lib/api/registration";
 import { getCourseCategories } from "@/lib/api/courseCategory";
 import { getCourses } from "@/lib/api/course";
-import Select from "react-select";
-import { Controller } from "react-hook-form";
+import { getBranches } from "@/lib/api/branches";
+import ReactSelect from "react-select";
 import { useToast } from "@/contexts/ToastContext";
+import {
+  Select as ShadcnSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ApplyOnlineModalProps {
   open: boolean;
   onClose: () => void;
+  defaultDepartmentId?: string;
+  defaultCourseId?: string;
+  disableCourseSelection?: boolean;
 }
 
 interface FormData {
-  branch: string;
+  branch_id: string;
   department_id: string;
   course_id: string;
   student_name: string;
@@ -42,13 +52,17 @@ interface FormData {
 export default function ApplyOnlineModal({
   open,
   onClose,
+  defaultDepartmentId,
+  defaultCourseId,
+  disableCourseSelection = false,
 }: ApplyOnlineModalProps) {
   const [departments, setDepartments] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
+  const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { showSuccess, showError } = useToast();
+  const prefillInitialized = useRef(false);
 
   const {
     register,
@@ -61,6 +75,14 @@ export default function ApplyOnlineModal({
   } = useForm<FormData>({
     defaultValues: {
       qualification: [],
+      branch_id: "",
+      department_id: "",
+      course_id: "",
+      gender: "",
+      marital_status: "",
+      religion: "",
+      community: "",
+      district: "",
     },
   });
 
@@ -79,18 +101,76 @@ export default function ApplyOnlineModal({
     }
   }, [watchedPhoto]);
 
-  // Load departments on mount
+  // Reset prefill flag on modal open
   useEffect(() => {
-    const loadDepartments = async () => {
-      const res = await getCourseCategories(1, 200, "");
-      setDepartments(res?.data || []);
+    if (open) {
+      prefillInitialized.current = false;
+    }
+  }, [open]);
+
+  // Load departments, branches, and courses on mount
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const promises: Promise<any>[] = [
+          getCourseCategories(1, 200, ""),
+          getBranches(1, 500),
+        ];
+
+        if (defaultDepartmentId) {
+          promises.push(
+            getCourses(1, 200, "", {
+              category_id: defaultDepartmentId,
+            })
+          );
+        }
+
+        const results = await Promise.all(promises);
+        const deptRes = results[0];
+        const branchRes = results[1];
+        const courseRes = results[2];
+
+        setDepartments(deptRes?.data || []);
+        setBranches(branchRes?.data || []);
+
+        if (courseRes) {
+          setCourses(courseRes?.data || []);
+        }
+      } catch (err) {
+        console.error("Error loading initial data:", err);
+      }
     };
-    loadDepartments();
-  }, []);
+    if (open) {
+      loadInitialData();
+    }
+  }, [open, defaultDepartmentId]);
+
+  // Set default prefilled fields once options are loaded in state
+  useEffect(() => {
+    if (open && departments.length > 0 && !prefillInitialized.current) {
+      if (defaultDepartmentId) {
+        setValue("department_id", String(defaultDepartmentId));
+      }
+
+      if (defaultCourseId) {
+        if (courses.length > 0) {
+          setValue("course_id", String(defaultCourseId));
+          prefillInitialized.current = true;
+        }
+      } else {
+        prefillInitialized.current = true;
+      }
+    }
+  }, [open, departments, courses, defaultDepartmentId, defaultCourseId, setValue]);
 
   // Load courses when department changes
   useEffect(() => {
     const loadCourses = async () => {
+      // If course selection is locked, we do not need dynamic loading on department change
+      if (disableCourseSelection) {
+        return;
+      }
+
       if (!selectedDepartment) {
         setCourses([]);
         setValue("course_id", "");
@@ -100,21 +180,22 @@ export default function ApplyOnlineModal({
       const res = await getCourses(1, 200, "", {
         category_id: selectedDepartment,
       });
-      setCourses(res?.data || []);
+      const loadedCourses = res?.data || [];
+      setCourses(loadedCourses);
+      setValue("course_id", "");
     };
 
     loadCourses();
-  }, [selectedDepartment, setValue]);
+  }, [selectedDepartment, setValue, disableCourseSelection]);
 
   const onSubmit = async (data: FormData) => {
     try {
       setLoading(true);
-      setSuccessMessage("");
 
       const formData = new FormData();
 
       // Append all text fields
-      formData.append("branch", data.branch);
+      formData.append("branch_id", data.branch_id);
       formData.append("department_id", data.department_id);
       formData.append("course_id", data.course_id);
       formData.append("student_name", data.student_name);
@@ -160,24 +241,10 @@ export default function ApplyOnlineModal({
   const handleClose = () => {
     reset();
     setPhotoPreview(null);
-    setSuccessMessage("");
     onClose();
   };
 
   if (!open) return null;
-
-  const BRANCH_OPTIONS = [
-    "BALUSSERY",
-    "CALICUT",
-    "EDAPPAL",
-    "MALAPPURAM",
-    "MANJERI",
-    "NILAMBUR",
-    "PALAKKAD",
-    "PATTAMBI",
-    "PERINTHALMANNA",
-    "TIRUR",
-  ];
 
   const DISTRICT_OPTIONS = [
     "Alappuzha",
@@ -268,20 +335,31 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Branch
               </label>
-              <select
-                {...register("branch", { required: "Branch is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select Branch</option>
-                {BRANCH_OPTIONS.map((branch) => (
-                  <option key={branch} value={branch}>
-                    {branch}
-                  </option>
-                ))}
-              </select>
-              {errors.branch && (
+              <Controller
+                name="branch_id"
+                control={control}
+                rules={{ required: "Branch is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                      <SelectValue placeholder="Select Branch" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {branches.map((b) => (
+                        <SelectItem key={b.branch_id} value={String(b.branch_id)}>
+                          {b.branch_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
+              {errors.branch_id && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.branch.message}
+                  {errors.branch_id.message}
                 </p>
               )}
             </div>
@@ -291,19 +369,30 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Department
               </label>
-              <select
-                {...register("department_id", {
-                  required: "Department is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept.category_id} value={dept.category_id}>
-                    {dept.category_name}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="department_id"
+                control={control}
+                rules={{ required: "Department is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className={`w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      disableCourseSelection ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                    }`}>
+                      <SelectValue placeholder="Select Department" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.category_id} value={String(dept.category_id)}>
+                          {dept.category_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
               {errors.department_id && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.department_id.message}
@@ -316,18 +405,30 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Course
               </label>
-              <select
-                {...register("course_id", { required: "Course is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                disabled={!selectedDepartment || courses.length === 0}
-              >
-                <option value="">Select Course</option>
-                {courses.map((course) => (
-                  <option key={course.course_id} value={course.course_id}>
-                    {course.course_name}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="course_id"
+                control={control}
+                rules={{ required: "Course is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className={`w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      (disableCourseSelection || !selectedDepartment || courses.length === 0) ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                    }`}>
+                      <SelectValue placeholder="Select Course" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {courses.map((course) => (
+                        <SelectItem key={course.course_id} value={String(course.course_id)}>
+                          {course.course_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
               {errors.course_id && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.course_id.message}
@@ -397,15 +498,26 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Gender
               </label>
-              <select
-                {...register("gender", { required: "Gender is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Others">Others</option>
-              </select>
+              <Controller
+                name="gender"
+                control={control}
+                rules={{ required: "Gender is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                      <SelectValue placeholder="Select Gender" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Others">Others</SelectItem>
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
               {errors.gender && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.gender.message}
@@ -418,16 +530,25 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Marital Status
               </label>
-              <select
-                {...register("marital_status", {
-                  required: "Marital status is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select Status</option>
-                <option value="Single">Single</option>
-                <option value="Married">Married</option>
-              </select>
+              <Controller
+                name="marital_status"
+                control={control}
+                rules={{ required: "Marital status is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      <SelectItem value="Single">Single</SelectItem>
+                      <SelectItem value="Married">Married</SelectItem>
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
               {errors.marital_status && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.marital_status.message}
@@ -440,17 +561,28 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Religion
               </label>
-              <select
-                {...register("religion", { required: "Religion is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select Religion</option>
-                {RELIGION_OPTIONS.map((religion) => (
-                  <option key={religion} value={religion}>
-                    {religion}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="religion"
+                control={control}
+                rules={{ required: "Religion is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                      <SelectValue placeholder="Select Religion" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {RELIGION_OPTIONS.map((religion) => (
+                        <SelectItem key={religion} value={religion}>
+                          {religion}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
               {errors.religion && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.religion.message}
@@ -463,19 +595,28 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Community
               </label>
-              <select
-                {...register("community", {
-                  required: "Community is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select Community</option>
-                {COMMUNITY_OPTIONS.map((community) => (
-                  <option key={community} value={community}>
-                    {community}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="community"
+                control={control}
+                rules={{ required: "Community is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                      <SelectValue placeholder="Select Community" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {COMMUNITY_OPTIONS.map((community) => (
+                        <SelectItem key={community} value={community}>
+                          {community}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
               {errors.community && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.community.message}
@@ -494,7 +635,7 @@ export default function ApplyOnlineModal({
                 control={control}
                 rules={{ required: "At least one qualification is required" }}
                 render={({ field }) => (
-                  <Select
+                  <ReactSelect
                     {...field}
                     options={QUALIFICATION_SELECT_OPTIONS}
                     isMulti
@@ -560,17 +701,28 @@ export default function ApplyOnlineModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 District
               </label>
-              <select
-                {...register("district", { required: "District is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="">Select District</option>
-                {DISTRICT_OPTIONS.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="district"
+                control={control}
+                rules={{ required: "District is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                      <SelectValue placeholder="Select District" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto">
+                      {DISTRICT_OPTIONS.map((district) => (
+                        <SelectItem key={district} value={district}>
+                          {district}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
+              />
               {errors.district && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.district.message}
@@ -740,7 +892,7 @@ export default function ApplyOnlineModal({
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 cursor-pointer bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-md hover:from-cyan-600 hover:to-blue-600 transition disabled:opacity-50"
+              className="px-6 py-2 cursor-pointer bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-md hover:from-cyan-600 hover:to-blue-600 transition disabled:opacity-50"
             >
               {loading ? "Submitting..." : "Submit"}
             </button>

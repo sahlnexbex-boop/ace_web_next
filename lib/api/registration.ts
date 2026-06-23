@@ -9,7 +9,8 @@ export const getOnlineRegistrations = async (
   search = "",
   department_id?: number,
   course_id?: number,
-  apply_status?: string
+  apply_status?: string,
+  branch_id?: number
 ) => {
   const params = new URLSearchParams({
     page: String(page),
@@ -20,6 +21,7 @@ export const getOnlineRegistrations = async (
   if (department_id) params.append("department_id", String(department_id));
   if (course_id) params.append("course_id", String(course_id));
   if (apply_status) params.append("apply_status", apply_status);
+  if (branch_id) params.append("branch_id", String(branch_id));
 
   return apiRequest(
     `/api/online-registration?${params.toString()}`,

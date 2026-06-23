@@ -21,11 +21,13 @@ import {
 
 import { getCourseCategories } from "@/lib/api/courseCategory";
 import { getCourses } from "@/lib/api/course";
+import { getBranches } from "@/lib/api/branches";
 
 export default function OnlineRegistrationPage() {
   const [data, setData] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
+  const [branches, setBranches] = useState<any[]>([]);
   const [filters, setFilters] = useState<Record<string, string>>({});
 
   const [page, setPage] = useState(1);
@@ -49,19 +51,10 @@ export default function OnlineRegistrationPage() {
 
   /* ---------- STATIC OPTIONS ---------- */
 
-  const BRANCH_OPTIONS = [
-    "AREACODE",
-    "BALUSSERY",
-    "CALICUT",
-    "EDAPPAL",
-    "MALAPPURAM",
-    "MANJERI",
-    "NILAMBUR",
-    "PALAKKAD",
-    "PATTAMBI",
-    "PERINTHALMANNA",
-    "TIRUR",
-  ].map((v) => ({ label: v, value: v }));
+  const branchOptions = branches.map((b) => ({
+    label: b.branch_name,
+    value: String(b.branch_id),
+  }));
 
   const DISTRICT_OPTIONS = [
     "Alappuzha",
@@ -174,13 +167,19 @@ export default function OnlineRegistrationPage() {
         ? filters.apply_status
         : undefined;
 
+    const branch_id =
+      filters.branch_id && filters.branch_id !== ""
+        ? Number(filters.branch_id)
+        : undefined;
+
     const res = await getOnlineRegistrations(
       page,
       10,
       debouncedSearch,
       department_id,
       course_id,
-      apply_status
+      apply_status,
+      branch_id
     );
 
     setData(res?.data || []);
@@ -188,7 +187,16 @@ export default function OnlineRegistrationPage() {
   };
 
   useEffect(() => {
-    loadDepartments();
+    const loadInitialData = async () => {
+      await loadDepartments();
+      try {
+        const res = await getBranches(1, 500);
+        setBranches(res?.data || []);
+      } catch (err) {
+        console.error("Error loading branches:", err);
+      }
+    };
+    loadInitialData();
   }, []);
 
   useEffect(() => {
@@ -283,6 +291,12 @@ export default function OnlineRegistrationPage() {
           <TableFilter
             fields={[
               {
+                key: "branch_id",
+                label: "Branch",
+                type: "select",
+                options: branchOptions,
+              },
+              {
                 key: "department_id",
                 label: "Department",
                 type: "select",
@@ -341,7 +355,11 @@ export default function OnlineRegistrationPage() {
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
           },
           { key: "student_name", label: "Student Name" },
-          { key: "branch", label: "Branch" },
+          {
+            key: "branch",
+            label: "Branch",
+            render: (r) => r.branch?.branch_name || "—",
+          },
           {
             key: "department",
             label: "Department",
@@ -385,6 +403,7 @@ export default function OnlineRegistrationPage() {
         onEdit={(row) => {
           setSelected({
             ...row,
+            branch_id: String(row.branch_id),
             department_id: String(row.department_id),
             course_id: String(row.course_id),
             //  Parse qualification properly
@@ -403,7 +422,7 @@ export default function OnlineRegistrationPage() {
           const r = await getOnlineRegistrationById(row.registration_id);
 
           setViewData({
-            Branch: r.branch,
+            Branch: r.branch?.branch_name || "—",
             "Student Name": r.student_name,
             "Father Name": r.father_name,
             "Date of Birth": r.date_of_birth,
@@ -445,10 +464,10 @@ export default function OnlineRegistrationPage() {
         onClose={() => setOpenForm(false)}
         fields={[
           {
-            name: "branch",
+            name: "branch_id",
             label: "Branch",
             type: "select",
-            options: BRANCH_OPTIONS,
+            options: branchOptions,
             required: true,
           },
 

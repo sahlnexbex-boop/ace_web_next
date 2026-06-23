@@ -6,6 +6,7 @@ import { Download, FileText, ChevronDown, Lock, Play, PlayCircle, Eye } from "lu
 import { getCourseBySlug } from "@/lib/api/course";
 import { getReviews } from "@/lib/api/review";
 import EnquiryModal from "@/components/enquiryModal";
+import ApplyOnlineModal from "@/components/applyOnlineModal";
 import VideoModal from "@/components/videoModal";
 import { CourseDetailsSkeleton } from "@/components/skeltons/skelton";
 import {
@@ -54,6 +55,7 @@ export default function CourseDetailsClient({
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [showApplyOnlineModal, setShowApplyOnlineModal] = useState(false);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const [openVideo, setOpenVideo] = useState<{ id: string } | null>(null);
@@ -209,12 +211,20 @@ export default function CourseDetailsClient({
                 </div>
               </div>
 
-              <button
-                onClick={() => setShowEnquiryModal(true)}
-                className="bg-gradient-to-r from-[#1F67A5] to-[#087fc2] hover:from-[#087fc2] hover:to-[#1F67A5] text-white font-semibold px-6 py-2.5 rounded-lg transition cursor-pointer"
-              >
-                Enquire Now
-              </button>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => setShowEnquiryModal(true)}
+                  className="bg-linear-to-r from-[#1F67A5] to-[#087fc2] hover:from-[#087fc2] hover:to-[#1F67A5] text-white font-semibold px-6 py-2.5 rounded-lg transition cursor-pointer"
+                >
+                  Enquire Now
+                </button>
+                <button
+                  onClick={() => setShowApplyOnlineModal(true)}
+                  className="bg-linear-to-r from-[#0197db] to-[#0c8da6] hover:from-[#0c8da6] hover:to-[#0197db] text-white font-semibold px-6 py-2.5 rounded-lg transition cursor-pointer"
+                >
+                  Online Admission
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -425,6 +435,13 @@ export default function CourseDetailsClient({
         onClose={() => setShowEnquiryModal(false)}
         enquiryType={2}
         courseId={course.course_id}
+      />
+      <ApplyOnlineModal
+        open={showApplyOnlineModal}
+        onClose={() => setShowApplyOnlineModal(false)}
+        defaultDepartmentId={String(course.category?.category_id)}
+        defaultCourseId={String(course.course_id)}
+        disableCourseSelection={true}
       />
       <VideoModal
         isOpen={!!openVideo}
