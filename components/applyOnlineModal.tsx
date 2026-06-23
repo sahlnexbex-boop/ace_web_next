@@ -240,6 +240,9 @@ export default function ApplyOnlineModal({
 
   const handleClose = () => {
     reset();
+    setDepartments([]);
+    setCourses([]);
+    setBranches([]);
     setPhotoPreview(null);
     onClose();
   };
