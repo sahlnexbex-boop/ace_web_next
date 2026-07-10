@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { createExamRegistration } from "@/lib/api/examRegistration";
 import { useToast } from "@/contexts/ToastContext";
+import {
+  Select as ShadcnSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 const BRANCH_OPTIONS = [
   { label: "BALUSSERY - BLS", value: "BLS" },
@@ -79,7 +87,7 @@ export default function ExamRegistrationModal({ open, onClose, exam }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-[0.5px] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-9999 bg-black/50 backdrop-blur-[0.5px] flex items-center justify-center px-4">
       <div
         className="bg-white w-full max-w-lg rounded-xl shadow-xl
                    animate-[fadeIn_0.25s_ease-in-out]"
@@ -134,18 +142,21 @@ export default function ExamRegistrationModal({ open, onClose, exam }: Props) {
           />
 
           {/* Branch */}
-          <select
-            className="input"
-            value={form.branch}
-            onChange={(e) => setForm({ ...form, branch: e.target.value })}
+          <ShadcnSelect
+            value={form.branch || ""}
+            onValueChange={(val) => setForm({ ...form, branch: val })}
           >
-            <option value="">Select Branch</option>
-            {BRANCH_OPTIONS.map((b) => (
-              <option key={b.value} value={b.value}>
-                {b.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full border rounded-md px-3 py-2 text-sm bg-white text-gray-700 h-10 border-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+              <SelectValue placeholder="Select Branch" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60 overflow-y-auto bg-white">
+              {BRANCH_OPTIONS.map((b) => (
+                <SelectItem key={b.value} value={b.value}>
+                  {b.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </ShadcnSelect>
 
           {/* Exam (disabled) */}
           <input

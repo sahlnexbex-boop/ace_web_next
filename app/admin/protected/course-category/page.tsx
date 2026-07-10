@@ -33,14 +33,49 @@ export default function CourseCategoryPage() {
   const [filters, setFilters] = useState<{ status?: string; type_id?: string }>(
     {}
   );
+  const [v2CategoryOptions, setV2CategoryOptions] = useState<{ label: string; value: string }[]>([]);
+  const [v2LevelNames, setV2LevelNames] = useState<Record<string, string>>({});
 
   const debouncedSearch = useDebounce(search, 500);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+  const loadV2CategoriesForType = async (v2TypeId: string | number) => {
+    if (!v2TypeId) {
+      setV2CategoryOptions([]);
+      return;
+    }
+    try {
+      const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/levebycategory/${v2TypeId}/`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const opts = data.map((item: any) => ({
+          label: item.name,
+          value: String(item.id),
+        }));
+        const uniqueOpts: any[] = [];
+        const seen = new Set();
+        for (const opt of opts) {
+          if (!seen.has(opt.value)) {
+            seen.add(opt.value);
+            uniqueOpts.push(opt);
+          }
+        }
+        setV2CategoryOptions(uniqueOpts);
+      } else {
+        setV2CategoryOptions([]);
+      }
+    } catch (err) {
+      console.error("Error loading V2 categories by type:", err);
+      setV2CategoryOptions([]);
+    }
+  };
+
   const loadCourseTypes = async () => {
     try {
-      const res = await getCourseTypes(1, "");
-      setCourseTypes(res.data || []);
+      const res = await getCourseTypes(1, "", 100);
+      const types = res.data || [];
+      setCourseTypes(types);
     } catch (err) {
       console.error("Error loading course types:", err);
     }
@@ -64,6 +99,51 @@ export default function CourseCategoryPage() {
     loadCategories();
   }, [page, debouncedSearch, filters]);
 
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    const parentIds = Array.from(
+      new Set(
+        data
+          .map((item) => item.courseType?.V2_category)
+          .filter(Boolean)
+      )
+    );
+
+    if (parentIds.length === 0) return;
+
+    const fetchNames = async () => {
+      const mapping = { ...v2LevelNames };
+      let updated = false;
+
+      const promises = parentIds.map(async (v2CatId) => {
+        try {
+          const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/levebycategory/${v2CatId}/`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const levels = await res.json();
+            levels.forEach((lvl: any) => {
+              const k = String(lvl.id);
+              if (mapping[k] !== lvl.name) {
+                mapping[k] = lvl.name;
+                updated = true;
+              }
+            });
+          }
+        } catch (err) {
+          console.error(`Error loading level names for V2 parent ${v2CatId}:`, err);
+        }
+      });
+
+      await Promise.all(promises);
+      if (updated) {
+        setV2LevelNames(mapping);
+      }
+    };
+
+    fetchNames();
+  }, [data]);
+
   const typeOptions = courseTypes.map((t) => ({
     label: t.type_name,
     value: String(t.type_id),
@@ -74,7 +154,6 @@ export default function CourseCategoryPage() {
       const res = await getCourseCategoryById(row.category_id);
       if (!res?.data) return;
       const c = res.data;
-
       const formatted = {
         "Category Name": c.category_name || "—",
         Description: (
@@ -83,6 +162,11 @@ export default function CourseCategoryPage() {
           </p>
         ),
         "Course Type": c.courseType?.type_name || "—",
+        "V2 Connected Category": c.V2_category 
+          ? (v2LevelNames[String(c.V2_category)] 
+              ? `${v2LevelNames[String(c.V2_category)]} ( ID : ${c.V2_category} )` 
+              : `ID: ${c.V2_category}`)
+          : "—",
         "Category Image": c.category_image ? (
           <div className="flex justify-end">
             <img
@@ -138,6 +222,25 @@ export default function CourseCategoryPage() {
       type: "select",
       options: typeOptions,
       required: true,
+      onChange: (val: string) => {
+        console.log("🔍 Selected Course Type ID:", val);
+        const selectedType = courseTypes.find((t) => String(t.type_id) === String(val));
+        console.log("🔍 Selected Type Object:", selectedType);
+        if (selectedType && selectedType.V2_category) {
+          console.log("🚀 Calling loadV2CategoriesForType with:", selectedType.V2_category);
+          loadV2CategoriesForType(selectedType.V2_category);
+        } else {
+          console.log("❌ selectedType or V2_category is missing!", { selectedType });
+          setV2CategoryOptions([]);
+        }
+      }
+    },
+    {
+      name: "V2_category",
+      label: "V2 Connected Category",
+      type: "select",
+      options: v2CategoryOptions,
+      required: false,
     },
     {
       name: "status",
@@ -190,6 +293,7 @@ export default function CourseCategoryPage() {
           <button
             onClick={() => {
               setSelected(null);
+              setV2CategoryOptions([]);
               setOpenForm(true);
             }}
             className="bg-cyan-700 flex items-center gap-2 text-white px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800"
@@ -205,6 +309,19 @@ export default function CourseCategoryPage() {
             key: "sno",
             label: "S.No",
             render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10,
+          },
+          {
+            key: "category_image",
+            label: "Image",
+            render: (r) =>
+              r.category_image ? (
+                <img
+                  src={server_url + r.category_image}
+                  className="w-10 h-10 object-cover rounded-full"
+                />
+              ) : (
+                "—"
+              ),
           },
           { key: "category_name", label: "Name" },
           {
@@ -222,17 +339,13 @@ export default function CourseCategoryPage() {
             render: (r) => r.courseType?.type_name || "—",
           },
           {
-            key: "category_image",
-            label: "Image",
-            render: (r) =>
-              r.category_image ? (
-                <img
-                  src={server_url + r.category_image}
-                  className="w-10 h-10 object-cover rounded-full"
-                />
-              ) : (
-                "—"
-              ),
+            key: "V2_category",
+            label: "V2 Connected Category",
+            render: (r) => {
+              if (!r.V2_category) return "—";
+              const name = v2LevelNames[String(r.V2_category)];
+              return name ? `${name} ( ID : ${r.V2_category} )` : `ID: ${r.V2_category}`;
+            },
           },
           {
             key: "status",
@@ -260,7 +373,14 @@ export default function CourseCategoryPage() {
             ...row,
             course_type_id: String(row.course_type_id),
             status: String(row.status),
+            V2_category: row.V2_category ? String(row.V2_category) : "",
           });
+          const selectedType = courseTypes.find((t) => String(t.type_id) === String(row.course_type_id));
+          if (selectedType && selectedType.V2_category) {
+            loadV2CategoriesForType(selectedType.V2_category);
+          } else {
+            setV2CategoryOptions([]);
+          }
           setOpenForm(true);
         }}
         onDelete={(row) => {

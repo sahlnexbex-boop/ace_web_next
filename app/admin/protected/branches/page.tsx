@@ -28,8 +28,26 @@ export default function BranchesPage() {
     const [openDelete, setOpenDelete] = useState(false);
     const [openView, setOpenView] = useState(false);
     const [viewData, setViewData] = useState<any>(null);
+    const [v2Branches, setV2Branches] = useState<any[]>([]);
     const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
     const debouncedSearch = useDebounce(search, 500);
+
+    // Fetch V2 branches
+    useEffect(() => {
+        const fetchV2Branches = async () => {
+            try {
+                const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/getallbranches/`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    setV2Branches(data);
+                }
+            } catch (err) {
+                console.error("Error fetching V2 branches:", err);
+            }
+        };
+        fetchV2Branches();
+    }, []);
 
     // Fetch jobs
     const loadData = async () => {
@@ -115,6 +133,18 @@ export default function BranchesPage() {
                     { key: "branch_phone", label: "Phone No" },
                     { key: "branch_address", label: "Address" },
                     {
+                        key: "V2_branch",
+                        label: "V2 Connected Branch",
+                        render: (r) => {
+                            if (!r.V2_branch) return "—";
+                            const v2Branch = v2Branches.find(
+                                (b) => String(b.id) === String(r.V2_branch)
+                            );
+                            return v2Branch ? `${v2Branch.name} ( ID : ${v2Branch.id} 
+                            )` : `ID: ${r.V2_branch}`;
+                        },
+                    },
+                    {
                         key: "status",
                         label: "Status",
                         render: (r) =>
@@ -142,6 +172,7 @@ export default function BranchesPage() {
                             ? row.apply_deadline.split("T")[0]
                             : "",
                         status: String(row.status),
+                        V2_branch: row.V2_branch ? String(row.V2_branch) : "",
                     });
                     setOpenForm(true);
                 }}
@@ -152,11 +183,15 @@ export default function BranchesPage() {
                 onRowClick={async (row) => {
                     const res = await getBranchById(row.branch_id);
                     const j = res?.data;
+                    const v2Branch = j.V2_branch
+                        ? v2Branches.find((b) => String(b.id) === String(j.V2_branch))
+                        : null;
 
                     const formatted = {
                         "Branch Name": j.branch_name,
                         "Branch Phone": j.branch_phone,
                         "Branch Address": j.branch_address,
+                        "V2 Branch Connection": v2Branch ? `${v2Branch.name} (${v2Branch.id})` : "—",
                         Status:
                             j.status == 1 ? (
                                 <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -207,12 +242,28 @@ export default function BranchesPage() {
                             { label: "Inactive", value: "0" },
                         ],
                     },
+                    {
+                        name: "V2_branch",
+                        label: "V2 Connected Branch",
+                        type: "select",
+                        options: v2Branches.map((b) => ({
+                            label: b.name,
+                            value: String(b.id),
+                        })),
+                        required: false,
+                    },
                 ]}
                 defaultValues={selected}
                 onSubmit={async (fd) => {
                     const payload: any = {};
                     fd.forEach((value, key) => {
-                        payload[key] = key === "status" ? Number(value) : value;
+                        if (key === "status") {
+                            payload[key] = Number(value);
+                        } else if (key === "V2_branch") {
+                            payload[key] = value ? Number(value) : null;
+                        } else {
+                            payload[key] = value;
+                        }
                     });
                     if (selected) await updateBranch(selected.branch_id, payload);
                     else await createBranch(payload);

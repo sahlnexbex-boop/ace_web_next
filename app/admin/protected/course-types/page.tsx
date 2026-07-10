@@ -28,8 +28,26 @@ export default function CourseTypesPage() {
   const [openDelete, setOpenDelete] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [viewData, setViewData] = useState<any>(null);
+  const [v2Categories, setV2Categories] = useState<any[]>([]);
 
   const debouncedSearch = useDebounce(search, 500);
+
+  // Fetch V2 categories
+  useEffect(() => {
+    const fetchV2Categories = async () => {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/categories/`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setV2Categories(data);
+        }
+      } catch (err) {
+        console.error("Error fetching V2 categories:", err);
+      }
+    };
+    fetchV2Categories();
+  }, []);
 
   const loadData = async () => {
     const res = await getCourseTypes(page, debouncedSearch, 10, filters);
@@ -46,9 +64,13 @@ export default function CourseTypesPage() {
       const res = await getCourseTypeById(row.type_id);
       if (!res?.data) return;
       const t = res.data;
+      const v2Cat = t.V2_category
+        ? v2Categories.find((c) => String(c.id) === String(t.V2_category))
+        : null;
 
       const formatted = {
         "Course Type Name": t.type_name || "—",
+        "V2 Connected Category": v2Cat ? `${v2Cat.name} ( ID : ${v2Cat.id} )` : "—",
         Status:
           t.status === 1 || t.status === "1" ? (
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -111,8 +133,19 @@ export default function CourseTypesPage() {
 
       <DataTable
         columns={[
-          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 },
+          { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "type_name", label: "Type Name" },
+          {
+            key: "V2_category",
+            label: "V2 Connected Category",
+            render: (r) => {
+              if (!r.V2_category) return "—";
+              const v2Cat = v2Categories.find(
+                (c) => String(c.id) === String(r.V2_category)
+              );
+              return v2Cat ? `${v2Cat.name} ( ID : ${v2Cat.id} )` : `ID: ${r.V2_category}`;
+            },
+          },
           {
             key: "status",
             label: "Status",
@@ -127,16 +160,6 @@ export default function CourseTypesPage() {
                 </span>
               ),
           },
-          // {
-          //   key: "created_at",
-          //   label: "Created At",
-          //   render: (r) =>
-          //     new Date(r.created_at).toLocaleDateString("en-IN", {
-          //       year: "numeric",
-          //       month: "short",
-          //       day: "numeric",
-          //     }),
-          // },
         ]}
         data={data}
         page={page}
@@ -145,7 +168,10 @@ export default function CourseTypesPage() {
         setPage={setPage}
         setSearch={setSearch}
         onEdit={(r) => {
-          setSelected(r);
+          setSelected({
+            ...r,
+            V2_category: r.V2_category ? String(r.V2_category) : "",
+          });
           setOpenForm(true);
         }}
         onDelete={(r) => {
@@ -176,12 +202,23 @@ export default function CourseTypesPage() {
             ],
             required: true,
           },
+          {
+            name: "V2_category",
+            label: "V2 Connected Category",
+            type: "select",
+            options: v2Categories.map((c) => ({
+              label: c.name,
+              value: String(c.id),
+            })),
+            required: false,
+          },
         ]}
         defaultValues={selected}
         onSubmit={async (fd) => {
           const payload = {
             type_name: fd.get("type_name"),
             status: fd.get("status"),
+            V2_category: fd.get("V2_category") ? Number(fd.get("V2_category")) : null,
           };
           if (selected) await updateCourseType(selected.type_id, payload);
           else await createCourseType(payload);

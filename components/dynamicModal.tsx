@@ -1,11 +1,19 @@
 "use client";
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { X, RotateCw, Check, ZoomIn, ZoomOut, Edit2 } from "lucide-react";
+import { X, RotateCw, Check, ZoomIn, ZoomOut, Edit2, ChevronDown } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import Cropper from "react-easy-crop";
 import CKEditorField from "@/components/CKEditorField";
 import Select from "react-select";
 import ModuleChapterEditor from "@/components/ModuleChapterEditor";
+import {
+  Select as ShadcnSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface Point {
   x: number;
@@ -74,6 +82,8 @@ export default function DynamicFormModal({
   onSubmit,
 }: DynamicFormModalProps) {
   const [formState, setFormState] = useState<Record<string, any>>({});
+  const [selectSearch, setSelectSearch] = useState<Record<string, string>>({});
+  const [openPopovers, setOpenPopovers] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [cropState, setCropState] = useState<CropState | null>(null);
@@ -224,6 +234,8 @@ export default function DynamicFormModal({
     setUploadedEditorImages([]);
     allEditorImagesRef.current = [];
     initialContentRef.current = "";
+    setSelectSearch({});
+    setOpenPopovers({});
     onClose();
   };
 
@@ -235,6 +247,8 @@ export default function DynamicFormModal({
 
   useEffect(() => {
     if (!isOpen) return;
+    setSelectSearch({});
+    setOpenPopovers({});
 
     const normalized: Record<string, any> = {};
     if (defaultValues) {
@@ -306,6 +320,13 @@ export default function DynamicFormModal({
       const field = fields.find((f) => f.name === name);
       if (field?.onChange) field.onChange(value);
     }
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    const cleanValue = value === "none" ? "" : value;
+    setFormState((prev) => ({ ...prev, [name]: cleanValue }));
+    const field = fields.find((f) => f.name === name);
+    if (field?.onChange) field.onChange(cleanValue);
   };
 
   const handleMultiSelectChange = (name: string, selectedOptions: any) => {
@@ -543,6 +564,7 @@ export default function DynamicFormModal({
       setUploadedEditorImages([]);
       allEditorImagesRef.current = [];
       initialContentRef.current = "";
+      setSelectSearch({});
 
       onSuccess?.();
       showSuccess("Submitted successfully!");
@@ -851,28 +873,89 @@ export default function DynamicFormModal({
               }
 
               if (field.type === "select") {
+                const searchQuery = selectSearch[field.name] ?? "";
+                const filteredOptions = field.options?.filter((opt) =>
+                  opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+                ) || [];
+
+                const selectedOpt = field.options?.find((opt) => String(opt.value) === String(value));
+                const isPopoverOpen = openPopovers[field.name] || false;
+                const displayValue = isPopoverOpen ? searchQuery : (selectedOpt?.label ?? "");
+
                 return (
                   <div key={field.name}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {field.label}
                     </label>
-                    <select
-                      name={field.name}
-                      value={value ?? ""}
-                      onChange={handleChange}
-                      required={field.required}
-                      disabled={field.disabled}
-                      className={`w-full border rounded p-2 focus:ring-2 focus:ring-cyan-500 ${
-                        field.disabled ? "bg-gray-100 cursor-not-allowed" : ""
-                      }`}
+                    <Popover
+                      open={isPopoverOpen}
+                      onOpenChange={(open) => {
+                        setOpenPopovers((prev) => ({ ...prev, [field.name]: open }));
+                        setSelectSearch((prev) => ({ ...prev, [field.name]: "" }));
+                      }}
                     >
-                      <option value="">Select...</option>
-                      {field.options?.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
+                      <PopoverTrigger asChild>
+                        <div className="relative w-full cursor-pointer">
+                          <input
+                            type="text"
+                            placeholder="Select..."
+                            className={`w-full h-10 border border-gray-300 rounded-md pr-10 pl-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer ${
+                              field.disabled ? "bg-gray-100 cursor-not-allowed opacity-50" : ""
+                            }`}
+                            disabled={field.disabled}
+                            value={displayValue}
+                            onChange={(e) => {
+                              setSelectSearch((prev) => ({
+                                ...prev,
+                                [field.name]: e.target.value,
+                              }));
+                              setOpenPopovers((prev) => ({ ...prev, [field.name]: true }));
+                            }}
+                          />
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+                            <ChevronDown size={16} />
+                          </div>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        className="p-1 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md z-9999"
+                        style={{ width: "var(--radix-popover-trigger-width)" }}
+                        onOpenAutoFocus={(e) => e.preventDefault()}
+                      >
+                        <div className="py-1">
+                          <div
+                            onClick={() => {
+                              handleSelectChange(field.name, "none");
+                              setOpenPopovers((prev) => ({ ...prev, [field.name]: false }));
+                            }}
+                            className="px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 cursor-pointer rounded-sm"
+                          >
+                            Select...
+                          </div>
+                          {filteredOptions.length > 0 ? (
+                            filteredOptions.map((opt) => (
+                              <div
+                                key={opt.value}
+                                onClick={() => {
+                                  handleSelectChange(field.name, opt.value);
+                                  setOpenPopovers((prev) => ({ ...prev, [field.name]: false }));
+                                }}
+                                className={`px-3 py-1.5 text-sm hover:bg-cyan-50 hover:text-cyan-800 cursor-pointer rounded-sm flex items-center justify-between ${
+                                  String(opt.value) === String(value) ? "bg-cyan-50 text-cyan-800 font-medium" : "text-gray-700"
+                                }`}
+                              >
+                                <span>{opt.label}</span>
+                                {String(opt.value) === String(value) && <Check size={16} className="text-cyan-600" />}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                              No options found
+                            </div>
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 );
               }
@@ -939,7 +1022,7 @@ export default function DynamicFormModal({
 
       {/* ================= IMAGE CROP MODAL ================= */}
       {cropState && (
-        <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/60 z-9999 flex items-center justify-center">
           <div className="bg-white rounded-xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center p-4 border-b">

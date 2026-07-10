@@ -30,6 +30,10 @@ export default function CoursesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<any[]>([]);
   const [filters, setFilters] = useState<{ status?: string; category_id?: string }>({});
+  const [formCategory, setFormCategory] = useState<string>("");
+  const [formCourseTypes, setFormCourseTypes] = useState<string>("");
+  const [v2CourseOptions, setV2CourseOptions] = useState<{ label: string; value: string }[]>([]);
+  const [v2CourseNames, setV2CourseNames] = useState<Record<string, string>>({});
   const debouncedSearch = useDebounce(search, 500);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -60,6 +64,105 @@ export default function CoursesPage() {
     loadCourses();
   }, [page, debouncedSearch, filters]);
 
+  // Dynamic V2 courses content options loader for form modal
+  useEffect(() => {
+    if (!formCategory) {
+      setV2CourseOptions([]);
+      return;
+    }
+    const cat = categories.find((c) => String(c.category_id) === String(formCategory));
+    const v2CourseTypeCatId = cat?.courseType?.V2_category;
+    const v2LevelId = cat?.V2_category;
+
+    if (!v2CourseTypeCatId) {
+      setV2CourseOptions([]);
+      return;
+    }
+
+    const loadV2CoursesForForm = async () => {
+      try {
+        const isOffline = formCourseTypes.includes("1");
+        const isOnline = formCourseTypes.includes("2");
+        const params = new URLSearchParams({
+          category: String(v2CourseTypeCatId),
+          offline: isOffline ? "True" : "False",
+          online: isOnline ? "True" : "False",
+          pagesize: "100",
+        });
+        const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/courses-content/?${params.toString()}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const resultData = await res.json();
+          const results = resultData.results || [];
+          // Filter by local CourseCategory's V2_category (level category ID)
+          const filtered = results.filter((item: any) =>
+            !v2LevelId ||
+            String(item.level) === String(v2LevelId) ||
+            String(item.level_id) === String(v2LevelId)
+          );
+          const opts = filtered.map((item: any) => ({
+            label: item.name,
+            value: String(item.id),
+          }));
+          setV2CourseOptions(opts);
+        } else {
+          setV2CourseOptions([]);
+        }
+      } catch (err) {
+        console.error("Error loading V2 courses for form:", err);
+        setV2CourseOptions([]);
+      }
+    };
+    loadV2CoursesForForm();
+  }, [formCategory, formCourseTypes, categories]);
+
+  // Dynamic V2 course names resolver for DataTable records
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+
+    const parentCatIds = Array.from(
+      new Set(
+        data
+          .map((c) => c.category?.courseType?.V2_category)
+          .filter(Boolean)
+      )
+    );
+
+    if (parentCatIds.length === 0) return;
+
+    const fetchNames = async () => {
+      const mapping = { ...v2CourseNames };
+      let updated = false;
+
+      const promises = parentCatIds.map(async (v2CatId) => {
+        try {
+          const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/courses-content/?category=${v2CatId}&pagesize=100`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const resultData = await res.json();
+            const results = resultData.results || [];
+            results.forEach((item: any) => {
+              const k = String(item.id);
+              if (mapping[k] !== item.name) {
+                mapping[k] = item.name;
+                updated = true;
+              }
+            });
+          }
+        } catch (err) {
+          console.error(`Error loading V2 course names for category ${v2CatId}:`, err);
+        }
+      });
+
+      await Promise.all(promises);
+      if (updated) {
+        setV2CourseNames(mapping);
+      }
+    };
+
+    fetchNames();
+  }, [data]);
+
   const categoryOptions = Array.isArray(categories)
     ? categories.map((c) => ({
         label: c.category_name,
@@ -82,6 +185,11 @@ export default function CoursesPage() {
             </p>
           ),
           Category: c.category?.category_name || "—",
+          "V2 Connected Course": c.V2_course
+            ? (v2CourseNames[String(c.V2_course)]
+                ? `${v2CourseNames[String(c.V2_course)]} ( ID : ${c.V2_course} )`
+                : `ID: ${c.V2_course}`)
+            : "—",
           Rating: c.course_rating || "—",
           Chapters: c.course_chapters || "—",
           Fee: c.course_fee || "—",
@@ -140,7 +248,7 @@ export default function CoursesPage() {
             ? new Date(c.updated_at).toLocaleString("en-IN")
             : "—",
           "Course Content": (c.modules && c.modules.length > 0) ? (
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mt-2 border-t pt-4">
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar mt-2 border-t pt-4">
                {c.modules.map((m: any, mIdx: number) => (
                  <div key={mIdx} className="border border-cyan-100 rounded-lg bg-cyan-50/20 p-3 shadow-sm">
                     <h5 className="font-bold text-cyan-800 flex items-center gap-2 mb-2">
@@ -190,6 +298,9 @@ export default function CoursesPage() {
       type: "select",
       options: categoryOptions,
       required: true,
+      onChange: (val: string) => {
+        setFormCategory(val);
+      },
     },
     {
       name: "course_type",
@@ -200,6 +311,16 @@ export default function CoursesPage() {
         { label: "Offline", value: "1" },
         { label: "Online", value: "2" },
       ],
+      required: false,
+      onChange: (val: string) => {
+        setFormCourseTypes(val);
+      },
+    },
+    {
+      name: "V2_course",
+      label: "V2 Connected Course",
+      type: "select",
+      options: v2CourseOptions,
       required: false,
     },
     { name: "course_rating", label: "Rating", type: "text", required: false },
@@ -290,6 +411,9 @@ export default function CoursesPage() {
           <button
             onClick={() => {
               setSelected(null);
+              setFormCategory("");
+              setFormCourseTypes("");
+              setV2CourseOptions([]);
               setOpenForm(true);
             }}
             className="bg-cyan-700 flex items-center gap-2 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-cyan-800 transition shadow-md"
@@ -302,6 +426,20 @@ export default function CoursesPage() {
       <DataTable
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
+          {
+            key: "course_image",
+            label: "Image",
+            render: (r) =>
+              r.course_image ? (
+                <img
+                  src={server_url + r.course_image}
+                  className="w-10 h-10 object-cover rounded-full border shadow-sm"
+                  alt="Class"
+                />
+              ) : (
+                "—"
+              ),
+          },
           { key: "course_name", label: "Name" },
           {
             key: "category",
@@ -342,23 +480,18 @@ export default function CoursesPage() {
               return labels.length ? labels.join(", ") : "—";
             },
           },
+          {
+            key: "V2_course",
+            label: "V2 Connected Course",
+            render: (r: any) => {
+              if (!r.V2_course) return "—";
+              const name = v2CourseNames[String(r.V2_course)];
+              return name ? `${name} ( ID : ${r.V2_course} )` : `ID: ${r.V2_course}`;
+            },
+          },
           { key: "course_rating", label: "Rating" },
           { key: "course_fee", label: "Fee" },
           { key: "course_chapters", label: "Chapters count" },
-          {
-            key: "course_image",
-            label: "Image",
-            render: (r) =>
-              r.course_image ? (
-                <img
-                  src={server_url + r.course_image}
-                  className="w-10 h-10 object-cover rounded-full border shadow-sm"
-                  alt="Class"
-                />
-              ) : (
-                "—"
-              ),
-          },
           {
             key: "status",
             label: "Status",
@@ -404,9 +537,28 @@ export default function CoursesPage() {
                 if (typeof ct === "number") return [ct];
                 return [];
               })(),
+              V2_course: r.V2_course ? String(r.V2_course) : "",
               // Ensure modules are loaded for the editor
               modules: r.modules || [],
             });
+
+            setFormCategory(String(r.course_category_id));
+            const cTypes = (() => {
+              const ct = r.course_type;
+              if (Array.isArray(ct)) return ct.map(String).join(",");
+              if (typeof ct === "string") {
+                try {
+                  const parsed = JSON.parse(ct);
+                  return Array.isArray(parsed) ? parsed.map(String).join(",") : "";
+                } catch {
+                  return "";
+                }
+              }
+              if (typeof ct === "number") return String(ct);
+              return "";
+            })();
+            setFormCourseTypes(cTypes);
+
             setOpenForm(true);
           } catch (error) {
             console.error("Error fetching full course for edit:", error);
