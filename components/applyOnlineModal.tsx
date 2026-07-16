@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface ApplyOnlineModalProps {
   open: boolean;
@@ -26,9 +27,14 @@ interface ApplyOnlineModalProps {
 }
 
 interface FormData {
+  is_ace_student: boolean; // boolean toggle
+  submit_type: string; // "register_only" | "online_payment"
+  amount?: string;
+  password?: string;
   branch_id: string;
   department_id: string;
   course_id: string;
+  course_mode: string;
   student_name: string;
   father_name: string;
   date_of_birth: string;
@@ -45,7 +51,6 @@ interface FormData {
   email: string;
   phone_number: string;
   second_phone_no: string;
-  message: string;
   student_photo?: FileList;
 }
 
@@ -63,6 +68,7 @@ export default function ApplyOnlineModal({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { showSuccess, showError } = useToast();
   const prefillInitialized = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
     register,
@@ -72,22 +78,97 @@ export default function ApplyOnlineModal({
     reset,
     watch,
     setValue,
+    clearErrors,
   } = useForm<FormData>({
     defaultValues: {
       qualification: [],
       branch_id: "",
       department_id: "",
       course_id: "",
+      course_mode: "",
       gender: "",
       marital_status: "",
       religion: "",
       community: "",
       district: "",
+      is_ace_student: false,
+      submit_type: "register_only",
+      amount: "",
+      password: "",
     },
   });
 
   const selectedDepartment = watch("department_id");
+  const selectedCourseId = watch("course_id");
   const watchedPhoto = watch("student_photo");
+  const isAceStudent = watch("is_ace_student");
+  const submitType = watch("submit_type");
+  const isOnlinePayment = submitType === "online_payment";
+
+  // Clear validation errors for fields that get hidden when they are an Ace student
+  useEffect(() => {
+    if (isAceStudent) {
+      clearErrors([
+        "student_name",
+        "password",
+        "father_name",
+        "date_of_birth",
+        "gender",
+        "marital_status",
+        "religion",
+        "community",
+        "qualification",
+        "house_name",
+        "place",
+        "district",
+        "post_office",
+        "pin_code",
+        "second_phone_no",
+        "student_photo",
+      ]);
+    }
+  }, [isAceStudent, clearErrors]);
+
+  // Derive available course modes from the selected course's course_type
+  const selectedCourseObj = courses.find(
+    (c: any) => String(c.course_id) === String(selectedCourseId)
+  );
+
+  const availableModes: { value: string; label: string }[] = (() => {
+    if (!selectedCourseObj) return [];
+    let types: number[] = [];
+    if (Array.isArray(selectedCourseObj.course_type)) {
+      types = selectedCourseObj.course_type;
+    } else if (typeof selectedCourseObj.course_type === "string") {
+      try {
+        types = JSON.parse(selectedCourseObj.course_type);
+      } catch {
+        types = [];
+      }
+    }
+    const modes: { value: string; label: string }[] = [];
+    if (types.includes(1)) modes.push({ value: "Offline", label: "Offline" });
+    if (types.includes(2)) modes.push({ value: "Online", label: "Online" });
+    return modes;
+  })();
+
+  const isSingleMode = availableModes.length === 1;
+
+  // Auto-set course_mode when only one mode is available, or reset when course changes
+  useEffect(() => {
+    if (availableModes.length === 1) {
+      setValue("course_mode", availableModes[0].value);
+    } else if (availableModes.length === 0) {
+      setValue("course_mode", "");
+    } else {
+      // Multiple modes available — reset so user must pick
+      const currentMode = watch("course_mode");
+      if (currentMode && !availableModes.find((m) => m.value === currentMode)) {
+        setValue("course_mode", "");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCourseId, courses]);
 
   useEffect(() => {
     if (watchedPhoto && watchedPhoto.length > 0) {
@@ -192,38 +273,80 @@ export default function ApplyOnlineModal({
     try {
       setLoading(true);
 
+      const selectedBranchObj = branches.find(
+        (b) => String(b.branch_id || b.id) === String(data.branch_id)
+      );
+      const selectedDeptObj = departments.find(
+        (d) => String(d.category_id || d.id || d.department_id) === String(data.department_id)
+      );
+      const selectedCourseObj = courses.find(
+        (c) => String(c.course_id || c.id) === String(data.course_id)
+      );
+
+      console.log("DEBUG ApplyOnlineModal onSubmit:", {
+        data_course_id: data.course_id,
+        courses_list_length: courses.length,
+        selectedCourseObj,
+        V2_course_val: selectedCourseObj?.V2_course || selectedCourseObj?.v2_course,
+      });
+
+      const v2BranchId = selectedBranchObj?.V2_branch ?? selectedBranchObj?.v2_branch ?? selectedBranchObj?.v2Branch ?? data.branch_id;
+      const v2DeptId = selectedDeptObj?.V2_category ?? selectedDeptObj?.v2_category ?? selectedDeptObj?.v2Category ?? data.department_id;
+      const v2CourseId = selectedCourseObj?.V2_course ?? selectedCourseObj?.v2_course ?? selectedCourseObj?.v2Course ?? data.course_id;
+
       const formData = new FormData();
 
-      // Append all text fields
-      formData.append("branch_id", data.branch_id);
-      formData.append("department_id", data.department_id);
-      formData.append("course_id", data.course_id);
-      formData.append("student_name", data.student_name);
-      formData.append("father_name", data.father_name);
-      formData.append("date_of_birth", data.date_of_birth);
-      formData.append("gender", data.gender);
-      formData.append("marital_status", data.marital_status);
-      formData.append("religion", data.religion);
-      formData.append("community", data.community);
-      formData.append("qualification", JSON.stringify(data.qualification));
-      formData.append("house_name", data.house_name);
-      formData.append("place", data.place);
-      formData.append("district", data.district);
-      formData.append("post_office", data.post_office);
-      formData.append("pin_code", data.pin_code);
+      // Append general fields
+      formData.append("branch_id", String(v2BranchId));
+      formData.append("department_id", String(v2DeptId));
+      formData.append("course_id", String(v2CourseId));
+      formData.append("course_mode", data.course_mode);
       formData.append("email", data.email);
       formData.append("phone_number", data.phone_number);
-      formData.append("second_phone_no", data.second_phone_no || "");
-      formData.append("message", data.message || "");
-
-      // Append file if exists
-      if (data.student_photo && data.student_photo.length > 0) {
-        formData.append("student_photo", data.student_photo[0]);
+      formData.append("is_ace_student", String(isAceStudent));
+      formData.append("is_online_payment", String(isOnlinePayment));
+      formData.append("amount", isOnlinePayment ? String(data.amount || "") : "");
+      if (isOnlinePayment) {
+        formData.append("callback_url", process.env.NEXT_PUBLIC_RAZORPAY_CALLBACK || "http://localhost:3000/transaction-complete");
       }
 
-      await createOnlineRegistration(formData);
+      // Append other fields only if NOT an Ace student
+      if (!isAceStudent) {
+        formData.append("student_name", data.student_name);
+        formData.append("password", data.password || "");
+        formData.append("father_name", data.father_name);
+        formData.append("date_of_birth", data.date_of_birth);
+        formData.append("gender", data.gender);
+        formData.append("marital_status", data.marital_status);
+        formData.append("religion", data.religion);
+        formData.append("community", data.community);
+        formData.append("qualification", JSON.stringify(data.qualification));
+        formData.append("house_name", data.house_name);
+        formData.append("place", data.place);
+        formData.append("district", data.district);
+        formData.append("post_office", data.post_office || "");
+        formData.append("pin_code", data.pin_code);
+        formData.append("second_phone_no", data.second_phone_no || "");
 
-      showSuccess("success", "Application submitted!");
+        // Append file if exists
+        if (data.student_photo && data.student_photo.length > 0) {
+          formData.append("student_photo", data.student_photo[0]);
+        }
+      }
+
+      const res = await createOnlineRegistration(formData);
+
+      if (isOnlinePayment) {
+        if (res?.payment_url) {
+          window.open(res.payment_url, "_blank");
+          showSuccess("success", "Your Registration is Completed. Redirecting to payment...");
+        } else {
+          showSuccess("success", "Your Registration is Completed.");
+        }
+      } else {
+        showSuccess("success", "Your Registration is Completed");
+      }
+
       reset();
       setPhotoPreview(null);
 
@@ -238,12 +361,23 @@ export default function ApplyOnlineModal({
     }
   };
 
+  const handleRemovePhoto = () => {
+    setValue("student_photo", undefined);
+    setPhotoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleClose = () => {
     reset();
     setDepartments([]);
     setCourses([]);
     setBranches([]);
     setPhotoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     onClose();
   };
 
@@ -333,6 +467,28 @@ export default function ApplyOnlineModal({
           className="overflow-y-auto flex-1 md:p-6 p-4"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Already Ace student ? */}
+            <div className="md:col-span-2 flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 mb-2">
+              <div>
+                <label className="block text-sm font-semibold text-cyan-700">
+                  Already Ace student ?
+                </label>
+                <p className="text-xs text-gray-500">
+                  Toggle on if you are currently or have previously been a student at Ace Institutions.
+                </p>
+              </div>
+              <Controller
+                name="is_ace_student"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+
             {/* Branch */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -439,341 +595,403 @@ export default function ApplyOnlineModal({
               )}
             </div>
 
-            {/* Student Name */}
+            {/* Course Mode */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Student Name
-              </label>
-              <input
-                type="text"
-                {...register("student_name", {
-                  required: "Student name is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.student_name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.student_name.message}
-                </p>
-              )}
-            </div>
-
-            {/* Father Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Father Name
-              </label>
-              <input
-                type="text"
-                {...register("father_name", {
-                  required: "Father name is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.father_name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.father_name.message}
-                </p>
-              )}
-            </div>
-
-            {/* Date of Birth */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                {...register("date_of_birth", {
-                  required: "Date of birth is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.date_of_birth && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.date_of_birth.message}
-                </p>
-              )}
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gender
+                Course Mode
               </label>
               <Controller
-                name="gender"
+                name="course_mode"
                 control={control}
-                rules={{ required: "Gender is required" }}
+                rules={{ required: "Course mode is required" }}
                 render={({ field }) => (
                   <ShadcnSelect
                     value={field.value || ""}
                     onValueChange={field.onChange}
+                    disabled={isSingleMode}
                   >
-                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                      <SelectValue placeholder="Select Gender" />
+                    <SelectTrigger className={`w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      (!selectedCourseId || availableModes.length === 0) ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                    } ${
+                      isSingleMode ? "opacity-70 cursor-not-allowed" : ""
+                    }`}>
+                      <SelectValue placeholder="Select Mode" />
                     </SelectTrigger>
                     <SelectContent className="max-h-60 overflow-y-auto">
-                      <SelectItem value="Male">Male</SelectItem>
-                      <SelectItem value="Female">Female</SelectItem>
-                      <SelectItem value="Others">Others</SelectItem>
-                    </SelectContent>
-                  </ShadcnSelect>
-                )}
-              />
-              {errors.gender && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.gender.message}
-                </p>
-              )}
-            </div>
-
-            {/* Marital Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Marital Status
-              </label>
-              <Controller
-                name="marital_status"
-                control={control}
-                rules={{ required: "Marital status is required" }}
-                render={({ field }) => (
-                  <ShadcnSelect
-                    value={field.value || ""}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                      <SelectValue placeholder="Select Status" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      <SelectItem value="Single">Single</SelectItem>
-                      <SelectItem value="Married">Married</SelectItem>
-                    </SelectContent>
-                  </ShadcnSelect>
-                )}
-              />
-              {errors.marital_status && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.marital_status.message}
-                </p>
-              )}
-            </div>
-
-            {/* Religion */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Religion
-              </label>
-              <Controller
-                name="religion"
-                control={control}
-                rules={{ required: "Religion is required" }}
-                render={({ field }) => (
-                  <ShadcnSelect
-                    value={field.value || ""}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                      <SelectValue placeholder="Select Religion" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      {RELIGION_OPTIONS.map((religion) => (
-                        <SelectItem key={religion} value={religion}>
-                          {religion}
+                      {availableModes.map((mode) => (
+                        <SelectItem key={mode.value} value={mode.value}>
+                          {mode.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </ShadcnSelect>
                 )}
               />
-              {errors.religion && (
+              {errors.course_mode && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.religion.message}
+                  {errors.course_mode.message}
                 </p>
               )}
             </div>
 
-            {/* Community */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Community
-              </label>
-              <Controller
-                name="community"
-                control={control}
-                rules={{ required: "Community is required" }}
-                render={({ field }) => (
-                  <ShadcnSelect
-                    value={field.value || ""}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                      <SelectValue placeholder="Select Community" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      {COMMUNITY_OPTIONS.map((community) => (
-                        <SelectItem key={community} value={community}>
-                          {community}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </ShadcnSelect>
-                )}
-              />
-              {errors.community && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.community.message}
-                </p>
-              )}
-            </div>
-
-            {/* Qualification - Multi Select (react-select) */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Qualification
-              </label>
-
-              <Controller
-                name="qualification"
-                control={control}
-                rules={{ required: "At least one qualification is required" }}
-                render={({ field }) => (
-                  <ReactSelect
-                    {...field}
-                    options={QUALIFICATION_SELECT_OPTIONS}
-                    isMulti
-                    closeMenuOnSelect={false}
-                    placeholder="Select qualification(s)"
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                    value={QUALIFICATION_SELECT_OPTIONS.filter((opt) =>
-                      field.value?.includes(opt.value)
-                    )}
-                    onChange={(selected) =>
-                      field.onChange(selected.map((item) => item.value))
-                    }
+            {!isAceStudent && (
+              <>
+                {/* Student Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student Name
+                  </label>
+                  <input
+                    type="text"
+                    {...register("student_name", {
+                      required: !isAceStudent ? "Student name is required" : false,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
-                )}
-              />
+                  {errors.student_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.student_name.message}
+                    </p>
+                  )}
+                </div>
 
-              {errors.qualification && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.qualification.message}
-                </p>
-              )}
-            </div>
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    {...register("password", {
+                      required: !isAceStudent ? "Password is required" : false,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.password.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* House Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                House Name
-              </label>
-              <input
-                type="text"
-                {...register("house_name", {
-                  required: "House name is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.house_name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.house_name.message}
-                </p>
-              )}
-            </div>
+                {/* Father Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Father Name
+                  </label>
+                  <input
+                    type="text"
+                    {...register("father_name", {
+                      required: !isAceStudent ? "Father name is required" : false,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                  {errors.father_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.father_name.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* Place */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Place
-              </label>
-              <input
-                type="text"
-                {...register("place", { required: "Place is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.place && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.place.message}
-                </p>
-              )}
-            </div>
+                {/* Date of Birth */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    {...register("date_of_birth", {
+                      required: !isAceStudent ? "Date of birth is required" : false,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                  {errors.date_of_birth && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.date_of_birth.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* District */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                District
-              </label>
-              <Controller
-                name="district"
-                control={control}
-                rules={{ required: "District is required" }}
-                render={({ field }) => (
-                  <ShadcnSelect
-                    value={field.value || ""}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                      <SelectValue placeholder="Select District" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      {DISTRICT_OPTIONS.map((district) => (
-                        <SelectItem key={district} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </ShadcnSelect>
-                )}
-              />
-              {errors.district && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.district.message}
-                </p>
-              )}
-            </div>
+                {/* Gender */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gender
+                  </label>
+                  <Controller
+                    name="gender"
+                    control={control}
+                    rules={{ required: !isAceStudent ? "Gender is required" : false }}
+                    render={({ field }) => (
+                      <ShadcnSelect
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                          <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Others">Others</SelectItem>
+                        </SelectContent>
+                      </ShadcnSelect>
+                    )}
+                  />
+                  {errors.gender && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.gender.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* Post Office */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Post Office
-              </label>
-              <input
-                type="text"
-                {...register("post_office", {
-                  required: "Post office is required",
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.post_office && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.post_office.message}
-                </p>
-              )}
-            </div>
+                {/* Marital Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Marital Status
+                  </label>
+                  <Controller
+                    name="marital_status"
+                    control={control}
+                    rules={{ required: !isAceStudent ? "Marital status is required" : false }}
+                    render={({ field }) => (
+                      <ShadcnSelect
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          <SelectItem value="Single">Single</SelectItem>
+                          <SelectItem value="Married">Married</SelectItem>
+                        </SelectContent>
+                      </ShadcnSelect>
+                    )}
+                  />
+                  {errors.marital_status && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.marital_status.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* Pin Code */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pin Code
-              </label>
-              <input
-                type="text"
-                {...register("pin_code", {
-                  required: "Pin code is required",
-                  pattern: {
-                    value: /^[0-9]{6}$/,
-                    message: "Pin code must be 6 digits",
-                  },
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-              {errors.pin_code && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.pin_code.message}
-                </p>
-              )}
-            </div>
+                {/* Religion */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Religion
+                  </label>
+                  <Controller
+                    name="religion"
+                    control={control}
+                    rules={{ required: !isAceStudent ? "Religion is required" : false }}
+                    render={({ field }) => (
+                      <ShadcnSelect
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                          <SelectValue placeholder="Select Religion" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {RELIGION_OPTIONS.map((religion) => (
+                            <SelectItem key={religion} value={religion}>
+                              {religion}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </ShadcnSelect>
+                    )}
+                  />
+                  {errors.religion && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.religion.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Community */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Community
+                  </label>
+                  <Controller
+                    name="community"
+                    control={control}
+                    rules={{ required: !isAceStudent ? "Community is required" : false }}
+                    render={({ field }) => (
+                      <ShadcnSelect
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                          <SelectValue placeholder="Select Community" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {COMMUNITY_OPTIONS.map((community) => (
+                            <SelectItem key={community} value={community}>
+                              {community}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </ShadcnSelect>
+                    )}
+                  />
+                  {errors.community && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.community.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Qualification - Multi Select (react-select) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Qualification
+                  </label>
+
+                  <Controller
+                    name="qualification"
+                    control={control}
+                    rules={{ required: !isAceStudent ? "At least one qualification is required" : false }}
+                    render={({ field }) => (
+                      <ReactSelect
+                        {...field}
+                        options={QUALIFICATION_SELECT_OPTIONS}
+                        isMulti
+                        closeMenuOnSelect={false}
+                        placeholder="Select qualification(s)"
+                        className="react-select-container"
+                        classNamePrefix="react-select"
+                        value={QUALIFICATION_SELECT_OPTIONS.filter((opt) =>
+                          field.value?.includes(opt.value)
+                        )}
+                        onChange={(selected) =>
+                          field.onChange(selected.map((item) => item.value))
+                        }
+                      />
+                    )}
+                  />
+
+                  {errors.qualification && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.qualification.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* House Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    House Name
+                  </label>
+                  <input
+                    type="text"
+                    {...register("house_name", {
+                      required: !isAceStudent ? "House name is required" : false,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                  {errors.house_name && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.house_name.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Place */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Place
+                  </label>
+                  <input
+                    type="text"
+                    {...register("place", { required: !isAceStudent ? "Place is required" : false })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                  {errors.place && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.place.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* District */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    District
+                  </label>
+                  <Controller
+                    name="district"
+                    control={control}
+                    rules={{ required: !isAceStudent ? "District is required" : false }}
+                    render={({ field }) => (
+                      <ShadcnSelect
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                          <SelectValue placeholder="Select District" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {DISTRICT_OPTIONS.map((district) => (
+                            <SelectItem key={district} value={district}>
+                              {district}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </ShadcnSelect>
+                    )}
+                  />
+                  {errors.district && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.district.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Post Office */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Post Office
+                  </label>
+                  <input
+                    type="text"
+                    {...register("post_office", {
+                      required: !isAceStudent ? "Post office is required" : false,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                  {errors.post_office && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.post_office.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Pin Code */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pin Code
+                  </label>
+                  <input
+                    type="text"
+                    {...register("pin_code", {
+                      required: !isAceStudent ? "Pin code is required" : false,
+                      pattern: !isAceStudent ? {
+                        value: /^[0-9]{6}$/,
+                        message: "Pin code must be 6 digits",
+                      } : undefined,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                  {errors.pin_code && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.pin_code.message}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Email */}
             <div>
@@ -801,7 +1019,7 @@ export default function ApplyOnlineModal({
             {/* Phone Number */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
+                {isAceStudent ? "Registered Phone Number" : "Phone Number"}
               </label>
               <input
                 type="tel"
@@ -822,65 +1040,130 @@ export default function ApplyOnlineModal({
             </div>
 
             {/* Second Phone Number */}
+            {!isAceStudent && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Second Phone Number
+                </label>
+                <input
+                  type="tel"
+                  {...register("second_phone_no", {
+                    pattern: !isAceStudent ? {
+                      value: /^[0-9]{10}$/,
+                      message: "Phone number must be 10 digits",
+                    } : undefined,
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+                {errors.second_phone_no && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.second_phone_no.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Submit Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Second Phone Number
+                Submit Type
               </label>
-              <input
-                type="tel"
-                {...register("second_phone_no", {
-                  pattern: {
-                    value: /^[0-9]{10}$/,
-                    message: "Phone number must be 10 digits",
-                  },
-                })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              <Controller
+                name="submit_type"
+                control={control}
+                rules={{ required: "Submit type is required" }}
+                render={({ field }) => (
+                  <ShadcnSelect
+                    value={field.value || "register_only"}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                      <SelectValue placeholder="Select Submit Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="register_only">Register only</SelectItem>
+                      <SelectItem value="online_payment">Online payment</SelectItem>
+                    </SelectContent>
+                  </ShadcnSelect>
+                )}
               />
-              {errors.second_phone_no && (
+              {errors.submit_type && (
                 <p className="text-red-500 text-xs mt-1">
-                  {errors.second_phone_no.message}
+                  {errors.submit_type.message}
                 </p>
               )}
             </div>
 
+            {/* Amount */}
+            {isOnlinePayment && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Amount
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  {...register("amount", {
+                    required: isOnlinePayment ? "Amount is required" : false,
+                    min: {
+                      value: 0.01,
+                      message: "Amount must be greater than 0",
+                    },
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+                {errors.amount && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.amount.message}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Student Photo with Preview */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Student Photo
-              </label>
+            {!isAceStudent && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Student Photo
+                </label>
 
-              <input
-                type="file"
-                accept="image/*"
-                {...register("student_photo")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-
-              {photoPreview && (
-                <div className="mt-3 flex justify-start">
-                  <div className="relative w-32 h-32 border rounded-md overflow-hidden shadow-sm">
-                    <img
-                      src={photoPreview}
-                      alt="Student Preview"
-                      className="w-full h-full object-cover"
+                {(() => {
+                  const { ref: registerRef, ...rest } = register("student_photo");
+                  return (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      {...rest}
+                      ref={(e) => {
+                        registerRef(e);
+                        fileInputRef.current = e;
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     />
-                  </div>
-                </div>
-              )}
-            </div>
+                  );
+                })()}
 
-            {/* Message */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message
-              </label>
-              <textarea
-                {...register("message")}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                placeholder="Any additional information..."
-              />
-            </div>
+                {photoPreview && (
+                  <div className="mt-3 flex justify-start">
+                    <div className="relative w-32 h-32 border rounded-md overflow-hidden shadow-sm">
+                      <img
+                        src={photoPreview}
+                        alt="Student Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 cursor-pointer shadow-md transition-all duration-200"
+                        title="Remove photo"
+                      >
+                        <IconX className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}
@@ -892,13 +1175,23 @@ export default function ApplyOnlineModal({
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 cursor-pointer bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-md hover:from-cyan-600 hover:to-blue-600 transition disabled:opacity-50"
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
+            {!isOnlinePayment ? (
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2 cursor-pointer bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-md hover:from-cyan-600 hover:to-blue-600 transition disabled:opacity-50"
+              >
+                {loading ? "Registering..." : "Register only"}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2 cursor-pointer bg-linear-to-r from-emerald-500 to-teal-500 text-white rounded-md hover:from-emerald-600 hover:to-teal-600 transition disabled:opacity-50"
+              >
+                {loading ? "Processing..." : "Pay Now"}
+              </button>
+            )}
           </div>
         </form>
       </div>

@@ -370,6 +370,11 @@ export default function OnlineRegistrationPage() {
             label: "Course",
             render: (r) => r.course?.course_name || "—",
           },
+          {
+            key: "course_mode",
+            label: "Mode",
+            render: (r) => r.course_mode || "—",
+          },
           { key: "phone_number", label: "Mobile" },
           {
             key: "apply_status",
@@ -442,6 +447,7 @@ export default function OnlineRegistrationPage() {
             Message: r.message || "—",
             Department: r.department?.category_name || "—",
             Course: r.course?.course_name || "—",
+            "Course Mode": r.course_mode || "—",
             Status: r.apply_status,
             Photo: r.student_photo ? (
               <img
@@ -487,6 +493,17 @@ export default function OnlineRegistrationPage() {
             options: courseOptions,
             required: true,
             disabled: courseDisabled,
+          },
+
+          {
+            name: "course_mode",
+            label: "Course Mode",
+            type: "select",
+            options: [
+              { label: "Online", value: "Online" },
+              { label: "Offline", value: "Offline" },
+            ],
+            required: true,
           },
 
           {

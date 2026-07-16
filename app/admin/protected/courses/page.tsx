@@ -33,7 +33,7 @@ export default function CoursesPage() {
   const [formCategory, setFormCategory] = useState<string>("");
   const [formCourseTypes, setFormCourseTypes] = useState<string>("");
   const [v2CourseOptions, setV2CourseOptions] = useState<{ label: string; value: string }[]>([]);
-  const [v2CourseNames, setV2CourseNames] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
   const debouncedSearch = useDebounce(search, 500);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -47,12 +47,15 @@ export default function CoursesPage() {
   };
 
   const loadCourses = async () => {
+    setLoading(true);
     try {
       const res = await getCourses(page, 10, debouncedSearch, filters);
       setData(res.data || []);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
       console.error("Error loading courses:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,53 +119,6 @@ export default function CoursesPage() {
     loadV2CoursesForForm();
   }, [formCategory, formCourseTypes, categories]);
 
-  // Dynamic V2 course names resolver for DataTable records
-  useEffect(() => {
-    if (!data || data.length === 0) return;
-
-    const parentCatIds = Array.from(
-      new Set(
-        data
-          .map((c) => c.category?.courseType?.V2_category)
-          .filter(Boolean)
-      )
-    );
-
-    if (parentCatIds.length === 0) return;
-
-    const fetchNames = async () => {
-      const mapping = { ...v2CourseNames };
-      let updated = false;
-
-      const promises = parentCatIds.map(async (v2CatId) => {
-        try {
-          const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/courses-content/?category=${v2CatId}&pagesize=100`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const resultData = await res.json();
-            const results = resultData.results || [];
-            results.forEach((item: any) => {
-              const k = String(item.id);
-              if (mapping[k] !== item.name) {
-                mapping[k] = item.name;
-                updated = true;
-              }
-            });
-          }
-        } catch (err) {
-          console.error(`Error loading V2 course names for category ${v2CatId}:`, err);
-        }
-      });
-
-      await Promise.all(promises);
-      if (updated) {
-        setV2CourseNames(mapping);
-      }
-    };
-
-    fetchNames();
-  }, [data]);
-
   const categoryOptions = Array.isArray(categories)
     ? categories.map((c) => ({
         label: c.category_name,
@@ -185,11 +141,9 @@ export default function CoursesPage() {
             </p>
           ),
           Category: c.category?.category_name || "—",
-          "V2 Connected Course": c.V2_course
-            ? (v2CourseNames[String(c.V2_course)]
-                ? `${v2CourseNames[String(c.V2_course)]} ( ID : ${c.V2_course} )`
-                : `ID: ${c.V2_course}`)
-            : "—",
+          "V2 Connected Course": c.V2_course_name
+            ? `${c.V2_course_name} ( ID : ${c.V2_course} )`
+            : (c.V2_course ? `ID: ${c.V2_course}` : "—"),
           Rating: c.course_rating || "—",
           Chapters: c.course_chapters || "—",
           Fee: c.course_fee || "—",
@@ -424,6 +378,7 @@ export default function CoursesPage() {
       </div>
 
       <DataTable
+        isLoading={loading}
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           {
@@ -485,8 +440,7 @@ export default function CoursesPage() {
             label: "V2 Connected Course",
             render: (r: any) => {
               if (!r.V2_course) return "—";
-              const name = v2CourseNames[String(r.V2_course)];
-              return name ? `${name} ( ID : ${r.V2_course} )` : `ID: ${r.V2_course}`;
+              return r.V2_course_name ? `${r.V2_course_name} ( ID : ${r.V2_course} )` : `ID: ${r.V2_course}`;
             },
           },
           { key: "course_rating", label: "Rating" },

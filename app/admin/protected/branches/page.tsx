@@ -29,11 +29,14 @@ export default function BranchesPage() {
     const [openView, setOpenView] = useState(false);
     const [viewData, setViewData] = useState<any>(null);
     const [v2Branches, setV2Branches] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
     const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
     const debouncedSearch = useDebounce(search, 500);
 
-    // Fetch V2 branches
+    // Fetch V2 branches when create/edit form modal opens
     useEffect(() => {
+        if (!openForm) return;
+
         const fetchV2Branches = async () => {
             try {
                 const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/getallbranches/`;
@@ -47,10 +50,11 @@ export default function BranchesPage() {
             }
         };
         fetchV2Branches();
-    }, []);
+    }, [openForm]);
 
     // Fetch jobs
     const loadData = async () => {
+        setLoading(true);
         try {
             const status =
                 filters.status && filters.status !== ""
@@ -68,6 +72,8 @@ export default function BranchesPage() {
             setTotalPages(res.totalPages || 1);
         } catch (err) {
             console.error("Error loading branches:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -112,6 +118,7 @@ export default function BranchesPage() {
             </div>
 
             <DataTable
+                isLoading={loading}
                 columns={[
                     {
                         key: "sno",
@@ -137,11 +144,10 @@ export default function BranchesPage() {
                         label: "V2 Connected Branch",
                         render: (r) => {
                             if (!r.V2_branch) return "—";
-                            const v2Branch = v2Branches.find(
+                            const branchName = r.V2_branch_name || v2Branches.find(
                                 (b) => String(b.id) === String(r.V2_branch)
-                            );
-                            return v2Branch ? `${v2Branch.name} ( ID : ${v2Branch.id} 
-                            )` : `ID: ${r.V2_branch}`;
+                            )?.name;
+                            return branchName ? `${branchName} (ID: ${r.V2_branch})` : `ID: ${r.V2_branch}`;
                         },
                     },
                     {
@@ -183,15 +189,15 @@ export default function BranchesPage() {
                 onRowClick={async (row) => {
                     const res = await getBranchById(row.branch_id);
                     const j = res?.data;
-                    const v2Branch = j.V2_branch
-                        ? v2Branches.find((b) => String(b.id) === String(j.V2_branch))
-                        : null;
+                    const branchName = j.V2_branch_name || (j.V2_branch
+                        ? v2Branches.find((b) => String(b.id) === String(j.V2_branch))?.name
+                        : null);
 
                     const formatted = {
                         "Branch Name": j.branch_name,
                         "Branch Phone": j.branch_phone,
                         "Branch Address": j.branch_address,
-                        "V2 Branch Connection": v2Branch ? `${v2Branch.name} (${v2Branch.id})` : "—",
+                        "V2 Branch Connection": branchName ? `${branchName} (${j.V2_branch})` : "—",
                         Status:
                             j.status == 1 ? (
                                 <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">

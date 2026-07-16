@@ -1,6 +1,7 @@
 import { apiRequest } from "./apiClients";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const ACEAPP_V2_URL = process.env.NEXT_PUBLIC_ACEAPP_V2_URL || "";
 
 /* LIST */
 export const getOnlineRegistrations = async (
@@ -35,7 +36,7 @@ export const getOnlineRegistrationById = (id: number) =>
 
 /* CREATE */
 export const createOnlineRegistration = (data: FormData) =>
-  apiRequest("/api/online-registration", "POST", data, true);
+  apiRequest(`${ACEAPP_V2_URL}/student/registration-requests/`, "POST", data, true);
 
 /* UPDATE */
 export const updateOnlineRegistration = (id: number, data: FormData) =>

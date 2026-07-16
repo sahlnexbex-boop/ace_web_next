@@ -20,6 +20,7 @@ interface DataTableProps {
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
   onRowClick?: (row: any) => void;
+  isLoading?: boolean;
 }
 
 export default function DataTable({
@@ -33,6 +34,7 @@ export default function DataTable({
   onEdit,
   onDelete,
   onRowClick,
+  isLoading = false,
 }: DataTableProps) {
   return (
     <div className="bg-white shadow rounded-lg overflow-x-auto">
@@ -68,7 +70,31 @@ export default function DataTable({
         </thead>
 
         <tbody className="divide-y divide-gray-100">
-          {data.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, rIdx) => (
+              <tr key={rIdx} className="animate-pulse">
+                {columns.map((col, cIdx) => (
+                  <td key={cIdx} className="px-4 py-3">
+                    <div
+                      className={`bg-gray-200 rounded ${
+                        col.key === "sno"
+                          ? "w-8 h-4"
+                          : col.key === "course_image" || col.key === "category_image" || col.key === "image"
+                          ? "w-10 h-10 rounded-full"
+                          : "w-3/4 h-4"
+                      }`}
+                    ></div>
+                  </td>
+                ))}
+                {(onEdit || onDelete) && (
+                  <td className="px-4 py-3 text-right space-x-5">
+                    <div className="inline-block h-6 w-6 bg-gray-200 rounded-full"></div>
+                    <div className="inline-block h-6 w-6 bg-gray-200 rounded-full"></div>
+                  </td>
+                )}
+              </tr>
+            ))
+          ) : data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length + 1}

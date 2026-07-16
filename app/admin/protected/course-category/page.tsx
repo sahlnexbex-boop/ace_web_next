@@ -35,6 +35,7 @@ export default function CourseCategoryPage() {
   );
   const [v2CategoryOptions, setV2CategoryOptions] = useState<{ label: string; value: string }[]>([]);
   const [v2LevelNames, setV2LevelNames] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
   const server_url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -82,67 +83,37 @@ export default function CourseCategoryPage() {
   };
 
   const loadCategories = async () => {
+    setLoading(true);
     try {
       const res = await getCourseCategories(page, 10, debouncedSearch, filters);
       setData(res.data || []);
       setTotalPages(res.totalPages || 1);
     } catch (err) {
       console.error("Error loading categories:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadCourseTypes();
-  }, []);
+    if (openForm) {
+      loadCourseTypes();
+    }
+  }, [openForm]);
 
   useEffect(() => {
     loadCategories();
   }, [page, debouncedSearch, filters]);
 
+  // Fetch V2 categories for the pre-selected course type when editing
   useEffect(() => {
-    if (!data || data.length === 0) return;
-
-    const parentIds = Array.from(
-      new Set(
-        data
-          .map((item) => item.courseType?.V2_category)
-          .filter(Boolean)
-      )
-    );
-
-    if (parentIds.length === 0) return;
-
-    const fetchNames = async () => {
-      const mapping = { ...v2LevelNames };
-      let updated = false;
-
-      const promises = parentIds.map(async (v2CatId) => {
-        try {
-          const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/levebycategory/${v2CatId}/`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const levels = await res.json();
-            levels.forEach((lvl: any) => {
-              const k = String(lvl.id);
-              if (mapping[k] !== lvl.name) {
-                mapping[k] = lvl.name;
-                updated = true;
-              }
-            });
-          }
-        } catch (err) {
-          console.error(`Error loading level names for V2 parent ${v2CatId}:`, err);
-        }
-      });
-
-      await Promise.all(promises);
-      if (updated) {
-        setV2LevelNames(mapping);
+    if (openForm && selected && selected.course_type_id && courseTypes.length > 0) {
+      const selectedType = courseTypes.find((t) => String(t.type_id) === String(selected.course_type_id));
+      if (selectedType && selectedType.V2_category) {
+        loadV2CategoriesForType(selectedType.V2_category);
       }
-    };
-
-    fetchNames();
-  }, [data]);
+    }
+  }, [openForm, selected, courseTypes]);
 
   const typeOptions = courseTypes.map((t) => ({
     label: t.type_name,
@@ -162,11 +133,9 @@ export default function CourseCategoryPage() {
           </p>
         ),
         "Course Type": c.courseType?.type_name || "—",
-        "V2 Connected Category": c.V2_category 
-          ? (v2LevelNames[String(c.V2_category)] 
-              ? `${v2LevelNames[String(c.V2_category)]} ( ID : ${c.V2_category} )` 
-              : `ID: ${c.V2_category}`)
-          : "—",
+        "V2 Connected Category": c.V2_category_name
+          ? `${c.V2_category_name} ( ID : ${c.V2_category} )`
+          : (c.V2_category ? `ID: ${c.V2_category}` : "—"),
         "Category Image": c.category_image ? (
           <div className="flex justify-end">
             <img
@@ -304,6 +273,7 @@ export default function CourseCategoryPage() {
       </div>
 
       <DataTable
+        isLoading={loading}
         columns={[
           {
             key: "sno",
@@ -343,8 +313,7 @@ export default function CourseCategoryPage() {
             label: "V2 Connected Category",
             render: (r) => {
               if (!r.V2_category) return "—";
-              const name = v2LevelNames[String(r.V2_category)];
-              return name ? `${name} ( ID : ${r.V2_category} )` : `ID: ${r.V2_category}`;
+              return r.V2_category_name ? `${r.V2_category_name} ( ID : ${r.V2_category} )` : `ID: ${r.V2_category}`;
             },
           },
           {

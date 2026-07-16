@@ -29,11 +29,14 @@ export default function CourseTypesPage() {
   const [openView, setOpenView] = useState(false);
   const [viewData, setViewData] = useState<any>(null);
   const [v2Categories, setV2Categories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
 
-  // Fetch V2 categories
+  // Fetch V2 categories when create/edit form modal opens
   useEffect(() => {
+    if (!openForm) return;
+
     const fetchV2Categories = async () => {
       try {
         const url = `${process.env.NEXT_PUBLIC_ACEAPP_V2_URL}/course_mang/categories/`;
@@ -47,12 +50,19 @@ export default function CourseTypesPage() {
       }
     };
     fetchV2Categories();
-  }, []);
+  }, [openForm]);
 
   const loadData = async () => {
-    const res = await getCourseTypes(page, debouncedSearch, 10, filters);
-    setData(res.data || []);
-    setTotalPages(res.totalPages || 1);
+    setLoading(true);
+    try {
+      const res = await getCourseTypes(page, debouncedSearch, 10, filters);
+      setData(res.data || []);
+      setTotalPages(res.totalPages || 1);
+    } catch (err) {
+      console.error("Error loading course types:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -64,13 +74,13 @@ export default function CourseTypesPage() {
       const res = await getCourseTypeById(row.type_id);
       if (!res?.data) return;
       const t = res.data;
-      const v2Cat = t.V2_category
-        ? v2Categories.find((c) => String(c.id) === String(t.V2_category))
-        : null;
+      const catName = t.V2_category_name || (t.V2_category
+        ? v2Categories.find((c) => String(c.id) === String(t.V2_category))?.name
+        : null);
 
       const formatted = {
         "Course Type Name": t.type_name || "—",
-        "V2 Connected Category": v2Cat ? `${v2Cat.name} ( ID : ${v2Cat.id} )` : "—",
+        "V2 Connected Category": catName ? `${catName} ( ID : ${t.V2_category} )` : "—",
         Status:
           t.status === 1 || t.status === "1" ? (
             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
@@ -132,6 +142,7 @@ export default function CourseTypesPage() {
       </div>
 
       <DataTable
+        isLoading={loading}
         columns={[
           { key: "sno", label: "S.No", render: (_, i) => (i ?? 0) + 1 + (page - 1) * 10 },
           { key: "type_name", label: "Type Name" },
@@ -140,10 +151,10 @@ export default function CourseTypesPage() {
             label: "V2 Connected Category",
             render: (r) => {
               if (!r.V2_category) return "—";
-              const v2Cat = v2Categories.find(
+              const catName = r.V2_category_name || v2Categories.find(
                 (c) => String(c.id) === String(r.V2_category)
-              );
-              return v2Cat ? `${v2Cat.name} ( ID : ${v2Cat.id} )` : `ID: ${r.V2_category}`;
+              )?.name;
+              return catName ? `${catName} ( ID : ${r.V2_category} )` : `ID: ${r.V2_category}`;
             },
           },
           {

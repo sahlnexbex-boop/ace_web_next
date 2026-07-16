@@ -22,7 +22,10 @@ export async function apiRequest(
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const fullUrl = `${BASE_URL}${url.startsWith("/") ? url : `/${url}`}`;
+  const fullUrl =
+    url.startsWith("http://") || url.startsWith("https://")
+      ? url
+      : `${BASE_URL}${url.startsWith("/") ? url : `/${url}`}`;
 
   const options: RequestInit = {
     method,
