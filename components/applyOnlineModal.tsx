@@ -24,6 +24,7 @@ interface ApplyOnlineModalProps {
   defaultDepartmentId?: string;
   defaultCourseId?: string;
   disableCourseSelection?: boolean;
+  v2Connected?: boolean;
 }
 
 interface FormData {
@@ -60,6 +61,7 @@ export default function ApplyOnlineModal({
   defaultDepartmentId,
   defaultCourseId,
   disableCourseSelection = false,
+  v2Connected = true,
 }: ApplyOnlineModalProps) {
   const [departments, setDepartments] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
@@ -194,14 +196,15 @@ export default function ApplyOnlineModal({
     const loadInitialData = async () => {
       try {
         const promises: Promise<any>[] = [
-          getCourseCategories(1, 200, ""),
-          getBranches(1, 500),
+          getCourseCategories(1, 200, "", { v2_connected: "true" }),
+          getBranches(1, 500, "", undefined, true),
         ];
 
         if (defaultDepartmentId) {
           promises.push(
             getCourses(1, 200, "", {
               category_id: defaultDepartmentId,
+              v2_connected: "true",
             })
           );
         }
@@ -260,6 +263,7 @@ export default function ApplyOnlineModal({
 
       const res = await getCourses(1, 200, "", {
         category_id: selectedDepartment,
+        v2_connected: "true",
       });
       const loadedCourses = res?.data || [];
       setCourses(loadedCourses);
@@ -382,6 +386,60 @@ export default function ApplyOnlineModal({
   };
 
   if (!open) return null;
+
+  if (!v2Connected) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between md:px-6 px-3 py-4 border-b">
+            <h2 className="text-2xl font-semibold text-cyan-700">
+              Online Registration
+            </h2>
+            <button
+              onClick={handleClose}
+              className="text-gray-500 hover:text-gray-700 transition cursor-pointer group"
+            >
+              <IconX className="h-7 w-7 group-hover:scale-120" />
+            </button>
+          </div>
+
+          <div className="flex flex-col items-center justify-center text-center p-8 md:p-12 space-y-6">
+            <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-100 shadow-xs">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+                <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
+              </svg>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-gray-800">Admission Not Available</h3>
+              <p className="text-gray-600 max-w-md mx-auto text-base">
+                This course Admission not Available Now! Please Contact Office or - <span className="font-semibold text-cyan-600">9995076789</span>
+              </p>
+            </div>
+            <button
+              onClick={handleClose}
+              className="px-8 py-2.5 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold rounded-lg shadow-sm transition cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const DISTRICT_OPTIONS = [
     "Alappuzha",

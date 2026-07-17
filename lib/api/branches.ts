@@ -5,6 +5,7 @@ export const getBranches = async (
     limit = 10,
     search = "",
     status?: number,
+    v2_connected?: boolean,
 ) => {
     const params = new URLSearchParams({
         page: String(page),
@@ -13,6 +14,7 @@ export const getBranches = async (
 
     if (search) params.append("search", search);
     if (status !== undefined) params.append("status", String(status));
+    if (v2_connected !== undefined) params.append("v2_connected", String(v2_connected));
 
     return apiRequest(`/api/branches?${params.toString()}`, "GET");
 };

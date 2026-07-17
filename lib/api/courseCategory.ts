@@ -4,7 +4,7 @@ export const getCourseCategories = async (
   page = 1,
   limit = 10,
   search = "",
-  filters: { status?: string; type_id?: string; course_type?: string } = {}
+  filters: { status?: string; type_id?: string; course_type?: string; v2_connected?: string } = {}
 ) => {
   const params = new URLSearchParams({
     page: String(page),
@@ -17,6 +17,7 @@ export const getCourseCategories = async (
   if (filters.type_id) params.append("type_id", filters.type_id);
   if (filters.status) params.append("status", filters.status);
   if (filters.course_type) params.append("course_type", filters.course_type);
+  if (filters.v2_connected) params.append("v2_connected", filters.v2_connected);
 
   return apiRequest(`/api/course-category?${params.toString()}`, "GET");
 };

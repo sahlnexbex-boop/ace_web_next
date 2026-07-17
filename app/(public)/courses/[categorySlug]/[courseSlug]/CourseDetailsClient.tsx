@@ -30,6 +30,7 @@ interface Course {
   course_questions_file?: string | null;
   course_image?: string;
   course_type?: string;
+  V2_course?: number | null;
   category?: {
     category_id: number;
     category_name: string;
@@ -442,6 +443,7 @@ export default function CourseDetailsClient({
         defaultDepartmentId={String(course.category?.category_id)}
         defaultCourseId={String(course.course_id)}
         disableCourseSelection={true}
+        v2Connected={course.V2_course !== null && course.V2_course !== undefined && course.V2_course !== 0}
       />
       <VideoModal
         isOpen={!!openVideo}
