@@ -68,6 +68,7 @@ export default function ApplyOnlineModal({
   const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [paymentType, setPaymentType] = useState<"full" | "custom">("full");
   const { showSuccess, showError } = useToast();
   const prefillInitialized = useRef(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -136,6 +137,28 @@ export default function ApplyOnlineModal({
     (c: any) => String(c.course_id) === String(selectedCourseId)
   );
 
+  const handlePaymentTypeChange = (value: "full" | "custom") => {
+    setPaymentType(value);
+    if (value === "full") {
+      setValue("amount", selectedCourseObj?.course_fee ? String(selectedCourseObj.course_fee) : "");
+      clearErrors("amount");
+    } else {
+      setValue("amount", "");
+    }
+  };
+
+  // Auto-set amount to course fee when full payment is selected
+  useEffect(() => {
+    if (isOnlinePayment && paymentType === "full") {
+      if (selectedCourseObj && selectedCourseObj.course_fee) {
+        setValue("amount", String(selectedCourseObj.course_fee));
+        clearErrors("amount");
+      } else {
+        setValue("amount", "");
+      }
+    }
+  }, [selectedCourseId, selectedCourseObj, paymentType, isOnlinePayment, setValue, clearErrors]);
+
   const availableModes: { value: string; label: string }[] = (() => {
     if (!selectedCourseObj) return [];
     let types: number[] = [];
@@ -188,6 +211,7 @@ export default function ApplyOnlineModal({
   useEffect(() => {
     if (open) {
       prefillInitialized.current = false;
+      setPaymentType("full");
     }
   }, [open]);
 
@@ -379,6 +403,7 @@ export default function ApplyOnlineModal({
     setCourses([]);
     setBranches([]);
     setPhotoPreview(null);
+    setPaymentType("full");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -1133,7 +1158,17 @@ export default function ApplyOnlineModal({
                 render={({ field }) => (
                   <ShadcnSelect
                     value={field.value || "register_only"}
-                    onValueChange={field.onChange}
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                      if (val !== "online_payment") {
+                        setValue("amount", "");
+                        clearErrors("amount");
+                      } else {
+                        setPaymentType("full");
+                        setValue("amount", selectedCourseObj?.course_fee ? String(selectedCourseObj.course_fee) : "");
+                        clearErrors("amount");
+                      }
+                    }}
                   >
                     <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
                       <SelectValue placeholder="Select Submit Type" />
@@ -1152,6 +1187,41 @@ export default function ApplyOnlineModal({
               )}
             </div>
 
+            {/* Course Fee Display */}
+            {isOnlinePayment && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Course Fee
+                </label>
+                <div className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 text-gray-600 flex items-center font-semibold">
+                  {selectedCourseObj?.course_fee 
+                    ? `₹ ${selectedCourseObj.course_fee}` 
+                    : "Select a course to view fee"}
+                </div>
+              </div>
+            )}
+
+            {/* Payment Option */}
+            {isOnlinePayment && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Payment Option
+                </label>
+                <ShadcnSelect
+                  value={paymentType}
+                  onValueChange={(val: "full" | "custom") => handlePaymentTypeChange(val)}
+                >
+                  <SelectTrigger className="w-full h-10 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                    <SelectValue placeholder="Select Payment Option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full">Full Payment</SelectItem>
+                    <SelectItem value="custom">Custom Amount</SelectItem>
+                  </SelectContent>
+                </ShadcnSelect>
+              </div>
+            )}
+
             {/* Amount */}
             {isOnlinePayment && (
               <div>
@@ -1161,14 +1231,33 @@ export default function ApplyOnlineModal({
                 <input
                   type="number"
                   step="0.01"
+                  readOnly={paymentType === "full"}
+                  placeholder={paymentType === "full" ? "Auto-filled" : "Enter amount"}
                   {...register("amount", {
                     required: isOnlinePayment ? "Amount is required" : false,
-                    min: {
-                      value: 0.01,
-                      message: "Amount must be greater than 0",
-                    },
+                    validate: {
+                      minAmount: (val) => {
+                        if (!isOnlinePayment) return true;
+                        const num = parseFloat(val || "0");
+                        if (num < 100) {
+                          return "Amount must be at least ₹100";
+                        }
+                        return true;
+                      },
+                      maxAmount: (val) => {
+                        if (!isOnlinePayment) return true;
+                        const num = parseFloat(val || "0");
+                        const maxFee = selectedCourseObj?.course_fee ? parseFloat(selectedCourseObj.course_fee) : 0;
+                        if (maxFee && num > maxFee) {
+                          return `Amount cannot exceed the course fee of ₹${maxFee}`;
+                        }
+                        return true;
+                      },
+                    }
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                    paymentType === "full" ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white text-gray-800"
+                  }`}
                 />
                 {errors.amount && (
                   <p className="text-red-500 text-xs mt-1">
