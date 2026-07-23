@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
   GraduationCap,
+  PlayCircle,
 } from "lucide-react";
 
 /* ================= STUDENT MENU ================= */
@@ -26,6 +27,11 @@ const studentMenuItems = [
     name: "Dashboard",
     icon: LayoutDashboard,
     path: "/user-portal/protected/dashboard",
+  },
+  {
+    name: "Test Videos",
+    icon: PlayCircle,
+    path: "/user-portal/protected/test-videos",
   },
   {
     name: "My Exams",
