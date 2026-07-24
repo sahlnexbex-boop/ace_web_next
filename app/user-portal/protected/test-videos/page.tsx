@@ -62,89 +62,46 @@ const pickBestVideoUrl = (links: Record<string, string>): string | null => {
 
 /* ================= VIDEO MODAL ================= */
 
-interface HlsPlayerProps {
+interface ShadowIframeProps {
   src: string;
   title: string;
   onLoadComplete: () => void;
   className?: string;
 }
 
-function HlsPlayer({ src, title, onLoadComplete, className }: HlsPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+function ShadowIframe({ src, title, onLoadComplete, className }: ShadowIframeProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!videoRef.current || !src) return;
+    if (!containerRef.current) return;
 
-    const video = videoRef.current;
-    let hls: any = null;
+    // Attach shadow root safely if it doesn't already exist
+    let shadow = containerRef.current.shadowRoot;
+    if (!shadow) {
+      shadow = containerRef.current.attachShadow({ mode: "open" });
+    } else {
+      shadow.innerHTML = ""; // Clear previous shadow tree contents
+    }
 
-    const initHls = () => {
-      const Hls = (window as any).Hls;
+    // Create iframe
+    const iframe = document.createElement("iframe");
+    iframe.src = src;
+    iframe.title = title;
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+    iframe.setAttribute("allowfullscreen", "true");
 
-      if (Hls) {
-        if (Hls.isSupported()) {
-          hls = new Hls();
-          hls.loadSource(src);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(() => {});
-            onLoadComplete();
-          });
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          // Native support (Safari)
-          video.src = src;
-          video.addEventListener("loadedmetadata", () => {
-            video.play().catch(() => {});
-            onLoadComplete();
-          });
-        }
-      } else {
-        // Load HLS.js dynamically from jsDelivr CDN
-        const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
-        script.onload = () => {
-          const LoadedHls = (window as any).Hls;
-          if (LoadedHls && LoadedHls.isSupported()) {
-            hls = new LoadedHls();
-            hls.loadSource(src);
-            hls.attachMedia(video);
-            hls.on(LoadedHls.Events.MANIFEST_PARSED, () => {
-              video.play().catch(() => {});
-              onLoadComplete();
-            });
-          } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-            video.src = src;
-            video.addEventListener("loadedmetadata", () => {
-              video.play().catch(() => {});
-              onLoadComplete();
-            });
-          }
-        };
-        document.body.appendChild(script);
-      }
+    iframe.onload = () => {
+      onLoadComplete();
     };
 
-    initHls();
+    shadow.appendChild(iframe);
+  }, [src, title, onLoadComplete]);
 
-    return () => {
-      if (hls) {
-        hls.destroy();
-      }
-    };
-  }, [src, onLoadComplete]);
-
-  return (
-    <video
-      ref={videoRef}
-      className={className}
-      controls
-      autoPlay
-      playsInline
-      controlsList="nodownload"
-      disablePictureInPicture
-      style={{ width: "100%", height: "100%", backgroundColor: "black" }}
-    />
-  );
+  return <div ref={containerRef} className={className} />;
 }
 
 interface VideoModalProps {
@@ -163,57 +120,10 @@ function VideoModal({
   title,
 }: VideoModalProps) {
   const [loading, setLoading] = useState(true);
-  const [hlsUrl, setHlsUrl] = useState<string | null>(null);
-  const [fetchError, setFetchError] = useState<string | null>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isOpen) {
-      setHlsUrl(null);
-      setFetchError(null);
-      return;
-    }
-
-    setLoading(true);
-    setFetchError(null);
-
-    // If we have a numeric vimeo ID, fetch its HLS stream link dynamically
-    if (videoId) {
-      const fetchHls = async () => {
-        try {
-          const response = await fetch(`${V2_API_BASE_URL}/app/get_vimeo_hls/${videoId}/`, {
-            headers: {
-              Accept: "application/json",
-            },
-          });
-
-          if (!response.ok) {
-            throw new Error(`Failed to load HLS stream: HTTP ${response.status}`);
-          }
-
-          const data = await response.json();
-          if (data.hls) {
-            setHlsUrl(data.hls);
-          } else {
-            throw new Error("HLS link not returned by API");
-          }
-        } catch (err: any) {
-          console.error("Error fetching HLS url:", err);
-          setFetchError(err?.message || "HLS streaming is not supported for this video");
-          setLoading(false);
-        }
-      };
-
-      fetchHls();
-    } else {
-      // Fallback: If no videoId is provided, we try to use the raw videoUrl directly (if available)
-      if (videoUrl) {
-        setHlsUrl(videoUrl);
-      } else {
-        setFetchError("No video source link available");
-        setLoading(false);
-      }
-    }
+    if (isOpen) setLoading(true);
   }, [isOpen, videoId, videoUrl]);
 
   // Security: Clean and block injected elements from downloader extensions
@@ -232,7 +142,8 @@ function VideoModal({
               node.tagName === "BUTTON" ||
               node.classList.contains("animate-spin") ||
               node.querySelector(".animate-spin") ||
-              node.tagName === "VIDEO" ||
+              node.tagName === "DIV" ||
+              node.shadowRoot ||
               node.getAttribute("data-react-modal") === "true";
 
             if (!isAllowed) {
@@ -249,40 +160,43 @@ function VideoModal({
       subtree: true,
     });
 
-    // 2. Periodic Scanner: Scan body/page for any absolute-positioned download options injected outside the modal
+    // 2. Aggressive Full-DOM Scanner: deletes any absolute/fixed elements with download keywords
     const scanInterval = setInterval(() => {
-      const extensionSelectors = [
-        '[class*="vimeo-downloader"]',
-        '[class*="download-btn"]',
-        '[class*="downloader-panel"]',
-        '[class*="vimeo-download"]',
-        '[id*="vimeo-downloader"]',
-        '[id*="vimeo-download"]',
-        '.vimeo-downloader',
-        '.vimeo-downloader-options',
-        'div[style*="z-index"][style*="position: absolute"]',
-        'div[style*="position:absolute"][style*="z-index"]'
-      ];
+      try {
+        const allElements = document.getElementsByTagName("*");
+        for (let i = 0; i < allElements.length; i++) {
+          const el = allElements[i];
+          if (el instanceof HTMLElement) {
+            const style = window.getComputedStyle(el);
+            const isAbsoluteOrFixed = style.position === "absolute" || style.position === "fixed";
+            const zIndex = parseInt(style.zIndex, 10);
 
-      extensionSelectors.forEach((selector) => {
-        try {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach((el) => {
-            if (
-              el instanceof HTMLElement &&
-              !el.classList.contains("bg-black/70") && // Keep backdrop
-              !modalElement.contains(el) && // Keep modal contents
-              !el.classList.contains("aspect-video")
-            ) {
-              console.log("[Security] Removed background extension element:", el);
-              el.remove();
+            // Target elements outside our modal with high z-index
+            if (isAbsoluteOrFixed && zIndex >= 80 && !modalElement.contains(el)) {
+              const html = el.innerHTML.toLowerCase();
+              const text = el.innerText.toLowerCase();
+              const className = el.className.toLowerCase();
+              const id = el.id.toLowerCase();
+
+              const hasDownloadKeyword =
+                html.includes("download") ||
+                text.includes("download") ||
+                className.includes("download") ||
+                className.includes("vdp-") ||
+                id.includes("download") ||
+                id.includes("vdp-");
+
+              if (hasDownloadKeyword) {
+                console.log("[Security] Aggressively removed extension UI:", el);
+                el.remove();
+              }
             }
-          });
-        } catch (e) {
-          // ignore selector errors
+          }
         }
-      });
-    }, 500);
+      } catch (err) {
+        // ignore errors during DOM scan
+      }
+    }, 400);
 
     return () => {
       observer.disconnect();
@@ -291,6 +205,11 @@ function VideoModal({
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  // Prefer Vimeo's iframe player when we can extract a numeric id to enforce domain whitelist
+  const playerSrc = videoId
+    ? `https://player.vimeo.com/video/${videoId}?autoplay=1&title=0&byline=0&portrait=0`
+    : videoUrl || "";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
@@ -313,14 +232,9 @@ function VideoModal({
           </div>
         )}
 
-        {fetchError ? (
-          <div className="w-full h-full flex flex-col items-center justify-center text-white px-4 text-center">
-            <p className="text-sm font-semibold text-rose-500 mb-2">Video Playback Error</p>
-            <p className="text-xs text-gray-400 max-w-md">{fetchError}</p>
-          </div>
-        ) : hlsUrl ? (
-          <HlsPlayer
-            src={hlsUrl}
+        {playerSrc ? (
+          <ShadowIframe
+            src={playerSrc}
             title={title}
             className={`w-full h-full transition-opacity duration-500 ${
               loading ? "opacity-0" : "opacity-100"
@@ -329,7 +243,7 @@ function VideoModal({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white text-sm">
-            Preparing video stream...
+            No video content available
           </div>
         )}
       </div>
