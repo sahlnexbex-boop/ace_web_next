@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   PlayCircle,
   FileText,
@@ -61,6 +61,46 @@ const pickBestVideoUrl = (links: Record<string, string>): string | null => {
 
 /* ================= VIDEO MODAL ================= */
 
+interface ShadowIframeProps {
+  src: string;
+  title: string;
+  onLoadComplete: () => void;
+  className?: string;
+}
+
+function ShadowIframe({ src, title, onLoadComplete, className }: ShadowIframeProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Clear any previous contents
+    containerRef.current.innerHTML = "";
+
+    // Attach shadow root
+    const shadow = containerRef.current.attachShadow({ mode: "open" });
+
+    // Create iframe
+    const iframe = document.createElement("iframe");
+    iframe.src = src;
+    iframe.title = title;
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+    iframe.setAttribute("allowfullscreen", "true");
+
+    iframe.onload = () => {
+      onLoadComplete();
+    };
+
+    shadow.appendChild(iframe);
+  }, [src, title, onLoadComplete]);
+
+  return <div ref={containerRef} className={className} />;
+}
+
 interface VideoModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -108,16 +148,13 @@ function VideoModal({
         )}
 
         {playerSrc ? (
-          <iframe
+          <ShadowIframe
             src={playerSrc}
             title={title}
             className={`w-full h-full transition-opacity duration-500 ${
               loading ? "opacity-0" : "opacity-100"
             }`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-            onLoad={() => setLoading(false)}
+            onLoadComplete={() => setLoading(false)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white text-sm">
