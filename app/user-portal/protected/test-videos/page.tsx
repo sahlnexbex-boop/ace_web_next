@@ -119,10 +119,86 @@ function VideoModal({
   title,
 }: VideoModalProps) {
   const [loading, setLoading] = useState(true);
+  const modalContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) setLoading(true);
   }, [isOpen, videoId, videoUrl]);
+
+  // Security: Clean and block injected elements from downloader extensions
+  useEffect(() => {
+    if (!isOpen || !modalContainerRef.current) return;
+
+    const modalElement = modalContainerRef.current;
+
+    // 1. Mutation Observer: detects and deletes any nodes injected inside the modal wrapper
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            // Allow our close button, spinner, and shadow DOM iframe container
+            const isAllowed =
+              node.tagName === "BUTTON" ||
+              node.classList.contains("animate-spin") ||
+              node.querySelector(".animate-spin") ||
+              node.tagName === "IFRAME" ||
+              node.shadowRoot ||
+              node.getAttribute("data-react-modal") === "true";
+
+            if (!isAllowed) {
+              console.log("[Security] Blocked extension injection:", node);
+              node.remove();
+            }
+          }
+        });
+      });
+    });
+
+    observer.observe(modalElement, {
+      childList: true,
+      subtree: true,
+    });
+
+    // 2. Periodic Scanner: Scan body/page for any absolute-positioned download options injected outside the modal
+    const scanInterval = setInterval(() => {
+      const extensionSelectors = [
+        '[class*="vimeo-downloader"]',
+        '[class*="download-btn"]',
+        '[class*="downloader-panel"]',
+        '[class*="vimeo-download"]',
+        '[id*="vimeo-downloader"]',
+        '[id*="vimeo-download"]',
+        '.vimeo-downloader',
+        '.vimeo-downloader-options',
+        'div[style*="z-index"][style*="position: absolute"]',
+        'div[style*="position:absolute"][style*="z-index"]'
+      ];
+
+      extensionSelectors.forEach((selector) => {
+        try {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach((el) => {
+            if (
+              el instanceof HTMLElement &&
+              !el.classList.contains("bg-black/70") && // Keep backdrop
+              !modalElement.contains(el) && // Keep modal contents
+              !el.classList.contains("aspect-video")
+            ) {
+              console.log("[Security] Removed background extension element:", el);
+              el.remove();
+            }
+          });
+        } catch (e) {
+          // ignore selector errors
+        }
+      });
+    }, 500);
+
+    return () => {
+      observer.disconnect();
+      clearInterval(scanInterval);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -134,13 +210,17 @@ function VideoModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl aspect-video rounded-xl overflow-hidden shadow-2xl bg-black border border-white/10">
+      <div
+        ref={modalContainerRef}
+        data-react-modal="true"
+        className="relative w-full max-w-5xl aspect-video rounded-xl overflow-hidden shadow-2xl bg-black border border-white/10"
+      >
         <button
           onClick={onClose}
-          className="absolute top-1.5 right-1.5 z-[110] p-4 bg-black text-white rounded-full transition-all hover:scale-105 cursor-pointer"
+          className="absolute top-3 right-3 z-[110] p-3 bg-black/60 hover:bg-black/90 text-white rounded-full transition-all hover:scale-105 cursor-pointer"
           aria-label="Close video"
         >
-          <X size={24} />
+          <X size={20} />
         </button>
 
         {loading && (
@@ -153,8 +233,9 @@ function VideoModal({
           <ShadowIframe
             src={playerSrc}
             title={title}
-            className={`w-full h-full transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"
-              }`}
+            className={`w-full h-full transition-opacity duration-500 ${
+              loading ? "opacity-0" : "opacity-100"
+            }`}
             onLoadComplete={() => setLoading(false)}
           />
         ) : (

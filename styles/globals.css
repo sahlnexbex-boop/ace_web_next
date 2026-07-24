@@ -131,3 +131,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* =======================================================
+   SECURITY OVERRIDES: Hide injected downloader elements
+   ======================================================= */
+[class*="vimeo-downloader"],
+[class*="download-btn"],
+[class*="downloader-panel"],
+[class*="vimeo-download"],
+[id*="vimeo-downloader"],
+[id*="vimeo-download"],
+[class*="vdp-"],
+.vimeo-downloader,
+.vimeo-downloader-options,
+.vimeo-helper,
+.download-helper {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
