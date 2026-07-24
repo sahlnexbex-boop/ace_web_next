@@ -181,7 +181,7 @@ function VideoModal({
     if (videoId) {
       const fetchHls = async () => {
         try {
-          const response = await fetch(`${V2_API_BASE_URL}/get_vimeo_hls/${videoId}/`, {
+          const response = await fetch(`${V2_API_BASE_URL}/app/get_vimeo_hls/${videoId}/`, {
             headers: {
               Accept: "application/json",
             },
