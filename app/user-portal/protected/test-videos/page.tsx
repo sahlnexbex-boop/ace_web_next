@@ -17,6 +17,7 @@ import {
 import {
   getDaywiseScheduleCourse,
   TestVideoItem,
+  V2_API_BASE_URL,
 } from "@/lib/api/testVideo";
 
 /* ================= CONSTANTS ================= */
@@ -61,46 +62,89 @@ const pickBestVideoUrl = (links: Record<string, string>): string | null => {
 
 /* ================= VIDEO MODAL ================= */
 
-interface ShadowIframeProps {
+interface HlsPlayerProps {
   src: string;
   title: string;
   onLoadComplete: () => void;
   className?: string;
 }
 
-function ShadowIframe({ src, title, onLoadComplete, className }: ShadowIframeProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+function HlsPlayer({ src, title, onLoadComplete, className }: HlsPlayerProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!videoRef.current || !src) return;
 
-    // Attach shadow root safely if it doesn't already exist
-    let shadow = containerRef.current.shadowRoot;
-    if (!shadow) {
-      shadow = containerRef.current.attachShadow({ mode: "open" });
-    } else {
-      shadow.innerHTML = ""; // Clear previous shadow tree contents
-    }
+    const video = videoRef.current;
+    let hls: any = null;
 
-    // Create iframe
-    const iframe = document.createElement("iframe");
-    iframe.src = src;
-    iframe.title = title;
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    iframe.style.border = "none";
-    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-    iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
-    iframe.setAttribute("allowfullscreen", "true");
+    const initHls = () => {
+      const Hls = (window as any).Hls;
 
-    iframe.onload = () => {
-      onLoadComplete();
+      if (Hls) {
+        if (Hls.isSupported()) {
+          hls = new Hls();
+          hls.loadSource(src);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.play().catch(() => {});
+            onLoadComplete();
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          // Native support (Safari)
+          video.src = src;
+          video.addEventListener("loadedmetadata", () => {
+            video.play().catch(() => {});
+            onLoadComplete();
+          });
+        }
+      } else {
+        // Load HLS.js dynamically from jsDelivr CDN
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+        script.onload = () => {
+          const LoadedHls = (window as any).Hls;
+          if (LoadedHls && LoadedHls.isSupported()) {
+            hls = new LoadedHls();
+            hls.loadSource(src);
+            hls.attachMedia(video);
+            hls.on(LoadedHls.Events.MANIFEST_PARSED, () => {
+              video.play().catch(() => {});
+              onLoadComplete();
+            });
+          } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = src;
+            video.addEventListener("loadedmetadata", () => {
+              video.play().catch(() => {});
+              onLoadComplete();
+            });
+          }
+        };
+        document.body.appendChild(script);
+      }
     };
 
-    shadow.appendChild(iframe);
-  }, [src, title, onLoadComplete]);
+    initHls();
 
-  return <div ref={containerRef} className={className} />;
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [src, onLoadComplete]);
+
+  return (
+    <video
+      ref={videoRef}
+      className={className}
+      controls
+      autoPlay
+      playsInline
+      controlsList="nodownload"
+      disablePictureInPicture
+      style={{ width: "100%", height: "100%", backgroundColor: "black" }}
+    />
+  );
 }
 
 interface VideoModalProps {
@@ -119,10 +163,57 @@ function VideoModal({
   title,
 }: VideoModalProps) {
   const [loading, setLoading] = useState(true);
+  const [hlsUrl, setHlsUrl] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) setLoading(true);
+    if (!isOpen) {
+      setHlsUrl(null);
+      setFetchError(null);
+      return;
+    }
+
+    setLoading(true);
+    setFetchError(null);
+
+    // If we have a numeric vimeo ID, fetch its HLS stream link dynamically
+    if (videoId) {
+      const fetchHls = async () => {
+        try {
+          const response = await fetch(`${V2_API_BASE_URL}/get_vimeo_hls/${videoId}/`, {
+            headers: {
+              Accept: "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to load HLS stream: HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (data.hls) {
+            setHlsUrl(data.hls);
+          } else {
+            throw new Error("HLS link not returned by API");
+          }
+        } catch (err: any) {
+          console.error("Error fetching HLS url:", err);
+          setFetchError(err?.message || "HLS streaming is not supported for this video");
+          setLoading(false);
+        }
+      };
+
+      fetchHls();
+    } else {
+      // Fallback: If no videoId is provided, we try to use the raw videoUrl directly (if available)
+      if (videoUrl) {
+        setHlsUrl(videoUrl);
+      } else {
+        setFetchError("No video source link available");
+        setLoading(false);
+      }
+    }
   }, [isOpen, videoId, videoUrl]);
 
   // Security: Clean and block injected elements from downloader extensions
@@ -136,13 +227,12 @@ function VideoModal({
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof HTMLElement) {
-            // Allow our close button, spinner, and shadow DOM iframe container
+            // Allow our close button, spinner, and video container
             const isAllowed =
               node.tagName === "BUTTON" ||
               node.classList.contains("animate-spin") ||
               node.querySelector(".animate-spin") ||
-              node.tagName === "IFRAME" ||
-              node.shadowRoot ||
+              node.tagName === "VIDEO" ||
               node.getAttribute("data-react-modal") === "true";
 
             if (!isAllowed) {
@@ -202,12 +292,6 @@ function VideoModal({
 
   if (!isOpen) return null;
 
-  // Prefer Vimeo's iframe player when we can extract a numeric id.
-  // Falls back to the encrypted CDN URL the API returned.
-  const playerSrc = videoId
-    ? `https://player.vimeo.com/video/${videoId}?autoplay=1&title=0&byline=0&portrait=0`
-    : videoUrl || "";
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div
@@ -229,17 +313,23 @@ function VideoModal({
           </div>
         )}
 
-        {playerSrc ? (
-          <ShadowIframe
-            src={playerSrc}
+        {fetchError ? (
+          <div className="w-full h-full flex flex-col items-center justify-center text-white px-4 text-center">
+            <p className="text-sm font-semibold text-rose-500 mb-2">Video Playback Error</p>
+            <p className="text-xs text-gray-400 max-w-md">{fetchError}</p>
+          </div>
+        ) : hlsUrl ? (
+          <HlsPlayer
+            src={hlsUrl}
             title={title}
-            className={`w-full h-full transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"
-              }`}
+            className={`w-full h-full transition-opacity duration-500 ${
+              loading ? "opacity-0" : "opacity-100"
+            }`}
             onLoadComplete={() => setLoading(false)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white text-sm">
-            No video content available
+            Preparing video stream...
           </div>
         )}
       </div>

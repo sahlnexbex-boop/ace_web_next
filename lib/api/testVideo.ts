@@ -2,7 +2,7 @@
 // No auth token is attached because the resource is hard-coded to a single
 // course/module pair in the spec.
 
-const V2_API_BASE_URL = process.env.NEXT_PUBLIC_ACEAPP_V2_URL || "https://v2api.aceonline.app";
+export const V2_API_BASE_URL = process.env.NEXT_PUBLIC_ACEAPP_V2_URL || "https://v2api.aceonline.app";
 
 export interface TestVideoMaterial {
   id: number;
