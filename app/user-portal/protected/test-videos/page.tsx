@@ -137,7 +137,7 @@ function VideoModal({
       <div className="relative w-full max-w-5xl aspect-video rounded-xl overflow-hidden shadow-2xl bg-black border border-white/10">
         <button
           onClick={onClose}
-          className="absolute top-1 right-1 z-[110] p-4 bg-black text-white rounded-full transition-all hover:scale-105 cursor-pointer"
+          className="absolute top-1.5 right-1.5 z-[110] p-4 bg-black text-white rounded-full transition-all hover:scale-105 cursor-pointer"
           aria-label="Close video"
         >
           <X size={24} />
