@@ -2,7 +2,10 @@
 // No auth token is attached because the resource is hard-coded to a single
 // course/module pair in the spec.
 
-const V2_API_BASE_URL = "http://localhost:8080";
+const V2_API_BASE_URL =
+  process.env.NEXT_PUBLIC_ACEAPP_V2_URL ||
+  process.env.NEXT_PUBLIC_V2_API_BASE_URL ||
+  "http://localhost:8080";
 
 export interface TestVideoMaterial {
   id: number;
@@ -38,6 +41,7 @@ export interface TestVideoItem {
   exams?: TestVideoQuestionPaper;
   thumbnails: string;
   video_links: Record<string, string>;
+  vimeoid?: string;
   subject?: string;
   week?: number;
   purchased?: boolean;

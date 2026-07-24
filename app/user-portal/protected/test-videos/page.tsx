@@ -472,7 +472,7 @@ export default function TestVideosPage() {
       <VideoModal
         isOpen={!!activeItem}
         onClose={() => setActiveItem(null)}
-        videoId={extractVimeoIdFromThumbnail(activeItem?.thumbnails)}
+        videoId={activeItem?.vimeoid || extractVimeoIdFromThumbnail(activeItem?.thumbnails)}
         videoUrl={pickBestVideoUrl(activeItem?.video_links ?? {})}
         title={activeItem?.topic_name || "Video player"}
       />
