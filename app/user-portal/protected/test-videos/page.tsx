@@ -137,10 +137,10 @@ function VideoModal({
       <div className="relative w-full max-w-5xl aspect-video rounded-xl overflow-hidden shadow-2xl bg-black border border-white/10">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 z-[110] p-1.5 bg-black/60 hover:bg-black/90 text-white rounded-full transition-all hover:scale-105 cursor-pointer"
+          className="absolute top-3 right-3 z-[110] p-5 bg-black text-white rounded-full transition-all hover:scale-105 cursor-pointer"
           aria-label="Close video"
         >
-          <X size={20} />
+          <X size={24} />
         </button>
 
         {loading && (
@@ -153,9 +153,8 @@ function VideoModal({
           <ShadowIframe
             src={playerSrc}
             title={title}
-            className={`w-full h-full transition-opacity duration-500 ${
-              loading ? "opacity-0" : "opacity-100"
-            }`}
+            className={`w-full h-full transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"
+              }`}
             onLoadComplete={() => setLoading(false)}
           />
         ) : (
@@ -474,11 +473,10 @@ export default function TestVideosPage() {
                   <div className="mt-3 flex items-center justify-between text-xs">
                     <button
                       onClick={() => toggleLike(item.id)}
-                      className={`flex items-center gap-1 cursor-pointer ${
-                        isLiked
-                          ? "text-cyan-700"
-                          : "text-gray-500 hover:text-cyan-700"
-                      }`}
+                      className={`flex items-center gap-1 cursor-pointer ${isLiked
+                        ? "text-cyan-700"
+                        : "text-gray-500 hover:text-cyan-700"
+                        }`}
                     >
                       {isLiked ? (
                         <CheckCircle2 size={14} />
