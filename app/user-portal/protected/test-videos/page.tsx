@@ -217,7 +217,7 @@ function VideoModal({
       >
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 z-[110] p-3 bg-black/60 hover:bg-black/90 text-white rounded-full transition-all hover:scale-105 cursor-pointer"
+          className="absolute top-2.5 right-2.5 z-[110] p-3 bg-black/60 hover:bg-black/90 text-white rounded-full transition-all hover:scale-105 cursor-pointer"
           aria-label="Close video"
         >
           <X size={20} />
@@ -233,9 +233,8 @@ function VideoModal({
           <ShadowIframe
             src={playerSrc}
             title={title}
-            className={`w-full h-full transition-opacity duration-500 ${
-              loading ? "opacity-0" : "opacity-100"
-            }`}
+            className={`w-full h-full transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"
+              }`}
             onLoadComplete={() => setLoading(false)}
           />
         ) : (
