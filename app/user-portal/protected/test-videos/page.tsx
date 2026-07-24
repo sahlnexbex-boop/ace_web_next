@@ -74,11 +74,13 @@ function ShadowIframe({ src, title, onLoadComplete, className }: ShadowIframePro
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Clear any previous contents
-    containerRef.current.innerHTML = "";
-
-    // Attach shadow root
-    const shadow = containerRef.current.attachShadow({ mode: "open" });
+    // Attach shadow root safely if it doesn't already exist
+    let shadow = containerRef.current.shadowRoot;
+    if (!shadow) {
+      shadow = containerRef.current.attachShadow({ mode: "open" });
+    } else {
+      shadow.innerHTML = ""; // Clear previous shadow tree contents
+    }
 
     // Create iframe
     const iframe = document.createElement("iframe");
