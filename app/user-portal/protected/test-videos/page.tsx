@@ -87,14 +87,14 @@ function HlsPlayer({ src, title, onLoadComplete, className }: HlsPlayerProps) {
           hls.loadSource(src);
           hls.attachMedia(video);
           hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(() => { });
+            video.play().catch(() => {});
             onLoadComplete();
           });
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
           // Native support (Safari)
           video.src = src;
           video.addEventListener("loadedmetadata", () => {
-            video.play().catch(() => { });
+            video.play().catch(() => {});
             onLoadComplete();
           });
         }
@@ -109,13 +109,13 @@ function HlsPlayer({ src, title, onLoadComplete, className }: HlsPlayerProps) {
             hls.loadSource(src);
             hls.attachMedia(video);
             hls.on(LoadedHls.Events.MANIFEST_PARSED, () => {
-              video.play().catch(() => { });
+              video.play().catch(() => {});
               onLoadComplete();
             });
           } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
             video.src = src;
             video.addEventListener("loadedmetadata", () => {
-              video.play().catch(() => { });
+              video.play().catch(() => {});
               onLoadComplete();
             });
           }
@@ -322,8 +322,9 @@ function VideoModal({
           <HlsPlayer
             src={hlsUrl}
             title={title}
-            className={`w-full h-full transition-opacity duration-500 ${loading ? "opacity-0" : "opacity-100"
-              }`}
+            className={`w-full h-full transition-opacity duration-500 ${
+              loading ? "opacity-0" : "opacity-100"
+            }`}
             onLoadComplete={() => setLoading(false)}
           />
         ) : (
